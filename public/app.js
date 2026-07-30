@@ -1227,13 +1227,13 @@ function renderDevLandTable() {
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
-            const descValue = dataRow.name !== undefined ? dataRow.name : (item.subcat || item.cat || '');
+            const descValue = dataRow.name !== undefined && dataRow.name !== item.num ? dataRow.name : (item.subcat || '');
             
             html += `
                 <tr>
                     <td style="font-weight:600; color:var(--text-secondary); text-align:center;">${numDisp}</td>
-                    <td style="font-weight:500; color:var(--text-primary); padding-left:16px;">
-                        ${descValue}
+                    <td>
+                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Item Description" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
                     </td>
                     <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand('${key}', 'sqm', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand('${key}', 'cost_sqm', this.value)"></td>
@@ -1285,6 +1285,19 @@ function renderDevLandTable() {
     refreshIcons();
 }
 
+function updateDevLandName(key, itemIdx, val) {
+    if (!state.data.dev_land[key]) {
+        state.data.dev_land[key] = { name: val, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    } else {
+        state.data.dev_land[key].name = val;
+    }
+    if (state.templates.dev_land[itemIdx]) {
+        state.templates.dev_land[itemIdx].subcat = val;
+    }
+    state.isDirty = true;
+    updateSyncIndicator(false);
+}
+
 function updateDevLandSubRowLetters() {
     const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t'];
     let subIdx = 0;
@@ -1324,8 +1337,7 @@ function addDevLandSubRow(headerIdx) {
     });
     
     updateDevLandSubRowLetters();
-    const assignedLetter = state.templates.dev_land[insertAt].num;
-    state.data.dev_land[key] = { name: assignedLetter, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    state.data.dev_land[key] = { name: '', sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
     state.isDirty = true;
     updateSyncIndicator(false);
     renderDevLandTable();
