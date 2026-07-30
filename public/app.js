@@ -995,6 +995,10 @@ function updateMarketingActivity(rowId, mIdx, val) {
 function renderDevLandTable() {
     const table = document.getElementById('dev-land-table');
     
+    if (!state.collapsedHeaders) {
+        state.collapsedHeaders = {};
+    }
+
     let html = `
         <thead>
             <tr>
@@ -1024,7 +1028,6 @@ function renderDevLandTable() {
         const text = (item.subcat || item.cat || '').trim();
         const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
         const isGroupHeader = (item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost';
-        const isSectionHeader = item.type === 'section_header' || (item.num && !item.cat.includes('.'));
         
         if (isGroupHeader) {
             let childIdx = idx + 1;
@@ -1074,6 +1077,9 @@ function renderDevLandTable() {
         }
     });
 
+    let activeParentCollapsed = false;
+    let activeSubCollapsed = false;
+
     state.templates.dev_land.forEach((item, itemIdx) => {
         const text = (item.subcat || item.cat || '').trim();
         const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
@@ -1095,14 +1101,16 @@ function renderDevLandTable() {
         } else if (item.type === 'section_header' || item.num === '1' || item.num === '2' || item.cat === 'Land Cost' || item.cat === 'Development Cost') {
             const numDisp = item.num || (item.cat === 'Land Cost' ? '1' : '2');
             const titleDisp = item.cat || item.subcat || '';
+            const headerKey = `sec_${numDisp}`;
+            const isCollapsed = !!state.collapsedHeaders[headerKey];
+            activeParentCollapsed = isCollapsed;
+            activeSubCollapsed = false;
             
             // Collect section aggregate across all child input rows
             let secSqm = 0, secRab = 0, secReal = 0, secEst = 0;
             const secMonthly = Array(12).fill(0);
 
-            let isSection2 = (numDisp === '2' || titleDisp.includes('Development Cost'));
             let activeSec = false;
-
             items.forEach((it) => {
                 const itNum = it.num || '';
                 const itCat = it.cat || '';
@@ -1129,7 +1137,12 @@ function renderDevLandTable() {
 
             html += `
                 <tr class="row-grand-total" style="background:rgba(139,92,246,0.25) !important; font-size:0.9rem;">
-                    <td style="font-weight:800; text-align:center;">${numDisp}</td>
+                    <td style="font-weight:800; text-align:center;">
+                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${headerKey}')" style="margin-right:4px;">
+                            <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
+                        </button>
+                        ${numDisp}
+                    </td>
                     <td style="font-weight:800; letter-spacing:0.03em;">${titleDisp}</td>
                     <td style="font-weight:700">${secSqm ? secSqm.toLocaleString('id-ID') : '-'}</td>
                     <td style="font-weight:700">${costPerSqm ? Math.round(costPerSqm).toLocaleString('id-ID') : '-'}</td>
@@ -1142,8 +1155,14 @@ function renderDevLandTable() {
                     <td></td>
                 </tr>`;
         } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
+            if (activeParentCollapsed) return; // Skip if parent section is collapsed
+
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
+            const headerKey = `hdr_${itemIdx}_${numDisp}`;
+            const isCollapsed = !!state.collapsedHeaders[headerKey];
+            activeSubCollapsed = isCollapsed;
+
             const hs = headerSums[itemIdx] || { sqm: 0, rab: 0, real: 0, est: 0, monthly: Array(12).fill(0) };
 
             const totalEstSpent = hs.real + hs.est;
@@ -1153,7 +1172,12 @@ function renderDevLandTable() {
 
             html += `
                 <tr class="row-group-header">
-                    <td style="font-weight:700; text-align:center;">${numDisp}</td>
+                    <td style="font-weight:700; text-align:center;">
+                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${headerKey}')" style="margin-right:4px;">
+                            <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
+                        </button>
+                        ${numDisp}
+                    </td>
                     <td style="font-weight:700">
                         ${titleDisp}
                         ${item.cat !== 'Hard Cost' && item.cat !== 'Soft Cost' ? `<button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Sub-Row</button>` : ''}
@@ -1170,6 +1194,8 @@ function renderDevLandTable() {
                 </tr>`;
         } else {
             // Input rows
+            if (activeParentCollapsed || activeSubCollapsed) return; // Skip hidden rows
+
             const key = item.row;
             const dataRow = state.data.dev_land[key] || { name: (item.subcat || item.cat || ''), sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
             
