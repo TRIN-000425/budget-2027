@@ -1090,12 +1090,12 @@ function renderDevLandTable() {
             if (text === 'Catatan' || text.startsWith('Catatan')) {
                 html += `
                     <tr style="background:rgba(255,255,255,0.03); font-weight:700; color:var(--text-secondary)">
-                        <td colspan="22" style="padding-top:16px;">Catatan:</td>
+                        <td colspan="21" style="padding-top:16px;">Catatan:</td>
                     </tr>`;
             } else if (text.startsWith('1. ') || text.startsWith('2. ') || text.startsWith('3. ') || text.startsWith('4. ')) {
                 html += `
                     <tr style="background:rgba(255,255,255,0.01); color:var(--text-muted); font-size:0.8rem">
-                        <td colspan="22" style="padding:4px 12px;">${text}</td>
+                        <td colspan="21" style="padding:4px 12px;">${text}</td>
                     </tr>`;
             }
         } else if (!item.num && !item.cat && !item.subcat) {
