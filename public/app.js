@@ -23,10 +23,14 @@ const formatCurrency = (val) => {
 };
 
 const formatShortCurrency = (val) => {
-    if (val === undefined || val === null || isNaN(val)) return 'Rp 0.00 Bio';
-    // Format to Rupiah Billion (Rp Bio)
-    const bioVal = val / 1000000000;
-    return 'Rp ' + bioVal.toFixed(2) + ' Bio';
+    if (val === undefined || val === null || isNaN(val) || val === 0) return 'Rp 0';
+    if (Math.abs(val) >= 1000000000) {
+        return 'Rp ' + (val / 1000000000).toFixed(2) + ' Bio';
+    } else if (Math.abs(val) >= 1000000) {
+        return 'Rp ' + (val / 1000000).toFixed(2) + ' M';
+    } else {
+        return 'Rp ' + Math.round(val).toLocaleString('id-ID');
+    }
 };
 
 const formatPercent = (val) => {
