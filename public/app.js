@@ -1015,7 +1015,39 @@ function renderDevLandTable() {
     `;
     
     let monthlyTotals = Array(12).fill(0);
+
+    // Track category totals
+    let currentCat = '';
+    let catMonthly = Array(12).fill(0);
+    let catRab = 0, catReal = 0, catEst = 0, catSqm = 0;
     
+    // Sub-totals for Land Cost (1) and Development Cost (2: Hard + Soft)
+    let landMonthly = Array(12).fill(0), hardMonthly = Array(12).fill(0), softMonthly = Array(12).fill(0);
+
+    // Compute all row sums upfront for header summaries
+    const items = state.templates.dev_land;
+    items.forEach(item => {
+        const text = (item.subcat || item.cat || '').trim();
+        const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
+        const isHeader = (item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || (item.cat && !item.num && item.type === 'section_header');
+        
+        if (!isNote && !isHeader && item.row) {
+            const key = item.row;
+            const dataRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+            const numStr = item.num || '';
+            const rowMonthly = dataRow.monthly || Array(12).fill(0);
+            
+            // Determine section based on item num / position
+            if (numStr.startsWith('1.') || item.cat?.includes('Land Cost')) {
+                rowMonthly.forEach((v, m) => landMonthly[m] += v);
+            } else if (numStr.startsWith('2.8') || numStr.startsWith('2.9') || item.subcat?.includes('Soft Cost') || item.cat?.includes('Soft Cost')) {
+                rowMonthly.forEach((v, m) => softMonthly[m] += v);
+            } else {
+                rowMonthly.forEach((v, m) => hardMonthly[m] += v);
+            }
+        }
+    });
+
     state.templates.dev_land.forEach((item, itemIdx) => {
         const text = (item.subcat || item.cat || '').trim();
         const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
@@ -1042,11 +1074,29 @@ function renderDevLandTable() {
         } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.'))) {
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
+            
+            // Highlight section headers 1 (Land Cost) and 2 (Development Cost)
+            let sectionSubtotalHtml = '';
+            if (numDisp === '1') {
+                const totalLand = landMonthly.reduce((a,b)=>a+b,0);
+                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:var(--accent-purple); margin-right:20px;">Subtotal 1. Land Cost: Rp ${totalLand.toLocaleString('id-ID')}</span>`;
+            } else if (numDisp === '2') {
+                const totalDev = hardMonthly.reduce((a,b)=>a+b,0) + softMonthly.reduce((a,b)=>a+b,0);
+                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:var(--accent-purple); margin-right:20px;">Subtotal 2. Development Cost: Rp ${totalDev.toLocaleString('id-ID')}</span>`;
+            } else if (titleDisp === 'Hard Cost') {
+                const totalHard = hardMonthly.reduce((a,b)=>a+b,0);
+                sectionSubtotalHtml = `<span style="float:right; font-weight:700; color:var(--accent-emerald); margin-right:20px;">Total Hard Cost: Rp ${totalHard.toLocaleString('id-ID')}</span>`;
+            } else if (titleDisp === 'Soft Cost') {
+                const totalSoft = softMonthly.reduce((a,b)=>a+b,0);
+                sectionSubtotalHtml = `<span style="float:right; font-weight:700; color:var(--accent-amber); margin-right:20px;">Total Soft Cost: Rp ${totalSoft.toLocaleString('id-ID')}</span>`;
+            }
+
             html += `
                 <tr class="row-group-header">
                     <td style="font-weight:700">${numDisp}</td>
                     <td colspan="20" style="font-weight:700">
                         ${titleDisp}
+                        ${sectionSubtotalHtml}
                         <button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:12px;"><i data-lucide="plus"></i> Sub-Row</button>
                     </td>
                     <td></td>
