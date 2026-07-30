@@ -1226,12 +1226,6 @@ function renderDevLandTable() {
             const totalEstSpent = dataRow.realisasi + dataRow.best_est;
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
-              const key = item.row;
-            const dataRow = state.data.dev_land[key] || { name: (item.subcat || item.cat || ''), sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
-            
-            const totalEstSpent = dataRow.realisasi + dataRow.best_est;
-            const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
-            const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
             const descValue = dataRow.name !== undefined ? dataRow.name : (item.subcat || item.cat || '');
             
