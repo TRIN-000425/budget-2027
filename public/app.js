@@ -2063,6 +2063,7 @@ function renderSummaryBudgetTable() {
     const mSalesInhouse = Array(12).fill(0), mSalesAgent = Array(12).fill(0);
     const mSalesProgram = Array(12).fill(0);
     const mMarketingATL = Array(12).fill(0), mMarketingBTL = Array(12).fill(0);
+    const mLandCost = Array(12).fill(0), mHardCost = Array(12).fill(0), mSoftCost = Array(12).fill(0);
     const mDevLand = Array(12).fill(0), mEmployee = Array(12).fill(0);
     const mGA = Array(12).fill(0), mOthers = Array(12).fill(0);
     const mFinance = Array(12).fill(0), mTax = Array(12).fill(0);
@@ -2078,7 +2079,22 @@ function renderSummaryBudgetTable() {
                 if (item.row < 46) mMarketingATL[m] += v; else mMarketingBTL[m] += v;
             }
         });
-        Object.keys(state.data.dev_land).forEach(r => { mDevLand[m] += state.data.dev_land[r].monthly[m]; });
+        
+        state.templates.dev_land.forEach(item => {
+            if (item.row && state.data.dev_land[item.row]) {
+                const val = state.data.dev_land[item.row].monthly[m] || 0;
+                mDevLand[m] += val;
+                const numStr = item.num || '';
+                if (numStr.startsWith('1.') || item.cat?.includes('Land Cost')) {
+                    mLandCost[m] += val;
+                } else if (numStr.startsWith('2.8') || numStr.startsWith('2.9') || item.subcat?.includes('Soft Cost') || item.cat?.includes('Soft Cost')) {
+                    mSoftCost[m] += val;
+                } else {
+                    mHardCost[m] += val;
+                }
+            }
+        });
+
         mEmployee[m] = Object.keys(state.data.payroll_expenses).reduce((s,c)=>s+state.data.payroll_expenses[c][m],0);
         Object.keys(state.data.ga_expenses).forEach(c=>{ mGA[m] += state.data.ga_expenses[c][m]; });
         // Business trip costs go into G&A
@@ -2104,6 +2120,9 @@ function renderSummaryBudgetTable() {
         units:   sum(mUnits),
         sqm:     sum(mSqm),
         revenue: sum(mRevenue),
+        landCost: sum(mLandCost),
+        hardCost: sum(mHardCost),
+        softCost: sum(mSoftCost),
         devland: sum(mDevLand),
         salesComm: sum(mSalesInhouse) + sum(mSalesAgent),
         progSales: sum(mSalesProgram),
@@ -2205,9 +2224,9 @@ function renderSummaryBudgetTable() {
     // ── B. PROJECT COST ──────────────────────────────────────────────────
     html += mainHdr('B. DEVELOPMENT & OPERATIONAL COST');
     html += secHdr('Project Cost');
-    html += row('Land Cost', 'land_cost', bgt27.devland, true);
-    html += row('Hard Cost (Dev Construction)', 'hard_cost', 0, true);
-    html += row('Soft Cost (Legal, Permits, Fees)', 'soft_cost', 0, true);
+    html += row('Land Cost', 'land_cost', bgt27.landCost, true);
+    html += row('Hard Cost (Dev Construction)', 'hard_cost', bgt27.hardCost, true);
+    html += row('Soft Cost (Legal, Permits, Fees)', 'soft_cost', bgt27.softCost, true);
     html += subtotal('Total Project Cost (Rp Bio)', 'total_proj', bgt27.devland);
 
     // ── C. SALES & MARKETING ─────────────────────────────────────────────
