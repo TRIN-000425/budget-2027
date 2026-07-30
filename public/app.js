@@ -1092,21 +1092,27 @@ function renderDevLandTable() {
             }
         } else if (!item.num && !item.cat && !item.subcat) {
             // Spacer row
-        } else if (item.type === 'section_header' || (item.num && !item.cat.includes('.'))) {
-            const numDisp = item.num || '';
+        } else if (item.type === 'section_header' || item.num === '1' || item.num === '2' || item.cat === 'Land Cost' || item.cat === 'Development Cost') {
+            const numDisp = item.num || (item.cat === 'Land Cost' ? '1' : '2');
             const titleDisp = item.cat || item.subcat || '';
             
             // Collect section aggregate across all child input rows
             let secSqm = 0, secRab = 0, secReal = 0, secEst = 0;
             const secMonthly = Array(12).fill(0);
-            
+
+            let isSection2 = (numDisp === '2' || titleDisp.includes('Development Cost'));
+            let activeSec = false;
+
             items.forEach((it) => {
                 const itNum = it.num || '';
                 const itCat = it.cat || '';
-                const isMatch = (numDisp === '1' && (itNum.startsWith('1.') || itCat.includes('Land Cost'))) ||
-                                (numDisp === '2' && (itNum.startsWith('2.') || itCat.includes('Hard Cost') || itCat.includes('Soft Cost')));
                 
-                if (isMatch && it.row) {
+                if (it.type === 'section_header' || itNum === '1' || itNum === '2') {
+                    activeSec = (numDisp === '1' && (itNum === '1' || itCat.includes('Land Cost'))) ||
+                                (numDisp === '2' && (itNum === '2' || itCat.includes('Development Cost')));
+                }
+
+                if (activeSec && it.row) {
                     const dRow = state.data.dev_land[it.row] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
                     secSqm += parseFloat(dRow.sqm) || 0;
                     secRab += parseFloat(dRow.rab_spk) || 0;
