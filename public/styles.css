@@ -630,6 +630,7 @@ body.light .theme-toggle-btn:hover {
 
 /* Header titles */
 .section-header {
+    display: none;
     margin-bottom: 28px;
 }
 
