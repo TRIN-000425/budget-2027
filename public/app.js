@@ -1104,7 +1104,8 @@ function renderDevLandTable() {
             const numDisp = item.num || (item.cat === 'Land Cost' ? '1' : '2');
             const titleDisp = item.cat || item.subcat || '';
             const headerKey = `sec_${numDisp}`;
-            const isCollapsed = !!state.collapsedHeaders[headerKey];
+            const safeKey = headerKey.replace(/[^a-zA-Z0-9_]/g, '_');
+            const isCollapsed = !!state.collapsedHeaders[safeKey];
             activeParentCollapsed = isCollapsed;
             activeSubCollapsed = false;
             
@@ -1116,12 +1117,10 @@ function renderDevLandTable() {
             items.forEach((it) => {
                 const itNum = it.num || '';
                 const itCat = it.cat || '';
-                
                 if (it.type === 'section_header' || itNum === '1' || itNum === '2') {
                     activeSec = (numDisp === '1' && (itNum === '1' || itCat.includes('Land Cost'))) ||
                                 (numDisp === '2' && (itNum === '2' || itCat.includes('Development Cost')));
                 }
-
                 if (activeSec && it.row) {
                     const dRow = state.data.dev_land[it.row] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
                     secSqm += parseFloat(dRow.sqm) || 0;
@@ -1136,7 +1135,6 @@ function renderDevLandTable() {
             const pctReal = secRab > 0 ? (totalEstSpent / secRab) : 0;
             const bSum = secMonthly.reduce((a,b)=>a+b,0);
             const costPerSqm = secSqm > 0 ? (secRab / secSqm) : 0;
-            const safeKey = headerKey.replace(/[^a-zA-Z0-9_]/g, '_');
 
             html += `
                 <tr class="row-grand-total" style="background:rgba(139,92,246,0.25) !important; font-size:0.9rem;">
@@ -1161,7 +1159,7 @@ function renderDevLandTable() {
             const isGroupTitle = (item.cat === 'Hard Cost' || item.cat === 'Soft Cost');
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
-            const rawKey = isGroupTitle ? `group_${item.cat}` : `hdr_${itemIdx}_${numDisp}`;
+            const rawKey = isGroupTitle ? `group_${item.cat}` : `hdr_${item.num || itemIdx}_${titleDisp}`;
             const safeKey = rawKey.replace(/[^a-zA-Z0-9_]/g, '_');
             
             const isCollapsed = !!state.collapsedHeaders[safeKey];
@@ -1178,9 +1176,6 @@ function renderDevLandTable() {
             const pctReal = hs.rab > 0 ? (totalEstSpent / hs.rab) : 0;
             const bSum = hs.monthly.reduce((a,b)=>a+b,0);
             const costPerSqm = hs.sqm > 0 ? (hs.rab / hs.sqm) : 0;
-
-            const headerSelfKey = `hdr_${itemIdx}_${numDisp}`.replace(/[^a-zA-Z0-9_]/g, '_');
-            const isSelfCollapsed = !!state.collapsedHeaders[headerSelfKey];
 
             html += `
                 <tr class="row-group-header">
@@ -1214,7 +1209,8 @@ function renderDevLandTable() {
                 const prev = items[i];
                 if ((prev.cat && prev.cat.includes('.')) || (prev.num && prev.num.includes('.'))) {
                     const pNum = prev.num || prev.cat;
-                    const pKey = `hdr_${i}_${pNum}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                    const pTitle = prev.subcat || prev.cat;
+                    const pKey = `hdr_${pNum}_${pTitle}`.replace(/[^a-zA-Z0-9_]/g, '_');
                     currentSubCollapsed = !!state.collapsedHeaders[pKey];
                     break;
                 }
