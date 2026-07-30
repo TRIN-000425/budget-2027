@@ -1929,12 +1929,14 @@ function getCalculatedSummary() {
         const allowancesMap = {
             'Director': { 'Local': 1500000, 'Overseas': 2000000 },
             'Manager':  { 'Local': 900000,  'Overseas': 1200000 },
-            'Staff':    { 'Local': 600000,  'Overseas': 800000 }
+            'SPV':      { 'Local': 750000,  'Overseas': 1000000 },
+            'Staff':    { 'Local': 600000,  'Overseas': 800000  }
         };
         const hotelRatesMap = {
             'Director': { 'Local': 1650000, 'Overseas': 2500000 },
             'Manager':  { 'Local': 750000,  'Overseas': 1200000 },
-            'Staff':    { 'Local': 500000,  'Overseas': 800000 }
+            'SPV':      { 'Local': 600000,  'Overseas': 1000000 },
+            'Staff':    { 'Local': 500000,  'Overseas': 800000  }
         };
         const standardFlightsMap = { 'Local': 4000000, 'Overseas': 8000000 };
         const grade = row.grade || 'Staff';
