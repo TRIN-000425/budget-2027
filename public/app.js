@@ -999,6 +999,8 @@ function renderDevLandTable() {
         state.collapsedHeaders = {};
     }
 
+    updateDevLandSubRowLetters();
+
     let html = `
         <thead>
             <tr>
@@ -1310,7 +1312,8 @@ function updateDevLandSubRowLetters() {
         if (isHeader) {
             subIdx = 0;
         } else if (item.row) {
-            item.num = letters[subIdx] || `sub_${subIdx+1}`;
+            const letter = letters[subIdx] || `sub_${subIdx+1}`;
+            item.num = letter.includes('.') ? letter : `${letter}.`;
             subIdx++;
         }
     });
