@@ -1016,15 +1016,35 @@ function renderDevLandTable() {
     let monthlyTotals = Array(12).fill(0);
     
     state.templates.dev_land.forEach(item => {
-        // Is it a header or input row?
-        if (!item.num || !item.num.includes('.')) {
-            // Main headers
+        const isHeader = !item.num && (!item.subcat || item.cat);
+        const isSubHeader = item.cat && (item.cat.includes('.') || item.num.includes('.'));
+        const isSubItem = !item.num && !item.cat && item.subcat;
+
+        if (item.cat === 'Catatan' || (item.subcat && item.subcat.startsWith('1. Nilai') || (item.subcat && item.subcat.startsWith('TOTAL LAND')))) {
+            // Summary / footer notes
+            if (item.subcat === 'TOTAL LAND & DEVELOPMENT COST') {
+                // Skip here, handled at total
+            } else {
+                html += `
+                    <tr class="row-group-header" style="background:rgba(255,255,255,0.02); color:var(--text-muted)">
+                        <td colspan="21" style="font-size:0.75rem;">${item.subcat || item.cat}</td>
+                    </tr>`;
+            }
+        } else if (!item.num && !item.cat && !item.subcat) {
+            // Spacer row
+        } else if (item.cat && !item.num && item.type === 'section_header') {
+            html += `
+                <tr class="row-grand-total" style="background:rgba(139,92,246,0.2) !important">
+                    <td colspan="21" style="font-weight:800">${item.cat}</td>
+                </tr>`;
+        } else if (isSubHeader && (!item.subcat || item.num)) {
+            const numDisp = item.num || item.cat;
+            const titleDisp = item.subcat || item.cat;
             html += `
                 <tr class="row-group-header">
-                    <td>${item.num}</td>
-                    <td colspan="21">${item.cat}</td>
-                </tr>
-            `;
+                    <td style="font-weight:700">${numDisp}</td>
+                    <td colspan="20" style="font-weight:700">${titleDisp}</td>
+                </tr>`;
         } else {
             // Input rows
             const key = item.row;
@@ -1034,20 +1054,24 @@ function renderDevLandTable() {
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
+            const numDisp = item.num || '';
+            const labelDisp = item.subcat || item.cat || '';
+            const indentStyle = (labelDisp.length <= 3 && !labelDisp.includes(' ')) ? 'padding-left:35px; font-weight:600;' : 'padding-left:20px;';
+            
             html += `
                 <tr>
-                    <td>${item.num}</td>
-                    <td>${item.subcat || item.cat}</td>
-                    <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand(${key}, 'sqm', this.value)"></td>
-                    <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand(${key}, 'cost_sqm', this.value)"></td>
-                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.rab_spk}" onchange="updateDevLand(${key}, 'rab_spk', this.value)"></td>
-                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.realisasi}" onchange="updateDevLand(${key}, 'realisasi', this.value)"></td>
-                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.best_est}" onchange="updateDevLand(${key}, 'best_est', this.value)"></td>
+                    <td>${numDisp}</td>
+                    <td style="${indentStyle}">${labelDisp}</td>
+                    <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand('${key}', 'sqm', this.value)"></td>
+                    <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand('${key}', 'cost_sqm', this.value)"></td>
+                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.rab_spk}" onchange="updateDevLand('${key}', 'rab_spk', this.value)"></td>
+                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.realisasi}" onchange="updateDevLand('${key}', 'realisasi', this.value)"></td>
+                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.best_est}" onchange="updateDevLand('${key}', 'best_est', this.value)"></td>
                     <td><span style="font-weight:600; color:var(--text-secondary)">${formatPercent(pctReal)}</span></td>
                     <td><input type="text" class="table-input readonly" readonly value="${budgetSum.toLocaleString('id-ID')}"></td>
                     ${dataRow.monthly.map((val, mIdx) => {
                         monthlyTotals[mIdx] += val;
-                        return `<td><input type="number" class="table-input" value="${val}" onchange="updateDevLand(${key}, 'monthly', this.value, ${mIdx})"></td>`;
+                        return `<td><input type="number" class="table-input" value="${val}" onchange="updateDevLand('${key}', 'monthly', this.value, ${mIdx})"></td>`;
                     }).join('')}
                 </tr>
             `;
