@@ -1553,9 +1553,107 @@ function updateExpensesData(keyPrefix, accCode, mIdx, val) {
     }
 }
 
+function renderMarketingSubTable(tableId, typeText) {
+    const table = document.getElementById(tableId);
+    
+    if (!state.collapsedHeaders) state.collapsedHeaders = {};
+
+    let html = `
+        <thead>
+            <tr>
+                <th>Marketing Activity Component</th>
+                <th>Classification</th>
+                <th>Total Budget</th>
+                ${months.map(m => `<th>${m}</th>`).join('')}
+            </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    let monthlyTotals = Array(12).fill(0);
+    
+    const filterRows = state.templates.marketing.filter(item => {
+        if (typeText === 'Above-The-Line') {
+            return item.row < 46;
+        } else {
+            return item.row >= 46;
+        }
+    });
+    
+    let activeHeaderCollapsed = false;
+
+    filterRows.forEach((item, itemIdx) => {
+        if (item.type === 'main_header' || item.type === 'sub_header' || item.type === 'category_header') {
+            const safeKey = `mkt_${tableId}_${item.row}_${itemIdx}`.replace(/[^a-zA-Z0-9_]/g, '_');
+            const isCollapsed = !!state.collapsedHeaders[safeKey];
+
+            if (item.type === 'main_header' || item.type === 'sub_header') {
+                activeHeaderCollapsed = isCollapsed;
+            }
+
+            const styleBg = item.type === 'main_header' ? 'background-color:rgba(139, 92, 246, 0.15); font-weight:700;' :
+                            item.type === 'sub_header' ? 'font-weight:700;' : 'font-weight:600; color:#d1d5db;';
+
+            html += `
+                <tr class="row-group-header" style="${styleBg}">
+                    <td colspan="15">
+                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:6px;">
+                            <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
+                        </button>
+                        ${item.name}
+                    </td>
+                </tr>`;
+        } else if (item.type === 'input') {
+            if (activeHeaderCollapsed) return; // Skip input row if parent header is collapsed
+
+            const mValues = state.data.marketing_activity[item.row] || Array(12).fill(0);
+            const rowSum = mValues.reduce((a, b) => a + b, 0);
+            
+            html += `
+                <tr>
+                    <td style="padding-left:30px;">${item.name}</td>
+                    <td><span style="font-size:0.75rem; color:var(--text-secondary)">${item.classification}</span></td>
+                    <td><input type="text" class="table-input readonly" readonly value="${rowSum.toLocaleString('id-ID')}"></td>
+                    ${mValues.map((val, mIdx) => {
+                        monthlyTotals[mIdx] += val;
+                        return `<td><input type="number" class="table-input" value="${val}" onchange="updateMarketingActivity(${item.row}, ${mIdx}, this.value)"></td>`;
+                    }).join('')}
+                </tr>
+            `;
+        }
+    });
+    
+    const grandSum = monthlyTotals.reduce((a, b) => a + b, 0);
+    
+    html += `
+        <tr class="row-grand-total">
+            <td colspan="2">TOTAL ${typeText.toUpperCase()}</td>
+            <td>${grandSum.toLocaleString('id-ID')}</td>
+            ${monthlyTotals.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+        </tr>
+        </tbody>
+    `;
+    
+    table.innerHTML = html;
+    refreshIcons();
+}
+
+function updateMarketingActivity(rowId, mIdx, val) {
+    val = parseFloat(val) || 0;
+    if (!state.data.marketing_activity[rowId]) {
+        state.data.marketing_activity[rowId] = Array(12).fill(0);
+    }
+    state.data.marketing_activity[rowId][mIdx] = val;
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderMarketingActivityTables();
+}
+
 // 7. MODULE RENDER: CORPORATE EVENTS
 function renderCorpEventTable() {
     const table = document.getElementById('corp-event-table');
+    
+    if (!state.collapsedHeaders) state.collapsedHeaders = {};
     
     let html = `
         <thead>
@@ -1579,18 +1677,30 @@ function renderCorpEventTable() {
     `;
     
     let monthlyTotals = Array(12).fill(0);
+    let activeCorpCollapsed = false;
     
     state.templates.corp_event.forEach((item, itemIdx) => {
         if (item.type === 'header') {
+            const safeKey = `ce_${itemIdx}_${item.activity}`.replace(/[^a-zA-Z0-9_]/g, '_');
+            const isCollapsed = !!state.collapsedHeaders[safeKey];
+            activeCorpCollapsed = isCollapsed;
+
             html += `
                 <tr class="row-group-header">
-                    <td colspan="17" style="font-weight:700; font-size:0.95rem;">${item.activity}</td>
+                    <td colspan="17" style="font-weight:700; font-size:0.95rem;">
+                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:6px;">
+                            <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
+                        </button>
+                        ${item.activity}
+                    </td>
                     <td style="background:none;">
                         <button class="btn btn-secondary btn-sm" onclick="addCorpEventDetail(${itemIdx})" title="Add detail row under this category" style="font-size:0.7rem; padding:3px 8px;"><i data-lucide="plus"></i> Detail</button>
                         <button class="btn-icon btn-danger" onclick="removeCorpEventCategory(${itemIdx})" title="Remove category">&times;</button>
                     </td>
                 </tr>`;
         } else {
+            if (activeCorpCollapsed) return; // Skip detail row if category header is collapsed
+
             const key = item.row;
             const dataRow = state.data.corp_events[key] || { qty: 0, price_unit: 0, monthly: Array(12).fill(0) };
             
