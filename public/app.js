@@ -991,7 +991,7 @@ function updateMarketingActivity(rowId, mIdx, val) {
     renderMarketingActivityTables();
 }
 
-// 4. MODULE RENDER: DEV & LAND PLAN COST
+// 4. MODULE RENDER: DEV & LAND
 function renderDevLandTable() {
     const table = document.getElementById('dev-land-table');
     
@@ -1016,35 +1016,41 @@ function renderDevLandTable() {
     
     let monthlyTotals = Array(12).fill(0);
 
-    // Track category totals
-    let currentCat = '';
-    let catMonthly = Array(12).fill(0);
-    let catRab = 0, catReal = 0, catEst = 0, catSqm = 0;
-    
-    // Sub-totals for Land Cost (1) and Development Cost (2: Hard + Soft)
-    let landMonthly = Array(12).fill(0), hardMonthly = Array(12).fill(0), softMonthly = Array(12).fill(0);
-
-    // Compute all row sums upfront for header summaries
+    // Compute subtotals per header item index upfront
+    const headerSums = {};
     const items = state.templates.dev_land;
-    items.forEach(item => {
+
+    items.forEach((item, idx) => {
         const text = (item.subcat || item.cat || '').trim();
         const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
-        const isHeader = (item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || (item.cat && !item.num && item.type === 'section_header');
-        
-        if (!isNote && !isHeader && item.row) {
-            const key = item.row;
-            const dataRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
-            const numStr = item.num || '';
-            const rowMonthly = dataRow.monthly || Array(12).fill(0);
-            
-            // Determine section based on item num / position
-            if (numStr.startsWith('1.') || item.cat?.includes('Land Cost')) {
-                rowMonthly.forEach((v, m) => landMonthly[m] += v);
-            } else if (numStr.startsWith('2.8') || numStr.startsWith('2.9') || item.subcat?.includes('Soft Cost') || item.cat?.includes('Soft Cost')) {
-                rowMonthly.forEach((v, m) => softMonthly[m] += v);
-            } else {
-                rowMonthly.forEach((v, m) => hardMonthly[m] += v);
+        const isHeader = isNote || !item.row;
+
+        if (isHeader) {
+            // Find all child input items belonging under this header until the next header
+            let childIdx = idx + 1;
+            let hSqm = 0, hRab = 0, hReal = 0, hEst = 0;
+            const hMonthly = Array(12).fill(0);
+
+            while (childIdx < items.length) {
+                const child = items[childIdx];
+                const cText = (child.subcat || child.cat || '').trim();
+                const cIsNote = child.cat === 'Catatan' || cText.startsWith('1. Nilai') || cText.startsWith('2. Apabila') || cText.startsWith('3. Apabila') || cText.startsWith('4. Agar') || cText.startsWith('Catatan') || cText === 'TOTAL LAND & DEVELOPMENT COST';
+                const cIsHeader = cIsNote || !child.row;
+
+                if (cIsHeader) break; // Next header encountered
+
+                const key = child.row;
+                const dRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+                hSqm += parseFloat(dRow.sqm) || 0;
+                hRab += parseFloat(dRow.rab_spk) || 0;
+                hReal += parseFloat(dRow.realisasi) || 0;
+                hEst += parseFloat(dRow.best_est) || 0;
+                (dRow.monthly || Array(12).fill(0)).forEach((v, m) => hMonthly[m] += v);
+
+                childIdx++;
             }
+
+            headerSums[idx] = { sqm: hSqm, rab: hRab, real: hReal, est: hEst, monthly: hMonthly };
         }
     });
 
@@ -1069,46 +1075,66 @@ function renderDevLandTable() {
         } else if (item.type === 'section_header' || (item.num && !item.cat.includes('.'))) {
             const numDisp = item.num || '';
             const titleDisp = item.cat || item.subcat || '';
-            let sectionSubtotalHtml = '';
             
-            if (numDisp === '1' || titleDisp.includes('Land Cost')) {
-                const totalLand = landMonthly.reduce((a,b)=>a+b,0);
-                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:#a78bfa; margin-right:20px;">1. Land Cost Subtotal: Rp ${totalLand.toLocaleString('id-ID')}</span>`;
-            } else if (numDisp === '2' || titleDisp.includes('Development Cost')) {
-                const totalDev = hardMonthly.reduce((a,b)=>a+b,0) + softMonthly.reduce((a,b)=>a+b,0);
-                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:#a78bfa; margin-right:20px;">2. Development Cost Subtotal: Rp ${totalDev.toLocaleString('id-ID')}</span>`;
-            }
+            // Collect section aggregate across all sub-headers if top-level section 1 or 2
+            let secSqm = 0, secRab = 0, secReal = 0, secEst = 0;
+            const secMonthly = Array(12).fill(0);
+            
+            items.forEach((it, i) => {
+                const itNum = it.num || it.cat || '';
+                if (numDisp === '1' && (itNum.startsWith('1.') || it.cat?.includes('Land Cost'))) {
+                    const hs = headerSums[i];
+                    if (hs) { secSqm += hs.sqm; secRab += hs.rab; secReal += hs.real; secEst += hs.est; hs.monthly.forEach((v,m)=>secMonthly[m]+=v); }
+                } else if (numDisp === '2' && (itNum.startsWith('2.') || it.cat?.includes('Hard Cost') || it.cat?.includes('Soft Cost'))) {
+                    const hs = headerSums[i];
+                    if (hs) { secSqm += hs.sqm; secRab += hs.rab; secReal += hs.real; secEst += hs.est; hs.monthly.forEach((v,m)=>secMonthly[m]+=v); }
+                }
+            });
+
+            const totalEstSpent = secReal + secEst;
+            const pctReal = secRab > 0 ? (totalEstSpent / secRab) : 0;
+            const bSum = secMonthly.reduce((a,b)=>a+b,0);
+            const costPerSqm = secSqm > 0 ? (secRab / secSqm) : 0;
 
             html += `
-                <tr class="row-grand-total" style="background:rgba(139,92,246,0.25) !important; font-size:0.95rem;">
+                <tr class="row-grand-total" style="background:rgba(139,92,246,0.25) !important; font-size:0.9rem;">
                     <td style="font-weight:800; text-align:center;">${numDisp}</td>
-                    <td colspan="20" style="font-weight:800; letter-spacing:0.03em;">
-                        ${titleDisp}
-                        ${sectionSubtotalHtml}
-                    </td>
+                    <td style="font-weight:800; letter-spacing:0.03em;">${titleDisp}</td>
+                    <td style="font-weight:700">${secSqm ? secSqm.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${costPerSqm ? Math.round(costPerSqm).toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${secRab ? secRab.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${secReal ? secReal.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${secEst ? secEst.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700; color:var(--text-secondary)">${formatPercent(pctReal)}</td>
+                    <td style="font-weight:800; color:#a78bfa">${bSum ? bSum.toLocaleString('id-ID') : '-'}</td>
+                    ${secMonthly.map(v => `<td style="font-weight:700">${v ? v.toLocaleString('id-ID') : '-'}</td>`).join('')}
                     <td></td>
                 </tr>`;
         } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
-            
-            let sectionSubtotalHtml = '';
-            if (titleDisp === 'Hard Cost' || item.cat === 'Hard Cost') {
-                const totalHard = hardMonthly.reduce((a,b)=>a+b,0);
-                sectionSubtotalHtml = `<span style="float:right; font-weight:700; color:var(--accent-emerald); margin-right:20px;">Total Hard Cost: Rp ${totalHard.toLocaleString('id-ID')}</span>`;
-            } else if (titleDisp === 'Soft Cost' || item.cat === 'Soft Cost') {
-                const totalSoft = softMonthly.reduce((a,b)=>a+b,0);
-                sectionSubtotalHtml = `<span style="float:right; font-weight:700; color:var(--accent-amber); margin-right:20px;">Total Soft Cost: Rp ${totalSoft.toLocaleString('id-ID')}</span>`;
-            }
+            const hs = headerSums[itemIdx] || { sqm: 0, rab: 0, real: 0, est: 0, monthly: Array(12).fill(0) };
+
+            const totalEstSpent = hs.real + hs.est;
+            const pctReal = hs.rab > 0 ? (totalEstSpent / hs.rab) : 0;
+            const bSum = hs.monthly.reduce((a,b)=>a+b,0);
+            const costPerSqm = hs.sqm > 0 ? (hs.rab / hs.sqm) : 0;
 
             html += `
                 <tr class="row-group-header">
                     <td style="font-weight:700; text-align:center;">${numDisp}</td>
-                    <td colspan="20" style="font-weight:700">
+                    <td style="font-weight:700">
                         ${titleDisp}
-                        ${sectionSubtotalHtml}
-                        ${item.cat !== 'Hard Cost' && item.cat !== 'Soft Cost' ? `<button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:12px;"><i data-lucide="plus"></i> Sub-Row</button>` : ''}
+                        ${item.cat !== 'Hard Cost' && item.cat !== 'Soft Cost' ? `<button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Sub-Row</button>` : ''}
                     </td>
+                    <td style="font-weight:700">${hs.sqm ? hs.sqm.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${costPerSqm ? Math.round(costPerSqm).toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${hs.rab ? hs.rab.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${hs.real ? hs.real.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700">${hs.est ? hs.est.toLocaleString('id-ID') : '-'}</td>
+                    <td style="font-weight:700; color:var(--text-secondary)">${formatPercent(pctReal)}</td>
+                    <td style="font-weight:700; color:var(--accent-indigo)">${bSum ? bSum.toLocaleString('id-ID') : '-'}</td>
+                    ${hs.monthly.map(v => `<td style="font-weight:700">${v ? v.toLocaleString('id-ID') : '-'}</td>`).join('')}
                     <td></td>
                 </tr>`;
         } else {
@@ -1125,7 +1151,7 @@ function renderDevLandTable() {
             
             html += `
                 <tr>
-                    <td style="font-weight:600; color:var(--text-secondary)">${numDisp}</td>
+                    <td style="font-weight:600; color:var(--text-secondary); text-align:center;">${numDisp}</td>
                     <td>
                         <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Description / Item Name" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
                     </td>
