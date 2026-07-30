@@ -1226,14 +1226,20 @@ function renderDevLandTable() {
             const totalEstSpent = dataRow.realisasi + dataRow.best_est;
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
+              const key = item.row;
+            const dataRow = state.data.dev_land[key] || { name: (item.subcat || item.cat || ''), sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+            
+            const totalEstSpent = dataRow.realisasi + dataRow.best_est;
+            const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
+            const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
             const descValue = dataRow.name !== undefined ? dataRow.name : (item.subcat || item.cat || '');
             
             html += `
                 <tr>
                     <td style="font-weight:600; color:var(--text-secondary); text-align:center;">${numDisp}</td>
-                    <td>
-                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Description / Item Name" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
+                    <td style="font-weight:500; color:var(--text-primary); padding-left:16px;">
+                        ${descValue}
                     </td>
                     <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand('${key}', 'sqm', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand('${key}', 'cost_sqm', this.value)"></td>
@@ -1253,7 +1259,7 @@ function renderDevLandTable() {
             `;
         }
     });
-    
+
     const grandSum = monthlyTotals.reduce((a, b) => a + b, 0);
     
     // YTD cumulative
@@ -1285,40 +1291,47 @@ function renderDevLandTable() {
     refreshIcons();
 }
 
-function updateDevLandName(key, itemIdx, val) {
-    if (!state.data.dev_land[key]) {
-        state.data.dev_land[key] = { name: val, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
-    } else {
-        state.data.dev_land[key].name = val;
-    }
-    if (state.templates.dev_land[itemIdx]) {
-        state.templates.dev_land[itemIdx].subcat = val;
-    }
-    state.isDirty = true;
-    updateSyncIndicator(false);
+function updateDevLandSubRowLetters() {
+    const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t'];
+    let subIdx = 0;
+    
+    state.templates.dev_land.forEach(item => {
+        const text = (item.subcat || item.cat || '').trim();
+        const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
+        const isHeader = isNote || (item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.type === 'section_header' || item.cat === 'Hard Cost' || item.cat === 'Soft Cost';
+
+        if (isHeader) {
+            subIdx = 0;
+        } else if (item.row) {
+            item.num = letters[subIdx] || `sub_${subIdx+1}`;
+            subIdx++;
+        }
+    });
 }
 
 function addDevLandSubRow(headerIdx) {
-    const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p'];
-    // Count existing sub-rows under this header
     let insertAt = headerIdx + 1;
-    let subCount = 0;
-    while (insertAt < state.templates.dev_land.length && !state.templates.dev_land[insertAt].num?.includes('.') && !state.templates.dev_land[insertAt].cat?.includes('.') && state.templates.dev_land[insertAt].type !== 'section_header') {
-        subCount++;
+    while (insertAt < state.templates.dev_land.length) {
+        const child = state.templates.dev_land[insertAt];
+        const cText = (child.subcat || child.cat || '').trim();
+        const cIsNote = child.cat === 'Catatan' || cText.startsWith('1. Nilai') || cText.startsWith('2. Apabila') || cText.startsWith('3. Apabila') || cText.startsWith('4. Agar') || cText.startsWith('Catatan') || cText === 'TOTAL LAND & DEVELOPMENT COST';
+        const cIsHeader = cIsNote || (child.cat && child.cat.includes('.')) || (child.num && child.num.includes('.')) || child.type === 'section_header' || child.cat === 'Hard Cost' || child.cat === 'Soft Cost';
+
+        if (cIsHeader) break;
         insertAt++;
     }
-    const letter = letters[subCount] || `sub_${subCount+1}`;
-    const name = prompt(`Enter item name for sub-row (${letter}):`, letter);
-    if (name === null) return;
-    
+
     const key = 'dl_custom_' + Date.now();
     state.templates.dev_land.splice(insertAt, 0, {
-        num: letter,
+        num: '',
         cat: '',
-        subcat: name.trim() || letter,
+        subcat: '',
         row: key
     });
-    state.data.dev_land[key] = { name: name.trim() || letter, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    
+    updateDevLandSubRowLetters();
+    const assignedLetter = state.templates.dev_land[insertAt].num;
+    state.data.dev_land[key] = { name: assignedLetter, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
     state.isDirty = true;
     updateSyncIndicator(false);
     renderDevLandTable();
@@ -1330,6 +1343,7 @@ function removeDevLandSubRow(key, itemIdx) {
         delete state.data.dev_land[key];
     }
     state.templates.dev_land.splice(itemIdx, 1);
+    updateDevLandSubRowLetters();
     state.isDirty = true;
     updateSyncIndicator(false);
     renderDevLandTable();
