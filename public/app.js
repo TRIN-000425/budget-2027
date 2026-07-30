@@ -1134,11 +1134,12 @@ function renderDevLandTable() {
             const pctReal = secRab > 0 ? (totalEstSpent / secRab) : 0;
             const bSum = secMonthly.reduce((a,b)=>a+b,0);
             const costPerSqm = secSqm > 0 ? (secRab / secSqm) : 0;
+            const safeKey = headerKey.replace(/[^a-zA-Z0-9_]/g, '_');
 
             html += `
                 <tr class="row-grand-total" style="background:rgba(139,92,246,0.25) !important; font-size:0.9rem;">
                     <td style="font-weight:800; text-align:center;">
-                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${headerKey}')" style="margin-right:4px;">
+                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:4px;">
                             <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
                         </button>
                         ${numDisp}
@@ -1155,16 +1156,20 @@ function renderDevLandTable() {
                     <td></td>
                 </tr>`;
         } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
-            if (activeParentCollapsed) return; // Skip if parent section is collapsed
-
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
-            const headerKey = `hdr_${itemIdx}_${numDisp}`;
-            const isCollapsed = !!state.collapsedHeaders[headerKey];
-            activeSubCollapsed = isCollapsed;
+            const rawKey = (item.cat === 'Hard Cost' || item.cat === 'Soft Cost') ? `group_${item.cat}` : `hdr_${itemIdx}_${numDisp}`;
+            const safeKey = rawKey.replace(/[^a-zA-Z0-9_]/g, '_');
+            
+            const isCollapsed = !!state.collapsedHeaders[safeKey];
+
+            if (item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
+                activeSubCollapsed = isCollapsed;
+            }
+
+            if (activeParentCollapsed) return; // Skip if parent section is collapsed
 
             const hs = headerSums[itemIdx] || { sqm: 0, rab: 0, real: 0, est: 0, monthly: Array(12).fill(0) };
-
             const totalEstSpent = hs.real + hs.est;
             const pctReal = hs.rab > 0 ? (totalEstSpent / hs.rab) : 0;
             const bSum = hs.monthly.reduce((a,b)=>a+b,0);
@@ -1173,7 +1178,7 @@ function renderDevLandTable() {
             html += `
                 <tr class="row-group-header">
                     <td style="font-weight:700; text-align:center;">
-                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${headerKey}')" style="margin-right:4px;">
+                        <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:4px;">
                             <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
                         </button>
                         ${numDisp}
@@ -1194,6 +1199,10 @@ function renderDevLandTable() {
                 </tr>`;
         } else {
             // Input rows
+            const rawKey = `hdr_${itemIdx}_${item.num}`;
+            const safeKey = rawKey.replace(/[^a-zA-Z0-9_]/g, '_');
+            const isSelfCollapsed = !!state.collapsedHeaders[safeKey];
+
             if (activeParentCollapsed || activeSubCollapsed) return; // Skip hidden rows
 
             const key = item.row;
