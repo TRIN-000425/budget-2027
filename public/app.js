@@ -1156,24 +1156,29 @@ function renderDevLandTable() {
                     <td></td>
                 </tr>`;
         } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
+            const isGroupTitle = (item.cat === 'Hard Cost' || item.cat === 'Soft Cost');
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
-            const rawKey = (item.cat === 'Hard Cost' || item.cat === 'Soft Cost') ? `group_${item.cat}` : `hdr_${itemIdx}_${numDisp}`;
+            const rawKey = isGroupTitle ? `group_${item.cat}` : `hdr_${itemIdx}_${numDisp}`;
             const safeKey = rawKey.replace(/[^a-zA-Z0-9_]/g, '_');
             
             const isCollapsed = !!state.collapsedHeaders[safeKey];
 
-            if (item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
+            if (isGroupTitle) {
                 activeSubCollapsed = isCollapsed;
             }
 
-            if (activeParentCollapsed) return; // Skip if parent section is collapsed
+            if (activeParentCollapsed) return; // Skip if Section 1 or 2 is collapsed
+            if (!isGroupTitle && activeSubCollapsed) return; // Skip sub-headers if Hard/Soft Cost group is collapsed
 
             const hs = headerSums[itemIdx] || { sqm: 0, rab: 0, real: 0, est: 0, monthly: Array(12).fill(0) };
             const totalEstSpent = hs.real + hs.est;
             const pctReal = hs.rab > 0 ? (totalEstSpent / hs.rab) : 0;
             const bSum = hs.monthly.reduce((a,b)=>a+b,0);
             const costPerSqm = hs.sqm > 0 ? (hs.rab / hs.sqm) : 0;
+
+            const headerSelfKey = `hdr_${itemIdx}_${numDisp}`.replace(/[^a-zA-Z0-9_]/g, '_');
+            const isSelfCollapsed = !!state.collapsedHeaders[headerSelfKey];
 
             html += `
                 <tr class="row-group-header">
@@ -1185,7 +1190,7 @@ function renderDevLandTable() {
                     </td>
                     <td style="font-weight:700">
                         ${titleDisp}
-                        ${item.cat !== 'Hard Cost' && item.cat !== 'Soft Cost' ? `<button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Sub-Row</button>` : ''}
+                        ${!isGroupTitle ? `<button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Sub-Row</button>` : ''}
                     </td>
                     <td style="font-weight:700">${hs.sqm ? hs.sqm.toLocaleString('id-ID') : '-'}</td>
                     <td style="font-weight:700">${costPerSqm ? Math.round(costPerSqm).toLocaleString('id-ID') : '-'}</td>
@@ -1199,11 +1204,21 @@ function renderDevLandTable() {
                 </tr>`;
         } else {
             // Input rows
-            const rawKey = `hdr_${itemIdx}_${item.num}`;
-            const safeKey = rawKey.replace(/[^a-zA-Z0-9_]/g, '_');
-            const isSelfCollapsed = !!state.collapsedHeaders[safeKey];
+            const numDisp = item.num || '';
+            let currentSubCollapsed = false;
 
-            if (activeParentCollapsed || activeSubCollapsed) return; // Skip hidden rows
+            // Find parent sub-header collapse status for this row
+            for (let i = itemIdx - 1; i >= 0; i--) {
+                const prev = items[i];
+                if ((prev.cat && prev.cat.includes('.')) || (prev.num && prev.num.includes('.'))) {
+                    const pNum = prev.num || prev.cat;
+                    const pKey = `hdr_${i}_${pNum}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                    currentSubCollapsed = !!state.collapsedHeaders[pKey];
+                    break;
+                }
+            }
+
+            if (activeParentCollapsed || activeSubCollapsed || currentSubCollapsed) return; // Skip hidden rows
 
             const key = item.row;
             const dataRow = state.data.dev_land[key] || { name: (item.subcat || item.cat || ''), sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
