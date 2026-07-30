@@ -1096,18 +1096,23 @@ function renderDevLandTable() {
             const numDisp = item.num || '';
             const titleDisp = item.cat || item.subcat || '';
             
-            // Collect section aggregate across all sub-headers if top-level section 1 or 2
+            // Collect section aggregate across all child input rows
             let secSqm = 0, secRab = 0, secReal = 0, secEst = 0;
             const secMonthly = Array(12).fill(0);
             
-            items.forEach((it, i) => {
-                const itNum = it.num || it.cat || '';
-                if (numDisp === '1' && (itNum.startsWith('1.') || it.cat?.includes('Land Cost'))) {
-                    const hs = headerSums[i];
-                    if (hs) { secSqm += hs.sqm; secRab += hs.rab; secReal += hs.real; secEst += hs.est; hs.monthly.forEach((v,m)=>secMonthly[m]+=v); }
-                } else if (numDisp === '2' && (itNum.startsWith('2.') || it.cat?.includes('Hard Cost') || it.cat?.includes('Soft Cost'))) {
-                    const hs = headerSums[i];
-                    if (hs) { secSqm += hs.sqm; secRab += hs.rab; secReal += hs.real; secEst += hs.est; hs.monthly.forEach((v,m)=>secMonthly[m]+=v); }
+            items.forEach((it) => {
+                const itNum = it.num || '';
+                const itCat = it.cat || '';
+                const isMatch = (numDisp === '1' && (itNum.startsWith('1.') || itCat.includes('Land Cost'))) ||
+                                (numDisp === '2' && (itNum.startsWith('2.') || itCat.includes('Hard Cost') || itCat.includes('Soft Cost')));
+                
+                if (isMatch && it.row) {
+                    const dRow = state.data.dev_land[it.row] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+                    secSqm += parseFloat(dRow.sqm) || 0;
+                    secRab += parseFloat(dRow.rab_spk) || 0;
+                    secReal += parseFloat(dRow.realisasi) || 0;
+                    secEst += parseFloat(dRow.best_est) || 0;
+                    (dRow.monthly || Array(12).fill(0)).forEach((v,m) => secMonthly[m] += v);
                 }
             });
 
