@@ -998,8 +998,8 @@ function renderDevLandTable() {
     let html = `
         <thead>
             <tr>
-                <th>No</th>
-                <th>Category</th>
+                <th style="width:50px">No</th>
+                <th style="min-width:260px">Category / Item Description</th>
                 <th>SQM</th>
                 <th>Cost / sqm</th>
                 <th>RAB / SPK Value</th>
@@ -1008,6 +1008,7 @@ function renderDevLandTable() {
                 <th>% Realisasi</th>
                 <th>Total Budget</th>
                 ${months.map(m => `<th>${m}</th>`).join('')}
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -1015,7 +1016,7 @@ function renderDevLandTable() {
     
     let monthlyTotals = Array(12).fill(0);
     
-    state.templates.dev_land.forEach(item => {
+    state.templates.dev_land.forEach((item, itemIdx) => {
         const text = (item.subcat || item.cat || '').trim();
         const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
 
@@ -1023,12 +1024,12 @@ function renderDevLandTable() {
             if (text === 'Catatan' || text.startsWith('Catatan')) {
                 html += `
                     <tr style="background:rgba(255,255,255,0.03); font-weight:700; color:var(--text-secondary)">
-                        <td colspan="21" style="padding-top:16px;">Catatan:</td>
+                        <td colspan="22" style="padding-top:16px;">Catatan:</td>
                     </tr>`;
             } else if (text.startsWith('1. ') || text.startsWith('2. ') || text.startsWith('3. ') || text.startsWith('4. ')) {
                 html += `
                     <tr style="background:rgba(255,255,255,0.01); color:var(--text-muted); font-size:0.8rem">
-                        <td colspan="21" style="padding:4px 12px;">${text}</td>
+                        <td colspan="22" style="padding:4px 12px;">${text}</td>
                     </tr>`;
             }
         } else if (!item.num && !item.cat && !item.subcat) {
@@ -1036,7 +1037,7 @@ function renderDevLandTable() {
         } else if (item.cat && !item.num && item.type === 'section_header') {
             html += `
                 <tr class="row-grand-total" style="background:rgba(139,92,246,0.2) !important">
-                    <td colspan="21" style="font-weight:800">${item.cat}</td>
+                    <td colspan="22" style="font-weight:800">${item.cat}</td>
                 </tr>`;
         } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.'))) {
             const numDisp = item.num || item.cat;
@@ -1044,25 +1045,30 @@ function renderDevLandTable() {
             html += `
                 <tr class="row-group-header">
                     <td style="font-weight:700">${numDisp}</td>
-                    <td colspan="20" style="font-weight:700">${titleDisp}</td>
+                    <td colspan="20" style="font-weight:700">
+                        ${titleDisp}
+                        <button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:12px;"><i data-lucide="plus"></i> Sub-Row</button>
+                    </td>
+                    <td></td>
                 </tr>`;
         } else {
             // Input rows
             const key = item.row;
-            const dataRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+            const dataRow = state.data.dev_land[key] || { name: (item.subcat || item.cat || ''), sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
             
             const totalEstSpent = dataRow.realisasi + dataRow.best_est;
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
             const numDisp = item.num || '';
-            const labelDisp = item.subcat || item.cat || '';
-            const indentStyle = (labelDisp.length <= 3 && !labelDisp.includes(' ')) ? 'padding-left:35px; font-weight:600;' : 'padding-left:20px;';
+            const descValue = dataRow.name !== undefined ? dataRow.name : (item.subcat || item.cat || '');
             
             html += `
                 <tr>
-                    <td>${numDisp}</td>
-                    <td style="${indentStyle}">${labelDisp}</td>
+                    <td style="font-weight:600; color:var(--text-secondary)">${numDisp}</td>
+                    <td>
+                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Description / Item Name" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
+                    </td>
                     <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand('${key}', 'sqm', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand('${key}', 'cost_sqm', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:110px" value="${dataRow.rab_spk}" onchange="updateDevLand('${key}', 'rab_spk', this.value)"></td>
@@ -1074,6 +1080,9 @@ function renderDevLandTable() {
                         monthlyTotals[mIdx] += val;
                         return `<td><input type="number" class="table-input" value="${val}" onchange="updateDevLand('${key}', 'monthly', this.value, ${mIdx})"></td>`;
                     }).join('')}
+                    <td class="action-cell">
+                        <button class="btn-delete" onclick="removeDevLandSubRow('${key}', ${itemIdx})"><i data-lucide="trash-2"></i></button>
+                    </td>
                 </tr>
             `;
         }
@@ -1090,15 +1099,17 @@ function renderDevLandTable() {
             <td colspan="8">TOTAL LAND & DEVELOPMENT PLAN COST</td>
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${monthlyTotals.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+            <td></td>
         </tr>
         <tr class="row-ytd">
             <td colspan="8">LAND & DEV COST YTD</td>
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${devYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+            <td></td>
         </tr>
         <tr>
-            <td colspan="21" style="padding:10px 0; background:none; border:none;">
-                <button class="btn btn-primary btn-sm" onclick="addDevLandCategory()"><i data-lucide="plus"></i> Add Category</button>
+            <td colspan="22" style="padding:10px 0; background:none; border:none;">
+                <button class="btn btn-primary btn-sm" onclick="addDevLandCategory()"><i data-lucide="plus"></i> Add Category Header</button>
             </td>
         </tr>
         </tbody>
@@ -1106,6 +1117,56 @@ function renderDevLandTable() {
     
     table.innerHTML = html;
     refreshIcons();
+}
+
+function updateDevLandName(key, itemIdx, val) {
+    if (!state.data.dev_land[key]) {
+        state.data.dev_land[key] = { name: val, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    } else {
+        state.data.dev_land[key].name = val;
+    }
+    if (state.templates.dev_land[itemIdx]) {
+        state.templates.dev_land[itemIdx].subcat = val;
+    }
+    state.isDirty = true;
+    updateSyncIndicator(false);
+}
+
+function addDevLandSubRow(headerIdx) {
+    const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p'];
+    // Count existing sub-rows under this header
+    let insertAt = headerIdx + 1;
+    let subCount = 0;
+    while (insertAt < state.templates.dev_land.length && !state.templates.dev_land[insertAt].num?.includes('.') && !state.templates.dev_land[insertAt].cat?.includes('.') && state.templates.dev_land[insertAt].type !== 'section_header') {
+        subCount++;
+        insertAt++;
+    }
+    const letter = letters[subCount] || `sub_${subCount+1}`;
+    const name = prompt(`Enter item name for sub-row (${letter}):`, letter);
+    if (name === null) return;
+    
+    const key = 'dl_custom_' + Date.now();
+    state.templates.dev_land.splice(insertAt, 0, {
+        num: letter,
+        cat: '',
+        subcat: name.trim() || letter,
+        row: key
+    });
+    state.data.dev_land[key] = { name: name.trim() || letter, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderDevLandTable();
+}
+
+function removeDevLandSubRow(key, itemIdx) {
+    if (!confirm('Delete this sub-row item?')) return;
+    if (key && state.data.dev_land[key]) {
+        delete state.data.dev_land[key];
+    }
+    state.templates.dev_land.splice(itemIdx, 1);
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderDevLandTable();
 }
 
 function addDevLandCategory() {
