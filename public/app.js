@@ -1349,6 +1349,12 @@ function updateDevLand(key, field, val, mIdx = null) {
     renderDevLandTable();
 }
 
+function toggleDevLandHeader(headerKey) {
+    if (!state.collapsedHeaders) state.collapsedHeaders = {};
+    state.collapsedHeaders[headerKey] = !state.collapsedHeaders[headerKey];
+    renderDevLandTable();
+}
+
 // 5. MODULE RENDER: BUDGET PAYROLL (COA-based)
 function renderPayrollTable() {
     renderExpensesSubTable('employee-table', state.templates.payroll, state.data.payroll_expenses, 'payroll');
