@@ -1066,38 +1066,48 @@ function renderDevLandTable() {
             }
         } else if (!item.num && !item.cat && !item.subcat) {
             // Spacer row
-        } else if (item.cat && !item.num && item.type === 'section_header') {
+        } else if (item.type === 'section_header' || (item.num && !item.cat.includes('.'))) {
+            const numDisp = item.num || '';
+            const titleDisp = item.cat || item.subcat || '';
+            let sectionSubtotalHtml = '';
+            
+            if (numDisp === '1' || titleDisp.includes('Land Cost')) {
+                const totalLand = landMonthly.reduce((a,b)=>a+b,0);
+                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:#a78bfa; margin-right:20px;">1. Land Cost Subtotal: Rp ${totalLand.toLocaleString('id-ID')}</span>`;
+            } else if (numDisp === '2' || titleDisp.includes('Development Cost')) {
+                const totalDev = hardMonthly.reduce((a,b)=>a+b,0) + softMonthly.reduce((a,b)=>a+b,0);
+                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:#a78bfa; margin-right:20px;">2. Development Cost Subtotal: Rp ${totalDev.toLocaleString('id-ID')}</span>`;
+            }
+
             html += `
-                <tr class="row-grand-total" style="background:rgba(139,92,246,0.2) !important">
-                    <td colspan="22" style="font-weight:800">${item.cat}</td>
+                <tr class="row-grand-total" style="background:rgba(139,92,246,0.25) !important; font-size:0.95rem;">
+                    <td style="font-weight:800; text-align:center;">${numDisp}</td>
+                    <td colspan="20" style="font-weight:800; letter-spacing:0.03em;">
+                        ${titleDisp}
+                        ${sectionSubtotalHtml}
+                    </td>
+                    <td></td>
                 </tr>`;
-        } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.'))) {
+        } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
             
-            // Highlight section headers 1 (Land Cost) and 2 (Development Cost)
             let sectionSubtotalHtml = '';
-            if (numDisp === '1') {
-                const totalLand = landMonthly.reduce((a,b)=>a+b,0);
-                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:var(--accent-purple); margin-right:20px;">Subtotal 1. Land Cost: Rp ${totalLand.toLocaleString('id-ID')}</span>`;
-            } else if (numDisp === '2') {
-                const totalDev = hardMonthly.reduce((a,b)=>a+b,0) + softMonthly.reduce((a,b)=>a+b,0);
-                sectionSubtotalHtml = `<span style="float:right; font-weight:800; color:var(--accent-purple); margin-right:20px;">Subtotal 2. Development Cost: Rp ${totalDev.toLocaleString('id-ID')}</span>`;
-            } else if (titleDisp === 'Hard Cost') {
+            if (titleDisp === 'Hard Cost' || item.cat === 'Hard Cost') {
                 const totalHard = hardMonthly.reduce((a,b)=>a+b,0);
                 sectionSubtotalHtml = `<span style="float:right; font-weight:700; color:var(--accent-emerald); margin-right:20px;">Total Hard Cost: Rp ${totalHard.toLocaleString('id-ID')}</span>`;
-            } else if (titleDisp === 'Soft Cost') {
+            } else if (titleDisp === 'Soft Cost' || item.cat === 'Soft Cost') {
                 const totalSoft = softMonthly.reduce((a,b)=>a+b,0);
                 sectionSubtotalHtml = `<span style="float:right; font-weight:700; color:var(--accent-amber); margin-right:20px;">Total Soft Cost: Rp ${totalSoft.toLocaleString('id-ID')}</span>`;
             }
 
             html += `
                 <tr class="row-group-header">
-                    <td style="font-weight:700">${numDisp}</td>
+                    <td style="font-weight:700; text-align:center;">${numDisp}</td>
                     <td colspan="20" style="font-weight:700">
                         ${titleDisp}
                         ${sectionSubtotalHtml}
-                        <button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:12px;"><i data-lucide="plus"></i> Sub-Row</button>
+                        ${item.cat !== 'Hard Cost' && item.cat !== 'Soft Cost' ? `<button class="btn btn-secondary btn-sm" onclick="addDevLandSubRow(${itemIdx})" title="Add sub-row under this header" style="font-size:0.7rem; padding:2px 8px; margin-left:12px;"><i data-lucide="plus"></i> Sub-Row</button>` : ''}
                     </td>
                     <td></td>
                 </tr>`;
