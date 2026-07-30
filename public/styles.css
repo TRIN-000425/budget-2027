@@ -832,13 +832,17 @@ body.light .theme-toggle-btn:hover {
     background-color: rgba(99, 102, 241, 0.05);
 }
 
-/* Premium Card Wrapper */
+/* Premium Card Wrapper/* Card containers */
 .premium-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 24px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - var(--header-height) - 64px);
+    overflow: hidden;
 }
 
 /* Card Tabs navigation */
@@ -889,7 +893,10 @@ body.light .theme-toggle-btn:hover {
 }
 
 .subtab-panel.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
 }
 
 .table-actions {
@@ -897,6 +904,7 @@ body.light .theme-toggle-btn:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 18px;
+    flex-shrink: 0;
 }
 
 .info-tag {
@@ -918,10 +926,13 @@ body.light .theme-toggle-btn:hover {
     height: 14px;
 }
 
-/* Horizontal Table Container Scroll */
+/* Horizontal & Vertical Table Container Scroll */
 .table-container {
     width: 100%;
+    flex: 1;
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - var(--header-height) - 180px);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
 }
@@ -929,12 +940,16 @@ body.light .theme-toggle-btn:hover {
 /* Main budget grid tables styling */
 .budget-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.88rem;
     text-align: left;
 }
 
 .budget-table th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
     background-color: var(--bg-surface-elevated);
     color: var(--text-primary);
     font-weight: 600;
