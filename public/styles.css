@@ -74,19 +74,22 @@ body {
 
 /* Scrollbar customizations */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 ::-webkit-scrollbar-track {
-    background: var(--bg-base);
+    background: transparent;
+    margin: 5px;
 }
 ::-webkit-scrollbar-thumb {
     background: var(--bg-surface-elevated);
-    border-radius: var(--radius-sm);
-    border: 2px solid var(--bg-base);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
+    background-clip: content-box;
 }
 
 /* Layout structural components */
@@ -935,6 +938,8 @@ body.light .theme-toggle-btn:hover {
     max-height: calc(100vh - var(--header-height) - 180px);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    padding: 4px;
+    scrollbar-gutter: stable;
 }
 
 /* Main budget grid tables styling */
