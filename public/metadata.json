@@ -1,0 +1,5274 @@
+{
+  "companies": [
+    "PT Perintis Triniti Properti Tbk",
+    "PT Puri Triniti Batam",
+    "PT Sirius Terang Cemerlang",
+    "PT Triniti Dinamik",
+    "PT Triniti Garam Properti",
+    "PT Triniti Menara Gading",
+    "PT Triniti Menara Serpong",
+    "PT Triniti Pilar Gemilang",
+    "Pilih Perusahaan",
+    "Sentul - JO"
+  ],
+  "projects": [
+    "Brooklyn",
+    "Collins Boulevard",
+    "District East",
+    "Head Office",
+    "Lampung-Holdwell Business Park",
+    "Lampung-Noble Spring Residence",
+    "Marc's Boulevard",
+    "Sentul-19ha",
+    "Sentul-72ha",
+    "Springwood",
+    "The Smith",
+    "Yukata"
+  ],
+  "projectCompanyMapping": {
+    "Brooklyn": ["PT Sirius Terang Cemerlang"],
+    "Collins Boulevard": ["PT Puri Triniti Batam"],
+    "District East": ["PT Perintis Triniti Properti Tbk"],
+    "Head Office": ["PT Perintis Triniti Properti Tbk"],
+    "Lampung-Holdwell Business Park": ["PT Triniti Garam Properti"],
+    "Lampung-Noble Spring Residence": ["PT Triniti Garam Properti"],
+    "Marc's Boulevard": ["PT Triniti Dinamik", "PT Triniti Pilar Gemilang"],
+    "Sentul-19ha": ["Sentul - JO"],
+    "Sentul-72ha": ["Sentul - JO", "PT Perintis Triniti Properti Tbk"],
+    "Springwood": ["PT Triniti Dinamik"],
+    "The Smith": ["PT Triniti Dinamik", "PT Triniti Menara Gading"],
+    "Yukata": ["PT Triniti Menara Serpong"]
+  },
+  "currencies": [
+    "CNY",
+    "EUR",
+    "IDR",
+    "SGD",
+    "USD"
+  ],
+  "justifications": [
+    "Must To Have",
+    "Nice To Have"
+  ],
+  "destinations": [
+    "Local",
+    "Overseas"
+  ],
+  "locals": [
+    "Balikpapan",
+    "Batam",
+    "Jakarta",
+    "Labuan Bajo",
+    "Lampung",
+    "Palembang",
+    "Pontianak"
+  ],
+  "overseas": [
+    "Australia",
+    "China",
+    "Hongkong",
+    "Jakarta",
+    "Malaysia",
+    "Singapore",
+    "Thailand"
+  ],
+  "anp": [
+    "Beban Marketing Promosi Lainnya",
+    "Billboard",
+    "Events & Exibition",
+    "Maket & Support",
+    "Media Cetak, Brosur, Spanduk, Katalog",
+    "Media Digital, Online, TV, Radio",
+    "Reward",
+    "RoadSHow",
+    "Show Unit",
+    "Signage",
+    "Transportasi dan Akomodasi"
+  ],
+  "coa": [
+    {
+      "id": "10000000",
+      "desc": "ASET"
+    },
+    {
+      "id": "11000000",
+      "desc": "ASET LANCAR"
+    },
+    {
+      "id": "11100000",
+      "desc": "KAS DAN BANK"
+    },
+    {
+      "id": "11110000",
+      "desc": "KAS"
+    },
+    {
+      "id": "11110001",
+      "desc": "KAS BESAR"
+    },
+    {
+      "id": "11110002",
+      "desc": "KAS KECIL"
+    },
+    {
+      "id": "11110003",
+      "desc": "KAS PROYEK"
+    },
+    {
+      "id": "11110004",
+      "desc": "POS SILANG"
+    },
+    {
+      "id": "11110005",
+      "desc": "CASH ADVANCE RM"
+    },
+    {
+      "id": "11110006",
+      "desc": "KAS DAN SETARA KAS"
+    },
+    {
+      "id": "11110007",
+      "desc": "KAS MARKETING"
+    },
+    {
+      "id": "11110008",
+      "desc": "CASH ADVANCE MARKETING"
+    },
+    {
+      "id": "11120000",
+      "desc": "BANK"
+    },
+    {
+      "id": "11120001",
+      "desc": "BANK BCA - 0353106047 TGP"
+    },
+    {
+      "id": "11120002",
+      "desc": "BCA - 8210558111 (IDR) PTB"
+    },
+    {
+      "id": "11120003",
+      "desc": "BCA - IDR - 0762777779 DEK"
+    },
+    {
+      "id": "11120004",
+      "desc": "BCA-0481 - IDR - NO REK 6043910481 TMI"
+    },
+    {
+      "id": "11120005",
+      "desc": "BCA-111 IDR - NO REK 111 PTP"
+    },
+    {
+      "id": "11120006",
+      "desc": "BCA-2828 IDR - NO REK 604 2828 111 TPG"
+    },
+    {
+      "id": "11120007",
+      "desc": "BCA-5365 IDR - NO REK 722 5365 555 STC"
+    },
+    {
+      "id": "11120008",
+      "desc": "BNI - 2108181117 TJO"
+    },
+    {
+      "id": "11120009",
+      "desc": "PANIN : 172-501-0111 TMI"
+    },
+    {
+      "id": "11120010",
+      "desc": "PANIN : 172-505-6111 TMG"
+    },
+    {
+      "id": "11120011",
+      "desc": "BANK BCA - 0353131874 TGP"
+    },
+    {
+      "id": "11120012",
+      "desc": "BANK MAYBANK IDR - NO REK 2703001204 STC"
+    },
+    {
+      "id": "11120013",
+      "desc": "BCA - 8210658000 (IDR) PTB"
+    },
+    {
+      "id": "11120014",
+      "desc": "BCA - IDR - 0765888111 DEK"
+    },
+    {
+      "id": "11120015",
+      "desc": "BCA : 689-096-8111 TMG"
+    },
+    {
+      "id": "11120016",
+      "desc": "BCA-3256 IDR - NO REK 604 3256 888 TPG"
+    },
+    {
+      "id": "11120017",
+      "desc": "BCA-8111 - IDR - NO REK 6043988111 TMI"
+    },
+    {
+      "id": "11120018",
+      "desc": "BII-0056 IDR - NO REK 2525000056 PTP"
+    },
+    {
+      "id": "11120019",
+      "desc": "MANDIRI - 1570021081113 TJO"
+    },
+    {
+      "id": "11120020",
+      "desc": "PANIN : 172-501-1133 TMS"
+    },
+    {
+      "id": "11120021",
+      "desc": "AYAT SILANG DEK"
+    },
+    {
+      "id": "11120022",
+      "desc": "BANK BCA - 0353131866 TGP"
+    },
+    {
+      "id": "11120023",
+      "desc": "BCA - 0355518383 TJO"
+    },
+    {
+      "id": "11120024",
+      "desc": "BCA : 604-171-7111 TMS"
+    },
+    {
+      "id": "11120025",
+      "desc": "BCA-9111 - IDR - NO REK 6043979111 TMI"
+    },
+    {
+      "id": "11120026",
+      "desc": "BII-6011 IDR - NO REK 2 703 006 011 TPG"
+    },
+    {
+      "id": "11120027",
+      "desc": "BRI-7302 IDR - NO REK 39801000087302 PTP"
+    },
+    {
+      "id": "11120028",
+      "desc": "MANDIRI - 109-00-8990098-9 (IDR) PTB"
+    },
+    {
+      "id": "11120029",
+      "desc": "PANIN : 022-500-9666 TMG"
+    },
+    {
+      "id": "11120030",
+      "desc": "ARTHA GRAHA - 9427 IDR - NO REK 107-9427-191 TPG"
+    },
+    {
+      "id": "11120031",
+      "desc": "BANK BCA - 0353233553 TGP"
+    },
+    {
+      "id": "11120032",
+      "desc": "BCA - 0356856885 TJO"
+    },
+    {
+      "id": "11120033",
+      "desc": "BCA - 8210668111 (IDR) PTB"
+    },
+    {
+      "id": "11120034",
+      "desc": "BCA - VA - 0761997997 DEK"
+    },
+    {
+      "id": "11120035",
+      "desc": "BCA-7111 - IDR - NO REK 6043927111 TMI"
+    },
+    {
+      "id": "11120036",
+      "desc": "BRI-8506 IDR - NO REK 39801002748506 PTP"
+    },
+    {
+      "id": "11120037",
+      "desc": "MANDIRI : 176-000-333-1111 TMS"
+    },
+    {
+      "id": "11120038",
+      "desc": "PERMATA : 953-696-1388 TMG"
+    },
+    {
+      "id": "11120039",
+      "desc": "BANK MANDIRI - 1570011817203 TGP"
+    },
+    {
+      "id": "11120040",
+      "desc": "BANK NOBU DEK"
+    },
+    {
+      "id": "11120041",
+      "desc": "BCA - 0353176223 TJO"
+    },
+    {
+      "id": "11120042",
+      "desc": "BCA - 8210778111 (IDR) PTB"
+    },
+    {
+      "id": "11120043",
+      "desc": "BTN-0681 IDR - NO REK 16801300000681 PTP"
+    },
+    {
+      "id": "11120044",
+      "desc": "PANIN : 022-557-5111 TMS"
+    },
+    {
+      "id": "11120045",
+      "desc": "PERMATA TMI"
+    },
+    {
+      "id": "11120046",
+      "desc": "BANK BTN DEK"
+    },
+    {
+      "id": "11120047",
+      "desc": "BANK MANDIRI - 1570011817187 TGP"
+    },
+    {
+      "id": "11120048",
+      "desc": "BANK NTT TMI"
+    },
+    {
+      "id": "11120049",
+      "desc": "BCA - 0353176231 TJO"
+    },
+    {
+      "id": "11120050",
+      "desc": "BRI-2307 IDR - NO REK 39801000092307 PTP"
+    },
+    {
+      "id": "11120051",
+      "desc": "PERMATA : 181-181-9111 TMS"
+    },
+    {
+      "id": "11120052",
+      "desc": "UOB - 3893026663 (IDR) PTB"
+    },
+    {
+      "id": "11120053",
+      "desc": "BCA ESCROW DEK"
+    },
+    {
+      "id": "11120054",
+      "desc": "BII-00052 IDR - NO REK 2525000052 PTP"
+    },
+    {
+      "id": "11120055",
+      "desc": "MANDIRI - 1570011196566 TJO"
+    },
+    {
+      "id": "11120056",
+      "desc": "NOBU - 18930225581 TGP"
+    },
+    {
+      "id": "11120057",
+      "desc": "OCBC NISP : 6368-0000-7123 TMS"
+    },
+    {
+      "id": "11120058",
+      "desc": "UOB - 3890010707 (IDR) PTB"
+    },
+    {
+      "id": "11120059",
+      "desc": "BCA-2909 IDR - NO REK 604 2909 111 PTP"
+    },
+    {
+      "id": "11120060",
+      "desc": "BTN - 1501300014766 TJO"
+    },
+    {
+      "id": "11120061",
+      "desc": "BTN - 1501300015819 TGP"
+    },
+    {
+      "id": "11120062",
+      "desc": "BTN - 2701300013266 (IDR) PTB"
+    },
+    {
+      "id": "11120063",
+      "desc": "BTN ESCROW DEK"
+    },
+    {
+      "id": "11120064",
+      "desc": "INDOSURYA : 0012-3103-6250 TMS"
+    },
+    {
+      "id": "11120065",
+      "desc": "BANK BNI - 2775999991 TGP"
+    },
+    {
+      "id": "11120066",
+      "desc": "BCA PENERIMAAN - 6044983332 DEK"
+    },
+    {
+      "id": "11120067",
+      "desc": "BCA-7111 IDR - NO REK 6043707111 PTP"
+    },
+    {
+      "id": "11120068",
+      "desc": "BWS OPERASIONAL - 200250002456 TJO"
+    },
+    {
+      "id": "11120069",
+      "desc": "MAYBANK : 777-000-0252 TMS"
+    },
+    {
+      "id": "11120070",
+      "desc": "MESTIKA - 10166003550 (IDR) PTB"
+    },
+    {
+      "id": "11120071",
+      "desc": "BCA OPERASIONAL - 6044843336 DEK"
+    },
+    {
+      "id": "11120072",
+      "desc": "BCA-6888 IDR - NO REK 6043036888 PTP"
+    },
+    {
+      "id": "11120073",
+      "desc": "MANDIRI - 109-00-9600098-9 (IDR) PTB"
+    },
+    {
+      "id": "11120074",
+      "desc": "MANDIRI - 1570088011110 TGP"
+    },
+    {
+      "id": "11120075",
+      "desc": "NOBU - 18930333693 TJO"
+    },
+    {
+      "id": "11120076",
+      "desc": "UOB : 573-300-7118 TMS"
+    },
+    {
+      "id": "11120077",
+      "desc": "BANK BJB- 8880000000168 TGP"
+    },
+    {
+      "id": "11120078",
+      "desc": "BCA INVESTASI - 6044873332 DEK"
+    },
+    {
+      "id": "11120079",
+      "desc": "BTN SYARIAH - 1000604427 TJO"
+    },
+    {
+      "id": "11120080",
+      "desc": "MANDIRI : 129-008-988-8883 TMS"
+    },
+    {
+      "id": "11120081",
+      "desc": "UOB-6111 IDR - NO REK 6111 PTP"
+    },
+    {
+      "id": "11120082",
+      "desc": "BANK BCA - 0358880111 TGP"
+    },
+    {
+      "id": "11120083",
+      "desc": "BRI : 0206-0100-987-3309 TMS"
+    },
+    {
+      "id": "11120084",
+      "desc": "MANDIRI - 1570028032200 TJO"
+    },
+    {
+      "id": "11120085",
+      "desc": "VICTORIA-3031 IDR - NO REK 810003031 PTP"
+    },
+    {
+      "id": "11120086",
+      "desc": "BNI-4569 IDR - NO REK 6856854569 PTP"
+    },
+    {
+      "id": "11120087",
+      "desc": "BRI : 0230-0100-395-0302 TMS"
+    },
+    {
+      "id": "11120088",
+      "desc": "MANDIRI - 1570077111111 TJO"
+    },
+    {
+      "id": "11120089",
+      "desc": "BANK BNI-3654211111 TJO"
+    },
+    {
+      "id": "11120090",
+      "desc": "BCA OPR : 604-390-7111 TMS"
+    },
+    {
+      "id": "11120091",
+      "desc": "BNI-567 USD - NO REK 5855854567 PTP"
+    },
+    {
+      "id": "11120092",
+      "desc": "BNI-678 USD - NO REK 1995555678 PTP"
+    },
+    {
+      "id": "11120093",
+      "desc": "PANIN : 100-500-2602 (PRK-1) TMS"
+    },
+    {
+      "id": "11120094",
+      "desc": "BTN-0108 IDR - NO REK 0016801320000108 PTP"
+    },
+    {
+      "id": "11120095",
+      "desc": "MEGA : 012-5200-1100-1648 TMS"
+    },
+    {
+      "id": "11120096",
+      "desc": "OCBC NISP : 4328-1002-2223 TMS"
+    },
+    {
+      "id": "11120097",
+      "desc": "PAN-3545 IDR - NO REK 3545 PTP"
+    },
+    {
+      "id": "11120098",
+      "desc": "BJB : 0110-30309-2001 TMS"
+    },
+    {
+      "id": "11120099",
+      "desc": "BJB-0001 IDR - NO REK 0016445800001 PTP"
+    },
+    {
+      "id": "11120100",
+      "desc": "BJB-3002 IDR - NO REK 0016922293002 PTP"
+    },
+    {
+      "id": "11120101",
+      "desc": "CIMB NIAGA : 8001-6895-3300 TMS"
+    },
+    {
+      "id": "11120102",
+      "desc": "BNI - 889 USD NO REK 7567822889 PTP"
+    },
+    {
+      "id": "11120103",
+      "desc": "UOB : 417-300-5444 TMS"
+    },
+    {
+      "id": "11120104",
+      "desc": "ARTHA GRAHA - 7424 IDR - NO REK 107-9497-424 PTP"
+    },
+    {
+      "id": "11120105",
+      "desc": "BCA BM : 604-446-2111 TMS"
+    },
+    {
+      "id": "11120106",
+      "desc": "BCA 4610 IDR - NO REK 604-4610111 OPR HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120107",
+      "desc": "NOBU : 189-3099-1119 TMS"
+    },
+    {
+      "id": "11120108",
+      "desc": "BCA 4170 IDR - NO REK 604-4170111 INV HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120109",
+      "desc": "BCA 4772 IDR - NO REK 604-4772111 OPR NSR LAMPUNG PTP"
+    },
+    {
+      "id": "11120110",
+      "desc": "BCA 4662 IDR - NO REK 604-4662111 INV NSR LAMPUNG PTP"
+    },
+    {
+      "id": "11120111",
+      "desc": "BCA 4992 IDR - NO REK 604-4992-111 PTP"
+    },
+    {
+      "id": "11120112",
+      "desc": "BCA 4720 IDR - NO REK 604-4720111 VA PENJUALAN HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120113",
+      "desc": "BCA 4193 IDR - NO REK 604-4193111 VA PENJUALAN NSR LAMPUNG PTP"
+    },
+    {
+      "id": "11120114",
+      "desc": "BCA 4303 IDR - NO REK 604-4303111 PAYROLL LAMPUNG PTP"
+    },
+    {
+      "id": "11120115",
+      "desc": "CIMB-1154 IDR- NO REK. 8600-1154-7800 PTP"
+    },
+    {
+      "id": "11120116",
+      "desc": "GANESHA (02103/1115) IDR- NO REK. 0001-2-02103-2 / 1000-3-1115-8 PTP"
+    },
+    {
+      "id": "11120117",
+      "desc": "MANDIRI 31115 IDR - NO REK 176-00-11131115 HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120118",
+      "desc": "BRI 62304 IDR - NO REK 213501000662304 HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120119",
+      "desc": "NOBU 7559 IDR - NO REK 18930777559 HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120120",
+      "desc": "MANDIRI 11113 IDR - NO REK 1140099311113 HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120121",
+      "desc": "MANDIRI ESCROW 11119 IDR - NO REK 1140033911119 HBP LAMPUNG PTP"
+    },
+    {
+      "id": "11120122",
+      "desc": "MANDIRI - 15771 IDR - NO REK - 1570015771117 PTP"
+    },
+    {
+      "id": "11120123",
+      "desc": "BNI-1119 IDR - NO REK 365-111111-9 PTP"
+    },
+    {
+      "id": "11120124",
+      "desc": "PANIN-9372 IDR - NO REK 1005009372 PTP"
+    },
+    {
+      "id": "11120125",
+      "desc": "BCA RDN - NO REK 4588404747 PTP"
+    },
+    {
+      "id": "11120126",
+      "desc": "BCA INVESTASI - TRIN DEK"
+    },
+    {
+      "id": "11120127",
+      "desc": "BCA PENERIMAAN - TRIN DEK"
+    },
+    {
+      "id": "11120128",
+      "desc": "BCA ESCROW - 3729999963 DEK"
+    },
+    {
+      "id": "11120129",
+      "desc": "BCA OPERASIONAL - TRIN DEK"
+    },
+    {
+      "id": "11120130",
+      "desc": "BANK OCBC - 545800016887"
+    },
+    {
+      "id": "11120131",
+      "desc": "PANIN - 1005001354 DEK"
+    },
+    {
+      "id": "11120132",
+      "desc": "UOB - 3273066533 DEK"
+    },
+    {
+      "id": "11120133",
+      "desc": "UOB - 3379028935 DEK"
+    },
+    {
+      "id": "11130000",
+      "desc": "BANK - USD"
+    },
+    {
+      "id": "11130001",
+      "desc": "PANIN USD 00989"
+    },
+    {
+      "id": "11130002",
+      "desc": "UOB USD - 3279028927"
+    },
+    {
+      "id": "11200000",
+      "desc": "DEPOSITO"
+    },
+    {
+      "id": "11210000",
+      "desc": "DEPOSITO"
+    },
+    {
+      "id": "11210001",
+      "desc": "DEPOSITO - BANK PANIN"
+    },
+    {
+      "id": "11210002",
+      "desc": "DEPOSITO - IDR - BANK PERMATA"
+    },
+    {
+      "id": "11210003",
+      "desc": "DEPOSITO - IDR - KOSPIN-INDOSURYA PTP"
+    },
+    {
+      "id": "11210004",
+      "desc": "DEPOSITO - IDR - UOB - 3890010707 PTB"
+    },
+    {
+      "id": "11210005",
+      "desc": "DEPOSITO BWS - 100250132148 TJO"
+    },
+    {
+      "id": "11210006",
+      "desc": "DEPOSITO - IDR - BANK VICTORIA PTP"
+    },
+    {
+      "id": "11210007",
+      "desc": "DEPOSITO - IDR - BANK UOB TMG"
+    },
+    {
+      "id": "11210008",
+      "desc": "DEPOSITO - INDOSURYA TMS"
+    },
+    {
+      "id": "11210009",
+      "desc": "DEPOSITO - BRI TMS"
+    },
+    {
+      "id": "11210010",
+      "desc": "DEPOSITO - IDR - BANK ARTHA PTP"
+    },
+    {
+      "id": "11210011",
+      "desc": "DEPOSITO - IDR - BANK CIMB NIAGA PTP"
+    },
+    {
+      "id": "11210012",
+      "desc": "DEPOSITO - MEGA TMS"
+    },
+    {
+      "id": "11210013",
+      "desc": "DEPOSITO - IDR - BANK MANDIRI PTP"
+    },
+    {
+      "id": "11210014",
+      "desc": "DEPOSITO - UOB TMS"
+    },
+    {
+      "id": "11210015",
+      "desc": "DEPOSITO - MAYBANK TMS"
+    },
+    {
+      "id": "11210016",
+      "desc": "DEPOSITO RETENSI - BTN"
+    },
+    {
+      "id": "11210017",
+      "desc": "BUKOPIN 61423 DEK"
+    },
+    {
+      "id": "11210018",
+      "desc": "MUAMALAT - 3270004562 DEK"
+    },
+    {
+      "id": "11210019",
+      "desc": "MUAMALAT ESCROW DEK"
+    },
+    {
+      "id": "11210020",
+      "desc": "MUAMALAT 65806 DEK"
+    },
+    {
+      "id": "11210021",
+      "desc": "NOBU - 18930777737 DEK"
+    },
+    {
+      "id": "11220000",
+      "desc": "DEPOSITO - USD"
+    },
+    {
+      "id": "11300000",
+      "desc": "PIUTANG USAHA"
+    },
+    {
+      "id": "11310000",
+      "desc": "PIUTANG USAHA - RESIDENTIAL"
+    },
+    {
+      "id": "11310001",
+      "desc": "PIUTANG USAHA - APARTMENT"
+    },
+    {
+      "id": "11310002",
+      "desc": "PIUTANG USAHA - APARTMENT"
+    },
+    {
+      "id": "11310003",
+      "desc": "PIUTANG USAHA - CONDOVILLA"
+    },
+    {
+      "id": "11310004",
+      "desc": "PIUTANG USAHA - TOWNHOUSE"
+    },
+    {
+      "id": "11310005",
+      "desc": "PIUTANG USAHA - STUDENT VILLAGE"
+    },
+    {
+      "id": "11310006",
+      "desc": "PIUTANG USAHA - LANDED HOUSE"
+    },
+    {
+      "id": "11310007",
+      "desc": "PIUTANG USAHA - RUKAN MULTIGUNA"
+    },
+    {
+      "id": "11320000",
+      "desc": "PIUTANG USAHA - RETAIL & COMMERSIAL"
+    },
+    {
+      "id": "11320001",
+      "desc": "PIUTANG USAHA - CMP"
+    },
+    {
+      "id": "11320002",
+      "desc": "PIUTANG USAHA - OFFICE"
+    },
+    {
+      "id": "11320003",
+      "desc": "PIUTANG USAHA - RETAIL & COMMERSIAL"
+    },
+    {
+      "id": "11320004",
+      "desc": "PIUTANG USAHA - RUKAN"
+    },
+    {
+      "id": "11320005",
+      "desc": "PIUTANG USAHA - KAVLING KOMERSIAL"
+    },
+    {
+      "id": "11320006",
+      "desc": "PIUTANG USAHA - SOHO"
+    },
+    {
+      "id": "11320007",
+      "desc": "PIUTANG USAHA - SHOPHOUSE"
+    },
+    {
+      "id": "11330000",
+      "desc": "PIUTANG USAHA - LAINNYA"
+    },
+    {
+      "id": "11330001",
+      "desc": "PIUTANG USAHA - LAINNYA"
+    },
+    {
+      "id": "11330002",
+      "desc": "PIUTANG USAHA - PIUTANG KASBON VIA KAS BESAR"
+    },
+    {
+      "id": "11330003",
+      "desc": "PIUTANG USAHA - KOMISI PENJUALAN"
+    },
+    {
+      "id": "11330004",
+      "desc": "PIUTANG USAHA - PIUTANG KASBON VIA BANK"
+    },
+    {
+      "id": "11330005",
+      "desc": "PIUTANG USAHA - PROFIT SHARING"
+    },
+    {
+      "id": "11330006",
+      "desc": "PIUTANG USAHA - COST SHARING"
+    },
+    {
+      "id": "11330007",
+      "desc": "PIUTANG USAHA - PIUTANG KASBON MARKETING"
+    },
+    {
+      "id": "11330008",
+      "desc": "PIUTANG USAHA - PIUTANG KASBON KONTRAKTOR"
+    },
+    {
+      "id": "11400000",
+      "desc": "PIUTANG LAIN-LAIN"
+    },
+    {
+      "id": "11410000",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI"
+    },
+    {
+      "id": "11410001",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - PT GVI"
+    },
+    {
+      "id": "11410002",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - PT MANGGARAI ANUGERAH SEMESTA"
+    },
+    {
+      "id": "11410003",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - THE SMITH"
+    },
+    {
+      "id": "11410004",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - KDI"
+    },
+    {
+      "id": "11410005",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - PTP"
+    },
+    {
+      "id": "11410006",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI PEMEGANG SAHAM"
+    },
+    {
+      "id": "11410007",
+      "desc": "PIUTANG PADA TMS"
+    },
+    {
+      "id": "11410008",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - SPRINGWOOD"
+    },
+    {
+      "id": "11410009",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - III"
+    },
+    {
+      "id": "11410010",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - STC"
+    },
+    {
+      "id": "11410011",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI ANAK USAHA"
+    },
+    {
+      "id": "11410012",
+      "desc": "PIUTANG PADA PTP"
+    },
+    {
+      "id": "11410013",
+      "desc": "PIUTANG PADA TMG"
+    },
+    {
+      "id": "11410014",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - API"
+    },
+    {
+      "id": "11410015",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - CIBUBUR"
+    },
+    {
+      "id": "11410016",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - FMI"
+    },
+    {
+      "id": "11410017",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - TPG"
+    },
+    {
+      "id": "11410018",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - TMS"
+    },
+    {
+      "id": "11410019",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI LAINNYA"
+    },
+    {
+      "id": "11410020",
+      "desc": "PIUTANG PADA PSG"
+    },
+    {
+      "id": "11410021",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - NBF"
+    },
+    {
+      "id": "11410022",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - PTB"
+    },
+    {
+      "id": "11410023",
+      "desc": "PIUTANG PIHAK BERELASI LAINNYA"
+    },
+    {
+      "id": "11410024",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - TD"
+    },
+    {
+      "id": "11410025",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - DIREKSI"
+    },
+    {
+      "id": "11410026",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - TDS"
+    },
+    {
+      "id": "11410027",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - ESTATE MANAGEMENT"
+    },
+    {
+      "id": "11410028",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - LAINNYA"
+    },
+    {
+      "id": "11410029",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - JO TRINITI SENTUL"
+    },
+    {
+      "id": "11410030",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - TGP"
+    },
+    {
+      "id": "11410031",
+      "desc": "PIUTANG LAIN-LAIN PIHAK BERELASI - LAINNYA (IKN)"
+    },
+    {
+      "id": "11420000",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA"
+    },
+    {
+      "id": "11420001",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA KARYAWAN"
+    },
+    {
+      "id": "11420002",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA LAINNYA"
+    },
+    {
+      "id": "11420003",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA NOMINEE"
+    },
+    {
+      "id": "11420004",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA BILLING RATE"
+    },
+    {
+      "id": "11420005",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA BUILDING MANAGEMENT"
+    },
+    {
+      "id": "11420006",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA MARKETING IN HOUSE"
+    },
+    {
+      "id": "11420007",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA PROFIT SHARING & COST SHARING"
+    },
+    {
+      "id": "11420008",
+      "desc": "CADANGAN PENURUNAN NILAI PIUTANG"
+    },
+    {
+      "id": "11420009",
+      "desc": "PIUTANG LAIN-LAIN PIHAK KETIGA MULTI GARAM PIONIR (MGP)"
+    },
+    {
+      "id": "11430000",
+      "desc": "PIUTANG LAIN-LAIN"
+    },
+    {
+      "id": "11430001",
+      "desc": "PIUTANG LAIN-LAIN"
+    },
+    {
+      "id": "11500000",
+      "desc": "PERSEDIAAN REAL ESTAT"
+    },
+    {
+      "id": "11510000",
+      "desc": "PERSEDIAAN RESIDENTIAL"
+    },
+    {
+      "id": "11510001",
+      "desc": "PERSEDIAAN UNIT APARTMENT"
+    },
+    {
+      "id": "11510002",
+      "desc": "PERSEDIAAN UNIT LANDED HOUSE"
+    },
+    {
+      "id": "11510003",
+      "desc": "PERSEDIAAN UNIT CONDOVILLA"
+    },
+    {
+      "id": "11510004",
+      "desc": "PERSEDIAAN UNIT TOWNHOUSE"
+    },
+    {
+      "id": "11510005",
+      "desc": "PERSEDIAAN UNIT STUDENT VILLAGE"
+    },
+    {
+      "id": "11510006",
+      "desc": "PERSEDIAAN UNIT KAVLING"
+    },
+    {
+      "id": "11510007",
+      "desc": "PERSEDIAAN UNIT XXXXX"
+    },
+    {
+      "id": "11520000",
+      "desc": "PERSEDIAAN RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "11520001",
+      "desc": "PERSEDIAAN RETAIL & COMMERSIAL"
+    },
+    {
+      "id": "11520002",
+      "desc": "PERSEDIAAN UNIT CMP"
+    },
+    {
+      "id": "11520003",
+      "desc": "PERSEDIAAN UNIT OFFICE"
+    },
+    {
+      "id": "11520004",
+      "desc": "PERSEDIAAN UNIT RUKAN"
+    },
+    {
+      "id": "11520005",
+      "desc": "PERSEDIAAN UNIT KAVLING KOMERSIAL"
+    },
+    {
+      "id": "11520006",
+      "desc": "PERSEDIAAN UNIT LAINNYA"
+    },
+    {
+      "id": "11520007",
+      "desc": "PERSEDIAAN UNIT SOHO"
+    },
+    {
+      "id": "11520008",
+      "desc": "PERSEDIAAN UNIT SHOPHOUSE"
+    },
+    {
+      "id": "11530000",
+      "desc": "PERSEDIAAN LAINNYA"
+    },
+    {
+      "id": "11530001",
+      "desc": "ASET REAL ESTATE DALAM PENGEMBANGAN"
+    },
+    {
+      "id": "11530002",
+      "desc": "PERSEDIAAN LAINNYA"
+    },
+    {
+      "id": "11530003",
+      "desc": "TANAH INVESTASI IMBRENG"
+    },
+    {
+      "id": "11530004",
+      "desc": "ASET REAL ESTATE OTHER COST DALAM PENGEMBANGAN"
+    },
+    {
+      "id": "11600000",
+      "desc": "UANG MUKA"
+    },
+    {
+      "id": "11610000",
+      "desc": "UANG MUKA PEMBELIAN"
+    },
+    {
+      "id": "11610001",
+      "desc": "UANG MUKA PEMBELIAN"
+    },
+    {
+      "id": "11610002",
+      "desc": "UANG MUKA PEMBELIAN INVENTARIS"
+    },
+    {
+      "id": "11610003",
+      "desc": "UANG MUKA PEMBELIAN TANAH"
+    },
+    {
+      "id": "11610004",
+      "desc": "UANG MUKA PEMBELIAN - XXXX"
+    },
+    {
+      "id": "11610005",
+      "desc": "UANG MUKA PEMBELIAN RENOVASI OFFICE"
+    },
+    {
+      "id": "11610006",
+      "desc": "UANG MUKA PEMBELIAN SUPPLIER"
+    },
+    {
+      "id": "11610007",
+      "desc": "UANG MUKA PEMBELIAN LAIN-LAIN"
+    },
+    {
+      "id": "11610008",
+      "desc": "UANG MUKA PEMBELIAN LAINNYA"
+    },
+    {
+      "id": "11610009",
+      "desc": "UANG MUKA INVESTASI"
+    },
+    {
+      "id": "11610010",
+      "desc": "UANG MUKA PROYEK"
+    },
+    {
+      "id": "11620000",
+      "desc": "UANG MUKA LAINNYA"
+    },
+    {
+      "id": "11620001",
+      "desc": "UANG MUKA KARYAWAN"
+    },
+    {
+      "id": "11620002",
+      "desc": "UANG MUKA PIHAK KETIGA"
+    },
+    {
+      "id": "11620003",
+      "desc": "UANG MUKA KASBON"
+    },
+    {
+      "id": "11620004",
+      "desc": "UANG MUKA TRANSFER ANONIM"
+    },
+    {
+      "id": "11620005",
+      "desc": "SECURITY DEPOSIT"
+    },
+    {
+      "id": "11620006",
+      "desc": "UANG MUKA KONSULTAN"
+    },
+    {
+      "id": "11620007",
+      "desc": "UANG MUKA LAINNYA"
+    },
+    {
+      "id": "11700000",
+      "desc": "BIAYA DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11710000",
+      "desc": "BIAYA SEWA DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11710001",
+      "desc": "BIAYA SEWA GEDUNG OPERASIONAL DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11710002",
+      "desc": "BIAYA SEWA ALAT BERAT DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11710003",
+      "desc": "BIAYA SEWA DIBAYAR DIMUKA LAINNYA"
+    },
+    {
+      "id": "11720000",
+      "desc": "BIAYA ASURANSI DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11720001",
+      "desc": "BIAYA ASURANSI BANGUNAN DALAM KONSTRUKSI"
+    },
+    {
+      "id": "11720002",
+      "desc": "BIAYA ASURANSI DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11720003",
+      "desc": "BIAYA ASURANSI KARYAWAN DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11720004",
+      "desc": "BIAYA ASURANSI GEDUNG KANTOR DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11720005",
+      "desc": "BIAYA ASURANSI KENDARAAN KANTOR DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11720006",
+      "desc": "BIAYA ASURANSI DIBAYAR DIMUKA LAINNYA"
+    },
+    {
+      "id": "11720007",
+      "desc": "BIAYA ASURANSI KESEHATAN KARYAWAN DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11730000",
+      "desc": "PAJAK DIBAYAR DIMUKA"
+    },
+    {
+      "id": "11730001",
+      "desc": "PPN MASUKAN"
+    },
+    {
+      "id": "11730002",
+      "desc": "PAJAK PENGHASILAN (PPH) PASAL 21"
+    },
+    {
+      "id": "11730003",
+      "desc": "PAJAK PENGHASILAN (PPH) PASAL 22"
+    },
+    {
+      "id": "11730004",
+      "desc": "PAJAK PENGHASILAN (PPH) PASAL 23"
+    },
+    {
+      "id": "11730005",
+      "desc": "PAJAK DIBAYAR DIMUKA PPH PASAL 4(2) PERALIHAN HAK ATAS TANAH & BANGUNAN"
+    },
+    {
+      "id": "11730006",
+      "desc": "PAJAK PENGHASILAN (PPH) PASAL 25"
+    },
+    {
+      "id": "11730007",
+      "desc": "PAJAK PENGHASILAN (PPH) FINAL PASAL 4 AYAT 2"
+    },
+    {
+      "id": "11730008",
+      "desc": "PIUTANG PPN THE SMITH"
+    },
+    {
+      "id": "11730009",
+      "desc": "PPH PENGALIHAN HAK ATAS TANAH DAN BANGUNAN"
+    },
+    {
+      "id": "11730010",
+      "desc": "PAJAK PENGHASILAN (PPH) FINAL (PPHTB)"
+    },
+    {
+      "id": "11730011",
+      "desc": "PIUTANG PPN SPRINGWOOD"
+    },
+    {
+      "id": "11740000",
+      "desc": "BIAYA DIBAYAR DIMUKA LAINNYA"
+    },
+    {
+      "id": "11740001",
+      "desc": "BIAYA DIBAYAR DIMUKA LAIN-LAIN"
+    },
+    {
+      "id": "11800000",
+      "desc": "AYAT SILANG / POS SEMENTARA"
+    },
+    {
+      "id": "11800001",
+      "desc": "PERSEDIAAN IN TRANSIT"
+    },
+    {
+      "id": "11810000",
+      "desc": "AYAT SILANG / POS SEMENTARA"
+    },
+    {
+      "id": "11810001",
+      "desc": "AYAT SILANG / POS SEMENTARA"
+    },
+    {
+      "id": "11900000",
+      "desc": "UANG MUKA JAMINAN"
+    },
+    {
+      "id": "11910000",
+      "desc": "UANG MUKA JAMINAN"
+    },
+    {
+      "id": "11910001",
+      "desc": "BANK GUARANTEE"
+    },
+    {
+      "id": "11910002",
+      "desc": "DEPOSIT SEWA"
+    },
+    {
+      "id": "12000000",
+      "desc": "ASET TIDAK LANCAR"
+    },
+    {
+      "id": "12100000",
+      "desc": "INVESTASI"
+    },
+    {
+      "id": "12200000",
+      "desc": "REKENING YANG DIBATASI PENGGUNAANNYA"
+    },
+    {
+      "id": "12210000",
+      "desc": "INVESTASI PADA ENTITAS ANAK"
+    },
+    {
+      "id": "12220000",
+      "desc": "REKENING BANK DIBATASI PENGGUNAANNYA"
+    },
+    {
+      "id": "12220001",
+      "desc": "INVESTASI PADA PT XXX"
+    },
+    {
+      "id": "12220002",
+      "desc": "INVESTASI PADA PT. SIRIUS TERANG CEMERLANG"
+    },
+    {
+      "id": "12220003",
+      "desc": "INVESTASI PADA PT. TRINITI DINAMIK SANTOZ"
+    },
+    {
+      "id": "12220004",
+      "desc": "INVESTASI PADA PT. TRINITI PILAR GEMILANG"
+    },
+    {
+      "id": "12220005",
+      "desc": "PANIN ESCROW : 022-500-6591"
+    },
+    {
+      "id": "12220006",
+      "desc": "REKENING BANK ESCROW"
+    },
+    {
+      "id": "12220007",
+      "desc": "BCA ESCROW : 689-066-7111"
+    },
+    {
+      "id": "12220008",
+      "desc": "INVESTASI PADA PT. SUKSES BANGUN SINERGI"
+    },
+    {
+      "id": "12220009",
+      "desc": "INVESTASI PADA PT. PURI TRINITI BATAM"
+    },
+    {
+      "id": "12220010",
+      "desc": "INVESTASI PADA PT. TRINITI MENARA SERPONG"
+    },
+    {
+      "id": "12220011",
+      "desc": "MAYBANK ESCROW : 277-000-0188"
+    },
+    {
+      "id": "12220012",
+      "desc": "INVESTASI PADA PT. TRINITI DINAMIK"
+    },
+    {
+      "id": "12220013",
+      "desc": "PANIN ESCROW : 100-500-2618 (PJM-2)"
+    },
+    {
+      "id": "12220014",
+      "desc": "INVESTASI PADA PT. TRINITI MENARA GADING"
+    },
+    {
+      "id": "12220015",
+      "desc": "PANIN ESCROW : 100-500-2623"
+    },
+    {
+      "id": "12220016",
+      "desc": "INVESTASI PADA PT. TRINITI GARAM PROPERTI"
+    },
+    {
+      "id": "12220017",
+      "desc": "NOBU ESCROW : 189-3399-1110"
+    },
+    {
+      "id": "12220018",
+      "desc": "INVESTASI PADA PT TANA MORI INDONESIA"
+    },
+    {
+      "id": "12220019",
+      "desc": "INVESTASI PADA PT TANAMORI MAKMUR INDONESIA"
+    },
+    {
+      "id": "12230000",
+      "desc": "DEPOSITO DIBATASI PENGGUNAANNYA"
+    },
+    {
+      "id": "12240000",
+      "desc": "INVESTASI PADA VENTURA BERSAMA"
+    },
+    {
+      "id": "12240001",
+      "desc": "DEPOSITO - OCBC NISP (DIBATASI PENGGUNAANNYA)"
+    },
+    {
+      "id": "12240002",
+      "desc": "INVESTASI PADA KSO 1 (BROOKLYN)"
+    },
+    {
+      "id": "12240003",
+      "desc": "INVESTASI PADA KSO 1 (DISTRICT EAST)"
+    },
+    {
+      "id": "12240004",
+      "desc": "INVESTASI PADA KSO 2 (YUKATA)"
+    },
+    {
+      "id": "12240005",
+      "desc": "DEPOSITO - PERMATA (DIBATASI PENGGUNAANNYA)"
+    },
+    {
+      "id": "12240006",
+      "desc": "DEPOSITO - BANK CIMB NIAGA (DIBATASI PENGGUNAANNYA)"
+    },
+    {
+      "id": "12240007",
+      "desc": "INVESTASI PADA JO TRINITI SENTUL (SEQUOIA)"
+    },
+    {
+      "id": "12250000",
+      "desc": "INVESTASI LAINNYA"
+    },
+    {
+      "id": "12250001",
+      "desc": "DEPOSITO - PERMATA (DIBATASI PENGGUNAANNYA)"
+    },
+    {
+      "id": "12250002",
+      "desc": "TANAH INVESTASI"
+    },
+    {
+      "id": "12250003",
+      "desc": "PROPERTI INVESTASI"
+    },
+    {
+      "id": "12250004",
+      "desc": "CADANGAN KERUGIAN INVESTASI LAINNYA"
+    },
+    {
+      "id": "12250005",
+      "desc": "INVESTASI UBUD VILLAGE"
+    },
+    {
+      "id": "12250006",
+      "desc": "INVESTASI MELROSE PLACE"
+    },
+    {
+      "id": "12250007",
+      "desc": "INVESTASI TANAH JELUPANG - VILLA SERPONG"
+    },
+    {
+      "id": "12250008",
+      "desc": "INVESTASI VILLA JIMBARAN"
+    },
+    {
+      "id": "12250009",
+      "desc": "AKUMULASI PENYUSUTAN PROPERTI INVESTASI"
+    },
+    {
+      "id": "12250010",
+      "desc": "TANAH BELUM DIKEMBANGKAN - BALIK PAPAN"
+    },
+    {
+      "id": "12250011",
+      "desc": "INVESTASI APARTEMEN BROOKLYN"
+    },
+    {
+      "id": "12250012",
+      "desc": "TANAH BELUM DIKEMBANGKAN - LABUAN BAJO"
+    },
+    {
+      "id": "12250013",
+      "desc": "CADANGAN INVESTASI APARTMENT BROOKLYN"
+    },
+    {
+      "id": "12300000",
+      "desc": "ASET REAL ESTATE"
+    },
+    {
+      "id": "12310000",
+      "desc": "PERSIAPAN LOKASI & PERSIAPAN KONSTRUKSI"
+    },
+    {
+      "id": "12310001",
+      "desc": "BIAYA PEKERJAAN PERSIAPAN PEMBANGUNAN"
+    },
+    {
+      "id": "12310002",
+      "desc": "BIAYA PERSIAPAN PEMBANGUNAN LAINNYA"
+    },
+    {
+      "id": "12310003",
+      "desc": "BIAYA PEMASANGAN PAGAR & TANDA/INFORMASI"
+    },
+    {
+      "id": "12310004",
+      "desc": "BIAYA KONSTRUKSI AWAL - PILLING"
+    },
+    {
+      "id": "12310005",
+      "desc": "BIAYA PERSIAPAN KONSTRUKSI LAINNYA"
+    },
+    {
+      "id": "12310006",
+      "desc": "AKUMULASI BIAYA PERSIAPAN LOKASI & KONSTRUKSI"
+    },
+    {
+      "id": "12310007",
+      "desc": "BIAYA PERSIAPAN TANAH"
+    },
+    {
+      "id": "12320000",
+      "desc": "TANAH YANG DIKEMBANGKAN"
+    },
+    {
+      "id": "12320001",
+      "desc": "BIAYA PEROLEHAN TANAH"
+    },
+    {
+      "id": "12320002",
+      "desc": "AKUMULASI BIAYA TANAH"
+    },
+    {
+      "id": "12320003",
+      "desc": "BEBAN HAK ATAS TANAH & PAJAK TANAH"
+    },
+    {
+      "id": "12320004",
+      "desc": "BIAYA PERATAAN TANAH"
+    },
+    {
+      "id": "12320005",
+      "desc": "BIAYA PENGUKURAN TANAH"
+    },
+    {
+      "id": "12320006",
+      "desc": "BIAYA PENGURUKAN TANAH"
+    },
+    {
+      "id": "12330000",
+      "desc": "BANGUNAN DALAM PROSES"
+    },
+    {
+      "id": "12330001",
+      "desc": "BIAYA PEKERJAAN KONSTRUKSI"
+    },
+    {
+      "id": "12330002",
+      "desc": "BIAYA PEKERJAAN STRUKTUR"
+    },
+    {
+      "id": "12330003",
+      "desc": "BIAYA PEKERJAAN ARSITEKTUR"
+    },
+    {
+      "id": "12330004",
+      "desc": "BIAYA PEKERJAAN FACADE"
+    },
+    {
+      "id": "12330005",
+      "desc": "BIAYA PEKERJAAN PLUMBING"
+    },
+    {
+      "id": "12330006",
+      "desc": "BIAYA PEKERJAAN MEKANIKAL, ELEKTRIKAL"
+    },
+    {
+      "id": "12330007",
+      "desc": "BIAYA INFRASTRUKTUR & UTILITI"
+    },
+    {
+      "id": "12330008",
+      "desc": "BIAYA FASILITAS UMUM"
+    },
+    {
+      "id": "12330009",
+      "desc": "BIAYA PENGADAAN BARANG"
+    },
+    {
+      "id": "12330010",
+      "desc": "AKUMULASI BANGUNAN DALAM PROSES PENYELESAIAN"
+    },
+    {
+      "id": "12340000",
+      "desc": "BIAYA PEKERJAAN LUAR - LAND SCAPE & HARD SCAPE"
+    },
+    {
+      "id": "12340001",
+      "desc": "BIAYA PENATAAN KAWASAN"
+    },
+    {
+      "id": "12340002",
+      "desc": "BIAYA PENATAAN KAWASAN BOULEVARD"
+    },
+    {
+      "id": "12340003",
+      "desc": "BIAYA PEKERJAAN LUAR LAINNYA"
+    },
+    {
+      "id": "12340004",
+      "desc": "AKUMULASI BIAYA PEKERJAAN LUAR"
+    },
+    {
+      "id": "12340005",
+      "desc": "BIAYA PEMBANGUNAN MARKETING GALERRY"
+    },
+    {
+      "id": "12350000",
+      "desc": "BIAYA LAINNYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK"
+    },
+    {
+      "id": "12350001",
+      "desc": "BIAYA LAINNYA"
+    },
+    {
+      "id": "12350002",
+      "desc": "AKUMULASI BIAYA LAINNYA"
+    },
+    {
+      "id": "12350003",
+      "desc": "BIAYA OUTSOURCING"
+    },
+    {
+      "id": "12360000",
+      "desc": "BIAYA PERIJINAN DAN LEGALITAS"
+    },
+    {
+      "id": "12360001",
+      "desc": "BIAYA JASA NOTARIS/PPAT ATAS TANAH YANG DIKEMBANGKAN"
+    },
+    {
+      "id": "12360002",
+      "desc": "BIAYA PERIJINAN DAN LEGALITAS"
+    },
+    {
+      "id": "12360003",
+      "desc": "BIAYA PERIJINAN DAN LEGALITAS ATAS TANAH YANG DIKEMBANGKAN"
+    },
+    {
+      "id": "12360004",
+      "desc": "AKUMULASI BIAYA PERIJINAN DAN LEGALITAS"
+    },
+    {
+      "id": "12360005",
+      "desc": "BIAYA PENDAFTARAN PATEN"
+    },
+    {
+      "id": "12370000",
+      "desc": "BIAYA KONSULTAN"
+    },
+    {
+      "id": "12370001",
+      "desc": "BIAYA JASA KONSULTAN"
+    },
+    {
+      "id": "12370002",
+      "desc": "BIAYA JASA KONSULTAN ARSITEKTUR"
+    },
+    {
+      "id": "12370003",
+      "desc": "BIAYA JASA KONSULTAN STRUKTUR"
+    },
+    {
+      "id": "12370004",
+      "desc": "BIAYA JASA KONSULTAN M & E"
+    },
+    {
+      "id": "12370005",
+      "desc": "BIAYA JASA KONSULTAN KONTRUKSI BANGUNAN"
+    },
+    {
+      "id": "12370006",
+      "desc": "BIAYA JASA KONSULTAN INTERIOR DESIGN"
+    },
+    {
+      "id": "12370007",
+      "desc": "BIAYA JASA KONSULTAN QUANTITY SURVEYOR"
+    },
+    {
+      "id": "12370008",
+      "desc": "BIAYA JASA KONSULTAN LALU LINTAS KAWASAN"
+    },
+    {
+      "id": "12370009",
+      "desc": "BIAYA JASA KONSULTAN SIPIL"
+    },
+    {
+      "id": "12370010",
+      "desc": "BIAYA JASA KONSULTAN TANAH"
+    },
+    {
+      "id": "12370011",
+      "desc": "BIAYA IZIN MENDIRIKAN BANGUNAN"
+    },
+    {
+      "id": "12370012",
+      "desc": "BIAYA JASA KONSULTAN PERIZINAN DAN PENGEMBANGAN BANGUNAN"
+    },
+    {
+      "id": "12370013",
+      "desc": "BIAYA JASA KONSULTAN STUDI KELAYAKAN"
+    },
+    {
+      "id": "12370014",
+      "desc": "BIAYA JASA UKUR ATAS TANAH YANG DIKEMBANGKAN"
+    },
+    {
+      "id": "12370015",
+      "desc": "BIAYA PBB ATAS TANAH YANG DIKEMBANGKAN"
+    },
+    {
+      "id": "12370016",
+      "desc": "BIAYA JASA KONSULTAN BRANDING"
+    },
+    {
+      "id": "12370017",
+      "desc": "BIAYA JASA KONSULTAN INFRASTRUKTUR"
+    },
+    {
+      "id": "12370018",
+      "desc": "BIAYA JASA KONSULTAN DESIGN"
+    },
+    {
+      "id": "12370019",
+      "desc": "BIAYA JASA KONSULTAN LAINNYA"
+    },
+    {
+      "id": "12380000",
+      "desc": "BIAYA LAIN YANG DAPAT DIKAPITALISASI"
+    },
+    {
+      "id": "12380001",
+      "desc": "BIAYA BUNGA BANK"
+    },
+    {
+      "id": "12380002",
+      "desc": "BIAYA BUNGA PINJAMAN LAINNYA"
+    },
+    {
+      "id": "12380003",
+      "desc": "BIAYA PINJAMAN BANK"
+    },
+    {
+      "id": "12380004",
+      "desc": "BIAYA ASURANSI PROYEK"
+    },
+    {
+      "id": "12380005",
+      "desc": "BIAYA ASURANSI PROYEK - CONSTRUCTION ALL RISK"
+    },
+    {
+      "id": "12380006",
+      "desc": "BIAYA UMUM PROYEK"
+    },
+    {
+      "id": "12380007",
+      "desc": "AKUMULASI BIAYA LAIN YANG DAPAT DIKAPITALISASI"
+    },
+    {
+      "id": "12380008",
+      "desc": "BIAYA MANAJEMEN FEE PROYEK"
+    },
+    {
+      "id": "12380009",
+      "desc": "BIAYA BUNGA BANK BJB KMK 1"
+    },
+    {
+      "id": "12380010",
+      "desc": "BIAYA BUNGA BANK MANDIRI KMK 1"
+    },
+    {
+      "id": "12380011",
+      "desc": "BIAYA BUNGA BANK BJB PRK 1"
+    },
+    {
+      "id": "12380012",
+      "desc": "BIAYA BUNGA BANK MANDIRI PRK 1"
+    },
+    {
+      "id": "12380013",
+      "desc": "BIAYA PINJAMAN BANK BJB"
+    },
+    {
+      "id": "12380014",
+      "desc": "BIAYA PINJAMAN BANK MANDIRI"
+    },
+    {
+      "id": "12380015",
+      "desc": "BIAYA BUNGA BANK BNI KMK"
+    },
+    {
+      "id": "12380016",
+      "desc": "BIAYA BUNGA BANK BNI PRK"
+    },
+    {
+      "id": "12380017",
+      "desc": "BIAYA PINJAMAN BANK BNI"
+    },
+    {
+      "id": "12390000",
+      "desc": "BIAYA MARKETING DAN PROMOSI"
+    },
+    {
+      "id": "12390001",
+      "desc": "MEDIA DIGITAL / ONLINE (WEBSITE, TV, RADIO, M-ADS)"
+    },
+    {
+      "id": "12390002",
+      "desc": "MEDIA CETAK (MAJALAH, KORAN)"
+    },
+    {
+      "id": "12390003",
+      "desc": "PERCETAKAN BROSUR, SPANDUK, KATALOG"
+    },
+    {
+      "id": "12390004",
+      "desc": "SIGNAGE"
+    },
+    {
+      "id": "12390005",
+      "desc": "BILLBOARD"
+    },
+    {
+      "id": "12390006",
+      "desc": "EVENTS & EXIBITION"
+    },
+    {
+      "id": "12390007",
+      "desc": "ROADSHOW"
+    },
+    {
+      "id": "12390008",
+      "desc": "TRANSPORTASI DAN AKOMODASI"
+    },
+    {
+      "id": "12390009",
+      "desc": "MAKET & SUPPORT"
+    },
+    {
+      "id": "12390010",
+      "desc": "SHOW UNIT"
+    },
+    {
+      "id": "12390011",
+      "desc": "REWARD"
+    },
+    {
+      "id": "12390012",
+      "desc": "BEBAN MARKETING PROMOSI LAINNYA"
+    },
+    {
+      "id": "12390013",
+      "desc": "DESIGN BRAND LOGO"
+    },
+    {
+      "id": "12390014",
+      "desc": "BEBAN KOMISI AGENT"
+    },
+    {
+      "id": "12390015",
+      "desc": "BEBAN KOMISI IN-HOUSE"
+    },
+    {
+      "id": "12390016",
+      "desc": "AKUMULASI BIAYA MARKETING"
+    },
+    {
+      "id": "12390017",
+      "desc": "BEBAN CASH BACK PEMBAYARAN"
+    },
+    {
+      "id": "12390018",
+      "desc": "BEBAN REWARD KONSUMEN"
+    },
+    {
+      "id": "12400000",
+      "desc": "ASET TETAP"
+    },
+    {
+      "id": "12410000",
+      "desc": "TANAH"
+    },
+    {
+      "id": "12410001",
+      "desc": "TANAH YANG BELUM DIKEMBANGKAN"
+    },
+    {
+      "id": "12420000",
+      "desc": "BANGUNAN PERMANEN KANTOR"
+    },
+    {
+      "id": "12420001",
+      "desc": "BANGUNAN MARKETING GALLERY"
+    },
+    {
+      "id": "12420002",
+      "desc": "BANGUNAN OPERASIONAL KANTOR"
+    },
+    {
+      "id": "12420003",
+      "desc": "AKTIVA DALAM PENYELESAIAN"
+    },
+    {
+      "id": "12420004",
+      "desc": "AKTIVA DALAM PENYELESAIAN MARKETING GALLERY"
+    },
+    {
+      "id": "12420005",
+      "desc": "BANGUNAN LAINNYA"
+    },
+    {
+      "id": "12420006",
+      "desc": "BANGUNAN OPERASIONAL SITE OFFICE"
+    },
+    {
+      "id": "12430000",
+      "desc": "KENDARAAN"
+    },
+    {
+      "id": "12430001",
+      "desc": "BANGUNAN DALAM PROSES - TOWER A"
+    },
+    {
+      "id": "12430002",
+      "desc": "KENDARAAN OPERASIONAL KANTOR"
+    },
+    {
+      "id": "12430003",
+      "desc": "BIAYA PEKERJAAN STRUKTUR - TOWER A"
+    },
+    {
+      "id": "12430004",
+      "desc": "BIAYA PEKERJAAN ARSITEKTUR - TOWER A"
+    },
+    {
+      "id": "12430005",
+      "desc": "BIAYA PEKERJAAN MEKANIKAL, ELEKTRIKAL, PLUMBING - TOWER A"
+    },
+    {
+      "id": "12430006",
+      "desc": "BIAYA SARANA, INFRASTRUKTUR & UTILITI - TOWER A"
+    },
+    {
+      "id": "12430007",
+      "desc": "BIAYA PENGADAAN BARANG (SBO) - TOWER A"
+    },
+    {
+      "id": "12430008",
+      "desc": "BANGUNAN DALAM PROSES - TOWER B"
+    },
+    {
+      "id": "12430009",
+      "desc": "BIAYA PEKERJAAN STRUKTUR - TOWER B"
+    },
+    {
+      "id": "12430010",
+      "desc": "BIAYA PEKERJAAN ARSITEKTUR - TOWER B"
+    },
+    {
+      "id": "12430011",
+      "desc": "BIAYA PEKERJAAN MEKANIKAL, ELEKTRIKAL, PLUMBING - TOWER B"
+    },
+    {
+      "id": "12430012",
+      "desc": "BIAYA SARANA, INFRASTRUKTUR & UTILITI - TOWER B"
+    },
+    {
+      "id": "12430013",
+      "desc": "BIAYA PENGADAAN BARANG (SBO) - TOWER B"
+    },
+    {
+      "id": "12430014",
+      "desc": "BANGUNAN DALAM PROSES - TOWER C"
+    },
+    {
+      "id": "12430015",
+      "desc": "BIAYA PEKERJAAN STRUKTUR - TOWER C"
+    },
+    {
+      "id": "12430016",
+      "desc": "BIAYA PEKERJAAN ARSITEKTUR - TOWER C"
+    },
+    {
+      "id": "12430017",
+      "desc": "BIAYA PEKERJAAN MEKANIKAL, ELEKTRIKAL, PLUMBING - TOWER C"
+    },
+    {
+      "id": "12430018",
+      "desc": "BIAYA SARANA, INFRASTRUKTUR & UTILITI - TOWER C"
+    },
+    {
+      "id": "12430019",
+      "desc": "BIAYA PENGADAAN BARANG (SBO) - TOWER C"
+    },
+    {
+      "id": "12440000",
+      "desc": "INVENTARIS"
+    },
+    {
+      "id": "12440001",
+      "desc": "INVENTARIS OPERASIONAL KANTOR"
+    },
+    {
+      "id": "12440002",
+      "desc": "INVENTARIS OPERASIONAL PROYEK"
+    },
+    {
+      "id": "12440003",
+      "desc": "INVENTARIS PERALATAN KANTOR"
+    },
+    {
+      "id": "12450000",
+      "desc": "AKUMULASI PENYUSUTAN"
+    },
+    {
+      "id": "12460000",
+      "desc": "BIAYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK"
+    },
+    {
+      "id": "12460001",
+      "desc": "AKUMULASI PENYUSUTAN KENDARAAN"
+    },
+    {
+      "id": "12460002",
+      "desc": "AKUMULASI PENYUSUTAN PERALATAN KANTOR"
+    },
+    {
+      "id": "12460003",
+      "desc": "BIAYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK LAINNYA"
+    },
+    {
+      "id": "12460004",
+      "desc": "AKUMULASI PENYUSUTAN INVENTARIS KANTOR"
+    },
+    {
+      "id": "12460005",
+      "desc": "AKUMULASI PENYUSUTAN INVESTARIS KANTOR"
+    },
+    {
+      "id": "12460006",
+      "desc": "AKUMULASI PENYUSUTAN INVENTARIS PERALATAN KANTOR"
+    },
+    {
+      "id": "12460007",
+      "desc": "AKUMULASI PENYUSUTAN INVENTARIS PROYEK"
+    },
+    {
+      "id": "12460008",
+      "desc": "AKUMULASI PENYUSUTAN KENDARAAN KANTOR"
+    },
+    {
+      "id": "12460009",
+      "desc": "AKUMULASI PENYUSUTAN BANGUNAN OPERASIONAL SITE OFFICE"
+    },
+    {
+      "id": "12460010",
+      "desc": "AKUMULASI BIAYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK"
+    },
+    {
+      "id": "12460011",
+      "desc": "BIAYA JASA KONSULTAN PEMBANGUNAN"
+    },
+    {
+      "id": "12460012",
+      "desc": "AKUMULASI BIAYA KONSULTAN"
+    },
+    {
+      "id": "12460013",
+      "desc": "BEBAN PROVISI & ADMINISTRASI PINJAMAN KONSTRUKSI PANIN - PRK & PJM"
+    },
+    {
+      "id": "12460014",
+      "desc": "BEBAN LAIN YANG DIKAPITALISASI"
+    },
+    {
+      "id": "12460015",
+      "desc": "BEBAN BUNGA PINJAMAN KONSTRUKSI PANIN - PJM 3"
+    },
+    {
+      "id": "12460016",
+      "desc": "AKUMULASI BIAYA YANG DAPAT DIKAPITALISASI"
+    },
+    {
+      "id": "12470000",
+      "desc": "BIAYA PROYEK LAINNYA"
+    },
+    {
+      "id": "12470001",
+      "desc": "AKUMULASI BIAYA PROYEK LAINNYA"
+    },
+    {
+      "id": "12480000",
+      "desc": "REKENING BANK YANG DIBATASI PENGGUNAANNYA"
+    },
+    {
+      "id": "12480001",
+      "desc": "BANK BTN IDR - NO REK XXXXXXXXXX - ESCROW"
+    },
+    {
+      "id": "12480002",
+      "desc": "BANK XXX IDR - NO REK XXXXXXXXXX - ESCROW"
+    },
+    {
+      "id": "12480003",
+      "desc": "MANDIRI ESCROW - 1570011196491"
+    },
+    {
+      "id": "12480004",
+      "desc": "MANDIRI ESCROW - 1570011817211"
+    },
+    {
+      "id": "12480005",
+      "desc": "MANDIRI ESCROW 11119 IDR - NO REK 1140033911119 HBP LAMPUNG"
+    },
+    {
+      "id": "12480006",
+      "desc": "BTN ESCROW - 1501320015409"
+    },
+    {
+      "id": "12480007",
+      "desc": "NOBU ESCROW - 18933225590"
+    },
+    {
+      "id": "12480008",
+      "desc": "BTN ESCROW - 0001501320016138"
+    },
+    {
+      "id": "12480009",
+      "desc": "BWS ESCROW - 200250002456"
+    },
+    {
+      "id": "12480010",
+      "desc": "BANK BWS ESCROW- 200200015066"
+    },
+    {
+      "id": "12480011",
+      "desc": "NOBU ESCROW - 18933333660"
+    },
+    {
+      "id": "12480012",
+      "desc": "BCA ESCROW - 0353269761"
+    },
+    {
+      "id": "12480013",
+      "desc": "BTN SYARIAH ESCROW - 1000609084"
+    },
+    {
+      "id": "12480014",
+      "desc": "MANDIRI ESCROW - 1570012380029"
+    },
+    {
+      "id": "12490000",
+      "desc": "BIAYA PRA OPERASIONAL KANTOR"
+    },
+    {
+      "id": "12491000",
+      "desc": "BIAYA PRE OPERASIONAL KANTOR"
+    },
+    {
+      "id": "12491001",
+      "desc": "BIAYA GAJI & TUNJANGAN KARYAWAN"
+    },
+    {
+      "id": "12491002",
+      "desc": "PRA OP - BIAYA GAJI & TUNJANGAN KARYAWAN"
+    },
+    {
+      "id": "12491003",
+      "desc": "BANGUNAN KANTOR MARKETING GALLERY DALAM PENYELESAIAN"
+    },
+    {
+      "id": "12491004",
+      "desc": "BIAYA UMUM & ADMINISTRASI KANTOR"
+    },
+    {
+      "id": "12491005",
+      "desc": "PRA OP - BIAYA UMUM & ADMINISTRASI KANTOR"
+    },
+    {
+      "id": "12491006",
+      "desc": "BANGUNAN SHOW UNIT DALAM PENYELESAIAN"
+    },
+    {
+      "id": "12491007",
+      "desc": "BIAYA PERALATAN & PERLENGKAPAN KANTOR"
+    },
+    {
+      "id": "12491008",
+      "desc": "PRA OP - BIAYA PERALATAN & PERLENGKAPAN KANTOR"
+    },
+    {
+      "id": "12491009",
+      "desc": "AKUMULASI AMORTISASI BIAYA PRE OPERASIONAL KANTOR"
+    },
+    {
+      "id": "12491010",
+      "desc": "BIAYA PRE OPERASIONAL"
+    },
+    {
+      "id": "12492000",
+      "desc": "BIAYA YANG DITANGGUHKAN"
+    },
+    {
+      "id": "12492001",
+      "desc": "BIAYA DITANGGUHKAN"
+    },
+    {
+      "id": "12492002",
+      "desc": "KOMISI PERCEPATAN"
+    },
+    {
+      "id": "12492003",
+      "desc": "BONUS PENJUALAN MARKETING"
+    },
+    {
+      "id": "12492004",
+      "desc": "JAMINAN KPR"
+    },
+    {
+      "id": "12492005",
+      "desc": "JAMINAN PROYEK"
+    },
+    {
+      "id": "12492006",
+      "desc": "UANG MUKA JAMINAN PROYEK"
+    },
+    {
+      "id": "12492007",
+      "desc": "BEBAN PERLENGKAPAN MARKETING"
+    },
+    {
+      "id": "12493000",
+      "desc": "GOODWILL"
+    },
+    {
+      "id": "12493001",
+      "desc": "BALANCING ACCOUNT"
+    },
+    {
+      "id": "12494000",
+      "desc": "HAK PATEN"
+    },
+    {
+      "id": "12494001",
+      "desc": "HAK PATEN"
+    },
+    {
+      "id": "12494002",
+      "desc": "AKUMULASI AMORTISASI HAK PATEN"
+    },
+    {
+      "id": "12495000",
+      "desc": "ASET PAJAK TANGGUHAN"
+    },
+    {
+      "id": "12495001",
+      "desc": "ASET PAJAK TANGGUHAN"
+    },
+    {
+      "id": "12496000",
+      "desc": "SOFTWARE SISTEM"
+    },
+    {
+      "id": "12496001",
+      "desc": "SOFTWARE SISTEM"
+    },
+    {
+      "id": "12496002",
+      "desc": "AKUMULASI AMORTISASI SOFTWARE SISTEM"
+    },
+    {
+      "id": "12500000",
+      "desc": "ASET TETAP TIDAK BERWUJUD"
+    },
+    {
+      "id": "12600000",
+      "desc": "BIAYA PENJUALAN DITANGGUHKAN"
+    },
+    {
+      "id": "12610000",
+      "desc": "BIAYA BIAYA UMUM & ADMINISTRASI KANTOR DITANGGUHKAN"
+    },
+    {
+      "id": "12620000",
+      "desc": "BIAYA KOMISI"
+    },
+    {
+      "id": "12620001",
+      "desc": "BIAYA PPH 21"
+    },
+    {
+      "id": "12620002",
+      "desc": "KOMISI AGENT"
+    },
+    {
+      "id": "12620003",
+      "desc": "BIAYA THR"
+    },
+    {
+      "id": "12620004",
+      "desc": "BIAYA BONUS"
+    },
+    {
+      "id": "12620005",
+      "desc": "BIAYA LEMBUR"
+    },
+    {
+      "id": "12620006",
+      "desc": "BIAYA TUNJANGAN LAINNYA"
+    },
+    {
+      "id": "12620007",
+      "desc": "BIAYA BPJS KESEHATAN"
+    },
+    {
+      "id": "12620008",
+      "desc": "BIAYA BPJS KETENAGAKERJAAN"
+    },
+    {
+      "id": "12620009",
+      "desc": "AMORTISASI BIAYA KOMISI"
+    },
+    {
+      "id": "12620010",
+      "desc": "AMORTISASI BIAYA UMUM PROYEK YANG DITANGGUHKAN"
+    },
+    {
+      "id": "12620011",
+      "desc": "BIAYA KOMISI AGENT"
+    },
+    {
+      "id": "12620012",
+      "desc": "AMORTISASI BIAYA MARKETING DAN PROMOSI"
+    },
+    {
+      "id": "12620013",
+      "desc": "AMORTISASI BIAYA KOMISI YANG DITANGGUHKAN"
+    },
+    {
+      "id": "12620014",
+      "desc": "PERCETAKAN BROSUR, SPANDUK, KATALOG, UMBUL2"
+    },
+    {
+      "id": "12620015",
+      "desc": "REWARD - KONSUMEN"
+    },
+    {
+      "id": "12620016",
+      "desc": "REWARD - KONSUMEN SUBSIDI PEMBAYARAN"
+    },
+    {
+      "id": "12620017",
+      "desc": "REWARD - MARKETING"
+    },
+    {
+      "id": "12620018",
+      "desc": "GOODWILL"
+    },
+    {
+      "id": "12700000",
+      "desc": "ASET ASET TIDAK LANCAR LAINNYA"
+    },
+    {
+      "id": "12800000",
+      "desc": "AYAT SILANG - AKUN SEMENTARA"
+    },
+    {
+      "id": "12810000",
+      "desc": "AYAT SILANG - AKUN SEMENTARA"
+    },
+    {
+      "id": "12810001",
+      "desc": "AYAT SILANG - AKUN SEMENTARA"
+    },
+    {
+      "id": "20000000",
+      "desc": "LIABILITAS"
+    },
+    {
+      "id": "21000000",
+      "desc": "LIABILITAS JANGKA PENDEK"
+    },
+    {
+      "id": "21100000",
+      "desc": "UTANG USAHA"
+    },
+    {
+      "id": "21110000",
+      "desc": "UTANG USAHA PIHAK KETIGA"
+    },
+    {
+      "id": "21110001",
+      "desc": "UTANG USAHA"
+    },
+    {
+      "id": "21110002",
+      "desc": "UTANG ATAS KOMISI PENJUALAN"
+    },
+    {
+      "id": "21110003",
+      "desc": "UTANG KONSULTAN"
+    },
+    {
+      "id": "21110004",
+      "desc": "UTANG KONTRAKTOR"
+    },
+    {
+      "id": "21110005",
+      "desc": "UTANG USAHA LAINNYA"
+    },
+    {
+      "id": "21110006",
+      "desc": "BIAYA YANG MASIH HARUS DIBAYAR"
+    },
+    {
+      "id": "21120000",
+      "desc": "UTANG USAHA PIHAK BERELASI"
+    },
+    {
+      "id": "21120001",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM"
+    },
+    {
+      "id": "21120002",
+      "desc": "UTANG USAHA KEPADA PEMEGANG SAHAM (PDK)"
+    },
+    {
+      "id": "21120003",
+      "desc": "UTANG KEPADA ENTITAS ANAK"
+    },
+    {
+      "id": "21120004",
+      "desc": "UTANG USAHA KEPADA ENTITAS ANAK (PDK)"
+    },
+    {
+      "id": "21200000",
+      "desc": "UTANG LAIN-LAIN"
+    },
+    {
+      "id": "21210000",
+      "desc": "UTANG LAIN-LAIN PIHAK KETIGA"
+    },
+    {
+      "id": "21210001",
+      "desc": "UTANG LAIN-LAIN PIHAK KETIGA (PDK)"
+    },
+    {
+      "id": "21210002",
+      "desc": "UTANG PIHAK KETIGA LAINNYA"
+    },
+    {
+      "id": "21210003",
+      "desc": "UTANG USAHA PIHAK KETIGA LAINNYA"
+    },
+    {
+      "id": "21210004",
+      "desc": "UTANG KOSPIN INDOSURYA"
+    },
+    {
+      "id": "21210005",
+      "desc": "UTANG RETENSI"
+    },
+    {
+      "id": "21210006",
+      "desc": "UTANG WATES"
+    },
+    {
+      "id": "21210007",
+      "desc": "UANG MUKA TITIPAN PIHAK KETIGA LAINNYA"
+    },
+    {
+      "id": "21210008",
+      "desc": "UTANG LAIN-LAIN BELUM TERIDENTIFIKASI"
+    },
+    {
+      "id": "21210009",
+      "desc": "UTANG LAINNYA"
+    },
+    {
+      "id": "21220000",
+      "desc": "UTANG LAIN-LAIN PIHAK BERELASI"
+    },
+    {
+      "id": "21220001",
+      "desc": "UTANG KEPADA ENTITAS ANAK-PTP"
+    },
+    {
+      "id": "21220002",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM PTP"
+    },
+    {
+      "id": "21220003",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM- PTGVI"
+    },
+    {
+      "id": "21220004",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM-KDI"
+    },
+    {
+      "id": "21220005",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM-PTP"
+    },
+    {
+      "id": "21220006",
+      "desc": "UTANG KEPADA THE SMITH"
+    },
+    {
+      "id": "21220007",
+      "desc": "UTANG LAIN-LAIN KEPADA PEMEGANG SAHAM (PDK)"
+    },
+    {
+      "id": "21220008",
+      "desc": "UTANG KEPADA CIBUBUR"
+    },
+    {
+      "id": "21220009",
+      "desc": "UTANG KEPADA ENTITAS ANAK-STC"
+    },
+    {
+      "id": "21220010",
+      "desc": "UTANG KEPADA ENTITAS ANAK-TPG"
+    },
+    {
+      "id": "21220011",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM-III"
+    },
+    {
+      "id": "21220012",
+      "desc": "UTANG KEPADA PIHAK BERELASI - PT MAS"
+    },
+    {
+      "id": "21220013",
+      "desc": "UTANG LAIN-LAIN KEPADA ENTITAS ANAK (PDK)"
+    },
+    {
+      "id": "21220014",
+      "desc": "UTANG KEPADA ENTITAS ANAK- TPG"
+    },
+    {
+      "id": "21220015",
+      "desc": "UTANG KEPADA ENTITAS ANAK-TMS"
+    },
+    {
+      "id": "21220016",
+      "desc": "UTANG KEPADA ENTITAS ANAK-TPG"
+    },
+    {
+      "id": "21220017",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM - PT FMI"
+    },
+    {
+      "id": "21220018",
+      "desc": "UTANG KEPADA PT TPG"
+    },
+    {
+      "id": "21220019",
+      "desc": "UTANG KEPADA SPRINGWOOD"
+    },
+    {
+      "id": "21220020",
+      "desc": "UTANG KEPADA ENTITAS ANAK-PTB"
+    },
+    {
+      "id": "21220021",
+      "desc": "UTANG KEPADA ENTITAS ANAK-STC"
+    },
+    {
+      "id": "21220022",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM - ALFONSO"
+    },
+    {
+      "id": "21220023",
+      "desc": "UTANG KEPADA - PT. SAMUDERA ATLANTIS INDONESIA"
+    },
+    {
+      "id": "21220024",
+      "desc": "UTANG KEPADA ENTITAS ANAK-TD"
+    },
+    {
+      "id": "21220025",
+      "desc": "UTANG KEPADA PIHAK BERELASI - PT DTUR PESONA INDONESIA"
+    },
+    {
+      "id": "21220026",
+      "desc": "UTANG KEPADA DIREKSI-MATIUS JUSUF"
+    },
+    {
+      "id": "21220027",
+      "desc": "UTANG PPH 23 - KEPADA THE SMITH"
+    },
+    {
+      "id": "21220028",
+      "desc": "UTANG KEPADA DIREKSI-CHANDRA"
+    },
+    {
+      "id": "21220029",
+      "desc": "UTANG KEPADA DIREKSI-SEPTIAN STARLIN"
+    },
+    {
+      "id": "21220030",
+      "desc": "UTANG PPH FINAL 4(2) - KEPADA THE SMITH"
+    },
+    {
+      "id": "21220031",
+      "desc": "UTANG KEPADA DIREKSI-JOHANES L ANDAYAPRANA"
+    },
+    {
+      "id": "21220032",
+      "desc": "UTANG KEPADA DIREKSI-MATIUS JUSUF"
+    },
+    {
+      "id": "21220033",
+      "desc": "UTANG PPN - KEPADA THE SMITH"
+    },
+    {
+      "id": "21220034",
+      "desc": "UTANG KEPADA DIREKSI-ISHAK CHANDRA"
+    },
+    {
+      "id": "21220035",
+      "desc": "UTANG PIHAK BERELASI LAINNYA"
+    },
+    {
+      "id": "21220036",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM - PT MGP"
+    },
+    {
+      "id": "21220037",
+      "desc": "UTANG PIHAK BERELASI LAINNYA - TGP"
+    },
+    {
+      "id": "21220038",
+      "desc": "UTANG KEPADA PEMEGANG SAHAM - PT SGV"
+    },
+    {
+      "id": "21220039",
+      "desc": "UTANG KEPADA PIHAK BERELASI - TD"
+    },
+    {
+      "id": "21220040",
+      "desc": "UTANG KEPADA PIHAK BERELASI - JO TRINITI SENTUL"
+    },
+    {
+      "id": "21220041",
+      "desc": "UTANG LAIN-LAIN (PDK)"
+    },
+    {
+      "id": "21220042",
+      "desc": "UTANG LAIN-LAIN CASH BACK KPA"
+    },
+    {
+      "id": "21220043",
+      "desc": "UTANG BIAYA GAJI & TUNJANGAN KARYAWAN"
+    },
+    {
+      "id": "21220044",
+      "desc": "UTANG BIAYA KOMISI"
+    },
+    {
+      "id": "21220045",
+      "desc": "BEBAN AKRUAL LAINNYA"
+    },
+    {
+      "id": "21220046",
+      "desc": "BIAYA YG MASIH HARUS DIBAYAR"
+    },
+    {
+      "id": "21220047",
+      "desc": "UTANG BIAYA AKRUAL"
+    },
+    {
+      "id": "21220048",
+      "desc": "UTANG BIAYA JASA PROFESIONAL"
+    },
+    {
+      "id": "21220049",
+      "desc": "UTANG BIAYA LAIN"
+    },
+    {
+      "id": "21220050",
+      "desc": "UANG MUKA PELANGGAN - APARTMENT"
+    },
+    {
+      "id": "21220051",
+      "desc": "UANG MUKA PELANGGAN - TOWNHOUSE"
+    },
+    {
+      "id": "21220052",
+      "desc": "UANG MUKA PELANGGAN - RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "21220053",
+      "desc": "UANG MUKA PELANGGAN - RETAIL & COMMERSIAL LAINNYA"
+    },
+    {
+      "id": "21220054",
+      "desc": "UANG MUKA PELANGGAN - OFFICE"
+    },
+    {
+      "id": "21220055",
+      "desc": "UANG MUKA PELANGGAN - KAVLING"
+    },
+    {
+      "id": "21220056",
+      "desc": "UANG MUKA PELANGGAN - RUKAN MULTIGUNA"
+    },
+    {
+      "id": "21220057",
+      "desc": "UANG MUKA PELANGGAN LAINNYA"
+    },
+    {
+      "id": "21220058",
+      "desc": "UANG MUKA PELANGGAN - KAVLING KOMERSIAL"
+    },
+    {
+      "id": "21220059",
+      "desc": "UANG MUKA PELANGGAN - KAVLING READY TO BUILD"
+    },
+    {
+      "id": "21230000",
+      "desc": "TITIPAN PELANGGAN"
+    },
+    {
+      "id": "21230001",
+      "desc": "TITIPAN PELANGGAN - RUKO CMP"
+    },
+    {
+      "id": "21230002",
+      "desc": "TITIPAN PELANGGAN - APARTMENT"
+    },
+    {
+      "id": "21230003",
+      "desc": "TITIPAN PELANGGAN - LANDED HOUSE"
+    },
+    {
+      "id": "21230004",
+      "desc": "TITIPAN PELANGGAN - VILLA"
+    },
+    {
+      "id": "21230005",
+      "desc": "TITIPAN PELANGGAN - CONDOVILLA"
+    },
+    {
+      "id": "21230006",
+      "desc": "TITIPAN PELANGGAN - RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "21230007",
+      "desc": "TITIPAN PELANGGAN - RUKAN"
+    },
+    {
+      "id": "21230008",
+      "desc": "TITIPAN PELANGGAN - KAVLING KOMERSIAL"
+    },
+    {
+      "id": "21230009",
+      "desc": "TITIPAN PELANGGAN - RETAIL & COMMERSIAL LAINNYA"
+    },
+    {
+      "id": "21230010",
+      "desc": "TITIPAN PELANGGAN - TOWNHOUSE"
+    },
+    {
+      "id": "21230011",
+      "desc": "TITIPAN PELANGGAN - AGEN"
+    },
+    {
+      "id": "21230012",
+      "desc": "TITIPAN PELANGGAN - BATAL"
+    },
+    {
+      "id": "21230013",
+      "desc": "TITIPAN PELANGGAN - STUDENT VILLAGE"
+    },
+    {
+      "id": "21230014",
+      "desc": "TITIPAN PENJUALAN BELUM TERIDENTIFIKASI"
+    },
+    {
+      "id": "21230015",
+      "desc": "TITIPAN PELANGGAN - OFFICE"
+    },
+    {
+      "id": "21230016",
+      "desc": "TITIPAN PELANGGAN - SOHO"
+    },
+    {
+      "id": "21230017",
+      "desc": "TITIPAN PELANGGAN - SHOPHOUSE"
+    },
+    {
+      "id": "21230018",
+      "desc": "TITIPAN PELANGGAN - KAVLING"
+    },
+    {
+      "id": "21230019",
+      "desc": "TITIPAN PELANGGAN - RUKAN MULTIGUNA"
+    },
+    {
+      "id": "21230020",
+      "desc": "TITIPAN PELANGGAN - TANAH"
+    },
+    {
+      "id": "21230021",
+      "desc": "TRANSFER ANONIM"
+    },
+    {
+      "id": "21230022",
+      "desc": "TITIPAN PELANGGAN - KAVLING READY TO BUILD"
+    },
+    {
+      "id": "21230023",
+      "desc": "TITIPAN LAIN-LAIN"
+    },
+    {
+      "id": "21230024",
+      "desc": "TITIPAN PELANGGAN - LAIN-LAIN"
+    },
+    {
+      "id": "21230025",
+      "desc": "TITIPAN PELANGGAN - CONDOVILLA ESCROW"
+    },
+    {
+      "id": "21230026",
+      "desc": "TITIPAN PELANGGAN - LANDED HOUSE ESCROW"
+    },
+    {
+      "id": "21230027",
+      "desc": "TITIPAN PELANGGAN - SHOPHOUSE ESCROW"
+    },
+    {
+      "id": "21300000",
+      "desc": "PENDAPATAN DITERIMA DIMUKA"
+    },
+    {
+      "id": "21310000",
+      "desc": "PENDAPATAN DITERIMA DIMUKA"
+    },
+    {
+      "id": "21320000",
+      "desc": "SEWA DITERIMA DIMUKA"
+    },
+    {
+      "id": "21320001",
+      "desc": "PENDAPATAN DITERIMA DIMUKA"
+    },
+    {
+      "id": "21320002",
+      "desc": "SEWA DITERIMA DIMUKA"
+    },
+    {
+      "id": "21320003",
+      "desc": "SEWA UBUD"
+    },
+    {
+      "id": "21320004",
+      "desc": "SEWA MELROSE PLACE"
+    },
+    {
+      "id": "21330000",
+      "desc": "PENDAPATAN KOMISI"
+    },
+    {
+      "id": "21330001",
+      "desc": "KOMISI PENJUALAN"
+    },
+    {
+      "id": "21400000",
+      "desc": "UTANG PAJAK"
+    },
+    {
+      "id": "21410000",
+      "desc": "UTANG PAJAK"
+    },
+    {
+      "id": "21410001",
+      "desc": "PPN KELUARAN"
+    },
+    {
+      "id": "21410002",
+      "desc": "UTANG PPN KELUARAN"
+    },
+    {
+      "id": "21410003",
+      "desc": "PPN KELUARAN DTP"
+    },
+    {
+      "id": "21410004",
+      "desc": "UTANG PPH 21/26"
+    },
+    {
+      "id": "21410005",
+      "desc": "UTANG PPH 23/26"
+    },
+    {
+      "id": "21410006",
+      "desc": "UTANG PPH 15"
+    },
+    {
+      "id": "21410007",
+      "desc": "UTANG PPH 25"
+    },
+    {
+      "id": "21410008",
+      "desc": "UTANG PPH 4 AYAT 2"
+    },
+    {
+      "id": "21410009",
+      "desc": "UTANG PPH 29"
+    },
+    {
+      "id": "21410010",
+      "desc": "UTANG PPH 4 AYAT 2 ATAS PERALIHAN TANAH DAN BANGUNAN"
+    },
+    {
+      "id": "21410011",
+      "desc": "UTANG PPN JLN"
+    },
+    {
+      "id": "21410012",
+      "desc": "UTANG PPH LAIN-LAIN"
+    },
+    {
+      "id": "21500000",
+      "desc": "UTANG OBLIGASI KONVERSI"
+    },
+    {
+      "id": "21510000",
+      "desc": "UTANG OBLIGASI KONVERSI"
+    },
+    {
+      "id": "21510001",
+      "desc": "UTANG OBLIGASI KONVERSI"
+    },
+    {
+      "id": "21510002",
+      "desc": "DISKONTO MCB"
+    },
+    {
+      "id": "21600000",
+      "desc": "BAGIAN HUTANG JK PANJANG JTH TEMPO DLM SATU THN"
+    },
+    {
+      "id": "21610000",
+      "desc": "LEMBAGA BANK"
+    },
+    {
+      "id": "21610001",
+      "desc": "BANK BCA"
+    },
+    {
+      "id": "21610002",
+      "desc": "LEMBAGA BANK"
+    },
+    {
+      "id": "21610003",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PRK 1 (100-500-2602) (PDK)"
+    },
+    {
+      "id": "21610004",
+      "desc": "UTANG BANK BII (6011)"
+    },
+    {
+      "id": "21610005",
+      "desc": "UTANG LEASING-BANK BCA FINANCE"
+    },
+    {
+      "id": "21610006",
+      "desc": "BANK MANDIRI"
+    },
+    {
+      "id": "21610007",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PRK 2 (PDK)"
+    },
+    {
+      "id": "21610008",
+      "desc": "UTANG BANK GANESHA"
+    },
+    {
+      "id": "21610009",
+      "desc": "BANK BJB"
+    },
+    {
+      "id": "21610010",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PJM 1 (PDK)"
+    },
+    {
+      "id": "21610011",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PJM 2 (PDK)"
+    },
+    {
+      "id": "21620000",
+      "desc": "LEMBAGA NON BANK"
+    },
+    {
+      "id": "21620001",
+      "desc": "MULTI FINANCE (PDK)"
+    },
+    {
+      "id": "21620002",
+      "desc": "UTANG MULTI FINANCE (LEASING)"
+    },
+    {
+      "id": "21630000",
+      "desc": "HUTANG KONSTRUKSI JANGKA PENDEK"
+    },
+    {
+      "id": "21630001",
+      "desc": "HUTANG KONSTRUKSI JANGKA PENDEK"
+    },
+    {
+      "id": "21700000",
+      "desc": "TITIPAN DANA BUILDING MANAGEMENT"
+    },
+    {
+      "id": "21700001",
+      "desc": "TITIPAN DANA BUILDING MANAGEMENT - DEPOSIT TENANT"
+    },
+    {
+      "id": "21700002",
+      "desc": "TITIPAN DANA BUILDING MANAGEMENT - ADMIN"
+    },
+    {
+      "id": "21700003",
+      "desc": "TITIPAN DANA BUILDING MANAGEMENT - LISTRIK"
+    },
+    {
+      "id": "21700004",
+      "desc": "TITIPAN DANA BUILDING MANAGEMENT - AIR"
+    },
+    {
+      "id": "21700005",
+      "desc": "TITIPAN DANA BUILDING MANAGEMENT - LAINNYA"
+    },
+    {
+      "id": "22000000",
+      "desc": "LIABILITAS JANGKA PANJANG"
+    },
+    {
+      "id": "22100000",
+      "desc": "UTANG JANGKA PANJANG"
+    },
+    {
+      "id": "22110000",
+      "desc": "UTANG VENTURA BERSAMA"
+    },
+    {
+      "id": "22110001",
+      "desc": "KSO-1"
+    },
+    {
+      "id": "22110002",
+      "desc": "KSO-1 (BROOKLYN)"
+    },
+    {
+      "id": "22110003",
+      "desc": "KSO-2 (YUKATA)"
+    },
+    {
+      "id": "22120000",
+      "desc": "UTANG BANK"
+    },
+    {
+      "id": "22120001",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PRK 1 (100-500-2602)"
+    },
+    {
+      "id": "22120002",
+      "desc": "UTANG BANK BCA"
+    },
+    {
+      "id": "22120003",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PRK 2"
+    },
+    {
+      "id": "22120004",
+      "desc": "UTANG BANK MANDIRI"
+    },
+    {
+      "id": "22120005",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PJM 1"
+    },
+    {
+      "id": "22120006",
+      "desc": "UTANG BANK CIMB NIAGA"
+    },
+    {
+      "id": "22120007",
+      "desc": "UTANG BANK MAYBANK"
+    },
+    {
+      "id": "22120008",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PJM 2"
+    },
+    {
+      "id": "22120009",
+      "desc": "PINJAMAN KONSTRUKSI BANK PANIN - PJM 3"
+    },
+    {
+      "id": "22130000",
+      "desc": "UTANG MULTI FINANCE"
+    },
+    {
+      "id": "22140000",
+      "desc": "UTANG NON BANK"
+    },
+    {
+      "id": "22140001",
+      "desc": "HUTANG LEASING"
+    },
+    {
+      "id": "22140002",
+      "desc": "UTANG MULTI FINANCE"
+    },
+    {
+      "id": "22140003",
+      "desc": "UTANG MULTI FINANCE - SFK"
+    },
+    {
+      "id": "22140004",
+      "desc": "UTANG OFFSHORE LOAN"
+    },
+    {
+      "id": "22150000",
+      "desc": "UTANG PIHAK BERELASI JK PANJANG"
+    },
+    {
+      "id": "22150001",
+      "desc": "PEMEGANG SAHAM - INDIVIDU"
+    },
+    {
+      "id": "22150002",
+      "desc": "PEMEGANG SAHAM - XXXX"
+    },
+    {
+      "id": "22150003",
+      "desc": "PT. PERINTIS TRINITI PROPERTI"
+    },
+    {
+      "id": "22150004",
+      "desc": "UTANG KEPADA TMS"
+    },
+    {
+      "id": "22150005",
+      "desc": "UTANG PEMEGANG SAHAM - PTP"
+    },
+    {
+      "id": "22150006",
+      "desc": "PT. TRINITI PILAR GEMILANG"
+    },
+    {
+      "id": "22150007",
+      "desc": "UTANG JK. PANJANG - ANAK USAHA"
+    },
+    {
+      "id": "22150008",
+      "desc": "UTANG KEPADA TPG"
+    },
+    {
+      "id": "22150009",
+      "desc": "UTANG PEMEGANG SAHAM - PSG"
+    },
+    {
+      "id": "22150010",
+      "desc": "PT. BATAMAS PURI PERMAI"
+    },
+    {
+      "id": "22150011",
+      "desc": "UTANG DIREKSI- SEPTIAN STARLIN"
+    },
+    {
+      "id": "22150012",
+      "desc": "UTANG PEMEGANG SAHAM - PTP TAHAP 1"
+    },
+    {
+      "id": "22150013",
+      "desc": "PT BATAMAS PURI PERMAI - BPR"
+    },
+    {
+      "id": "22150014",
+      "desc": "UTANG DIREKSI- JOHANES L ANDAYAPRANA"
+    },
+    {
+      "id": "22150015",
+      "desc": "UTANG PEMEGANG SAHAM - PTP TAHAP 2"
+    },
+    {
+      "id": "22150016",
+      "desc": "UTANG DIREKSI- CHANDRA"
+    },
+    {
+      "id": "22150017",
+      "desc": "UTANG PEMEGANG SAHAM - PTP DANA"
+    },
+    {
+      "id": "22150018",
+      "desc": "UTANG DIREKSI- MATIUS JUSUF"
+    },
+    {
+      "id": "22150019",
+      "desc": "UTANG PIHAK BERELASI"
+    },
+    {
+      "id": "22150020",
+      "desc": "UTANG DIREKSI- ISHAK CHANDRA"
+    },
+    {
+      "id": "22150021",
+      "desc": "UTANG PIHAK BERELASI - TMG"
+    },
+    {
+      "id": "22150022",
+      "desc": "UTANG PEMEGANG SAHAM - PTP TAMBAHAN"
+    },
+    {
+      "id": "22200000",
+      "desc": "UTANG LAINNYA"
+    },
+    {
+      "id": "22210000",
+      "desc": "UTANG LAINNYA"
+    },
+    {
+      "id": "22210001",
+      "desc": "HUTANG BUNGA SHL"
+    },
+    {
+      "id": "22210002",
+      "desc": "UTANG DEVIDEN"
+    },
+    {
+      "id": "22210003",
+      "desc": "UTANG REVENUE SHARING TANAH - PT PERKASA INTERNUSA MANDIRI"
+    },
+    {
+      "id": "22210004",
+      "desc": "UTANG IMBALAN PASCA KERJA"
+    },
+    {
+      "id": "22210005",
+      "desc": "UTANG REVENUE SHARING BANGUNAN - PT PERKASA INTERNUSA MANDIRI"
+    },
+    {
+      "id": "22210006",
+      "desc": "UTANG BUNGA UANG MUKA PELANGGAN"
+    },
+    {
+      "id": "22210007",
+      "desc": "HUTANG BUNGA CONSTRUCTION LOAN"
+    },
+    {
+      "id": "22300000",
+      "desc": "UANG MUKA PENJUALAN"
+    },
+    {
+      "id": "22400000",
+      "desc": "UANG MUKA PENJUALAN & TITIPAN PELANGGAN - JK PANJANG"
+    },
+    {
+      "id": "22410000",
+      "desc": "UANG MUKA DARI PELANGGAN"
+    },
+    {
+      "id": "22420000",
+      "desc": "UANG MUKA DARI PELANGGAN - JK PANJANG"
+    },
+    {
+      "id": "22430000",
+      "desc": "UANG MUKA PELANGGAN"
+    },
+    {
+      "id": "22440000",
+      "desc": "UANG MUKA PENJUALAN - JK PANJANG"
+    },
+    {
+      "id": "22440001",
+      "desc": "UANG MUKA PELANGGAN - APARTMENT - JK PANJANG"
+    },
+    {
+      "id": "22440002",
+      "desc": "UANG MUKA PELANGGAN - APARTMENT - TOWER A (JK PANJANG)"
+    },
+    {
+      "id": "22440003",
+      "desc": "UANG MUKA PELANGGAN - CONDOVILLA - JK PANJANG"
+    },
+    {
+      "id": "22440004",
+      "desc": "UANG MUKA PELANGGAN - LANDED HOUSE - JK PANJANG"
+    },
+    {
+      "id": "22440005",
+      "desc": "UANG MUKA PELANGGAN - RUKO CMP (JK PANJANG)"
+    },
+    {
+      "id": "22440006",
+      "desc": "UANG MUKA PELANGGAN - TANAH - JK PANJANG"
+    },
+    {
+      "id": "22440007",
+      "desc": "UANG MUKA PELANGGAN - APARTMENT - TOWER B (JK PANJANG)"
+    },
+    {
+      "id": "22440008",
+      "desc": "UANG MUKA PELANGGAN - RUKAN - JK PANJANG"
+    },
+    {
+      "id": "22440009",
+      "desc": "UANG MUKA PELANGGAN - APARTMENT - TOWER C (JK PANJANG)"
+    },
+    {
+      "id": "22440010",
+      "desc": "UANG MUKA PELANGGAN - KAVLING - JK PANJANG"
+    },
+    {
+      "id": "22440011",
+      "desc": "UANG MUKA PELANGGAN - KAVLING KOMERSIAL - JK PANJANG"
+    },
+    {
+      "id": "22440012",
+      "desc": "UANG MUKA PELANGGAN - TOWNHOUSE - JK PANJANG"
+    },
+    {
+      "id": "22440013",
+      "desc": "UANG MUKA PELANGGAN - RESIDENTIAL LAINNYA (JK PANJANG)"
+    },
+    {
+      "id": "22440014",
+      "desc": "UANG MUKA PELANGGAN - STUDENT VILLAGE - JK PANJANG"
+    },
+    {
+      "id": "22440015",
+      "desc": "UANG MUKA PELANGGAN - RETAIL & COMMERSIAL LAINNYA (JK PANJANG)"
+    },
+    {
+      "id": "22440016",
+      "desc": "UANG MUKA PELANGGAN - OFFICE - JK PANJANG"
+    },
+    {
+      "id": "22440017",
+      "desc": "UANG MUKA PELANGGAN - SOHO - JK PANJANG"
+    },
+    {
+      "id": "22440018",
+      "desc": "UANG MUKA PELANGGAN - SHOPHOUSE - JK PANJANG"
+    },
+    {
+      "id": "22440019",
+      "desc": "UANG MUKA PELANGGAN - RUKAN MULTIGUNA - JK PANJANG"
+    },
+    {
+      "id": "22440020",
+      "desc": "UANG MUKA PELANGGAN - KAVLING READY TO BUILD - JK PANJANG"
+    },
+    {
+      "id": "22450000",
+      "desc": "TITIPAN PELANGGAN - JK PANJANG"
+    },
+    {
+      "id": "22450001",
+      "desc": "TITIPAN PELANGGAN - APARTMENT - JK PANJANG"
+    },
+    {
+      "id": "22450002",
+      "desc": "TITIPAN PELANGGAN - CONDOVILLA - JK PANJANG"
+    },
+    {
+      "id": "22450003",
+      "desc": "TITIPAN PELANGGAN - LANDED HOUSE - JK PANJANG"
+    },
+    {
+      "id": "22450004",
+      "desc": "TITIPAN PELANGGAN - TANAH - JK PANJANG"
+    },
+    {
+      "id": "22450005",
+      "desc": "TITIPAN PELANGGAN - RUKAN - JK PANJANG"
+    },
+    {
+      "id": "22450006",
+      "desc": "TITIPAN PELANGGAN - VILLA - JK PANJANG"
+    },
+    {
+      "id": "22450007",
+      "desc": "TITIPAN PELANGGAN - KAVLING - JK PANJANG"
+    },
+    {
+      "id": "22450008",
+      "desc": "TITIPAN PELANGGAN - KAVLING KOMERSIAL - JK PANJANG"
+    },
+    {
+      "id": "22450009",
+      "desc": "TITIPAN PELANGGAN - TOWNHOUSE - JK PANJANG"
+    },
+    {
+      "id": "22450010",
+      "desc": "TITIPAN PELANGGAN - STUDENT VILLAGE - JK PANJANG"
+    },
+    {
+      "id": "22450011",
+      "desc": "TITIPAN PELANGGAN BATAL - JK PANJANG"
+    },
+    {
+      "id": "22450012",
+      "desc": "TITIPAN PELANGGAN - CONDOVILLA ESCROW - JK PANJANG"
+    },
+    {
+      "id": "22450013",
+      "desc": "TITIPAN PELANGGAN - LANDED HOUSE ESCROW - JK PANJANG"
+    },
+    {
+      "id": "22450014",
+      "desc": "TITIPAN PELANGGAN - OFFICE - JK PANJANG"
+    },
+    {
+      "id": "22450015",
+      "desc": "TITIPAN LAIN-LAIN - JK PANJANG"
+    },
+    {
+      "id": "22450016",
+      "desc": "TITIPAN PELANGGAN - SOHO - JK PANJANG"
+    },
+    {
+      "id": "22450017",
+      "desc": "TITIPAN PELANGGAN - SHOPHOUSE - JK PANJANG"
+    },
+    {
+      "id": "22450018",
+      "desc": "TITIPAN PELANGGAN - RUKAN MULTIGUNA - JK PANJANG"
+    },
+    {
+      "id": "22450019",
+      "desc": "TITIPAN PELANGGAN - KAVLING READY TO BUILD - JK PANJANG"
+    },
+    {
+      "id": "22500000",
+      "desc": "BEBAN AKRUAL"
+    },
+    {
+      "id": "22510000",
+      "desc": "BEBAN AKRUAL"
+    },
+    {
+      "id": "22510001",
+      "desc": "BEBAN YANG MASIH HARUS DIBAYAR JK PANJANG"
+    },
+    {
+      "id": "30000000",
+      "desc": "EKUITAS"
+    },
+    {
+      "id": "31000000",
+      "desc": "MODAL SAHAM"
+    },
+    {
+      "id": "31100000",
+      "desc": "MODAL DISETOR"
+    },
+    {
+      "id": "31100001",
+      "desc": "MODAL DISETOR"
+    },
+    {
+      "id": "31100002",
+      "desc": "MODAL DISETOR"
+    },
+    {
+      "id": "31100003",
+      "desc": "MODAL DISETOR - PT FLORES MAKMUR INDONESIA"
+    },
+    {
+      "id": "31100004",
+      "desc": "MODAL YANG BELUM TERLEGALISASI"
+    },
+    {
+      "id": "31100005",
+      "desc": "TAMBAHAN MODAL DISETOR"
+    },
+    {
+      "id": "31100006",
+      "desc": "AGIO (DISAGIO) SAHAM"
+    },
+    {
+      "id": "31100007",
+      "desc": "MODAL DISETOR - PT PERINTIS TRINITI PROPERTI"
+    },
+    {
+      "id": "31100008",
+      "desc": "MODAL DISETOR - ALFONSO RICO PERLUHUTAN PARDEDE"
+    },
+    {
+      "id": "31100009",
+      "desc": "PIUTANG PENEMPATAN MODAL"
+    },
+    {
+      "id": "31100010",
+      "desc": "MODAL DISETOR - PT NBF"
+    },
+    {
+      "id": "31200000",
+      "desc": "TAMBAHAN MODAL DISETOR - TA"
+    },
+    {
+      "id": "31210000",
+      "desc": "TAMBAHAN MODAL DISETOR - TA"
+    },
+    {
+      "id": "31210001",
+      "desc": "TAMBAHAN MODAL DISETOR - TA"
+    },
+    {
+      "id": "31300000",
+      "desc": "AGIO (DISAGIO) SAHAM"
+    },
+    {
+      "id": "31310000",
+      "desc": "AGIO (DISAGIO) SAHAM"
+    },
+    {
+      "id": "31310001",
+      "desc": "AGIO (DISAGIO) SAHAM"
+    },
+    {
+      "id": "31310002",
+      "desc": "TREASURY STOCK"
+    },
+    {
+      "id": "31400000",
+      "desc": "PIUTANG PENEMPATAN MODAL"
+    },
+    {
+      "id": "31400001",
+      "desc": "PIUTANG PENEMPATAN MODAL - FMI"
+    },
+    {
+      "id": "31400002",
+      "desc": "PIUTANG PENEMPATAN MODAL - NBF"
+    },
+    {
+      "id": "32000000",
+      "desc": "KOMPONEN EKUITAS PADA OBLIGASI KONVERSI"
+    },
+    {
+      "id": "33000000",
+      "desc": "SALDO LABA"
+    },
+    {
+      "id": "33100000",
+      "desc": "LABA (RUGI) DITAHAN"
+    },
+    {
+      "id": "33100001",
+      "desc": "KOMPONEN EKUITAS PADA OBLIGASI KONVERSI"
+    },
+    {
+      "id": "33100002",
+      "desc": "LABA (RUGI) DITAHAN"
+    },
+    {
+      "id": "33100003",
+      "desc": "LABA (RUGI) KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "33100004",
+      "desc": "PENYESUAIAN PENERAPAN PSAK"
+    },
+    {
+      "id": "33100005",
+      "desc": "BALANCING ACCOUNT"
+    },
+    {
+      "id": "33200000",
+      "desc": "LABA (RUGI) TAHUN BERJALAN"
+    },
+    {
+      "id": "33210000",
+      "desc": "LABA (RUGI) TAHUN BERJALAN"
+    },
+    {
+      "id": "33210001",
+      "desc": "LABA (RUGI) TAHUN BERJALAN"
+    },
+    {
+      "id": "33210002",
+      "desc": "LABA (RUGI) TAHUN BERJALAN KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "33300000",
+      "desc": "DEVIDEN TUNAI"
+    },
+    {
+      "id": "33310000",
+      "desc": "DEVIDEN TUNAI"
+    },
+    {
+      "id": "33310001",
+      "desc": "DEVIDEN TUNAI"
+    },
+    {
+      "id": "34000000",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA"
+    },
+    {
+      "id": "34010000",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA"
+    },
+    {
+      "id": "34010001",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA"
+    },
+    {
+      "id": "34010002",
+      "desc": "IMBALAN PASKA KERJA DITAHAN"
+    },
+    {
+      "id": "34010003",
+      "desc": "IMBALAN PASKA KERJA BERJALAN"
+    },
+    {
+      "id": "34100000",
+      "desc": "REVALUASI ASET TETAP"
+    },
+    {
+      "id": "34200000",
+      "desc": "REVALUASI ASET TETAP - TANAH YUKATA"
+    },
+    {
+      "id": "34210000",
+      "desc": "REVALUASI ASET TETAP"
+    },
+    {
+      "id": "34210001",
+      "desc": "IMBALAN PASCA KERJA"
+    },
+    {
+      "id": "34210002",
+      "desc": "REVALUASI ASET TETAP"
+    },
+    {
+      "id": "34210003",
+      "desc": "REVALUASI ASET TETAP - TANAH BROOKLYN"
+    },
+    {
+      "id": "34210004",
+      "desc": "REVALUASI ASET TETAP - TANAH YUKATA"
+    },
+    {
+      "id": "34300000",
+      "desc": "IMBALAN PASCAKERJA"
+    },
+    {
+      "id": "35000000",
+      "desc": "EKUITAS KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "35100000",
+      "desc": "EKUITAS KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "35100001",
+      "desc": "LABA (RUGI) DITAHAN TAHUN LALU"
+    },
+    {
+      "id": "36000000",
+      "desc": "EKUITAS YANG DAPAT DIATRIBUSIKAN KEPADA PEMILIK ENTITAS INDUK"
+    },
+    {
+      "id": "36100000",
+      "desc": "EKUITAS YANG DAPAT DIATRIBUSIKAN KEPADA PEMILIK ENTITAS INDUK"
+    },
+    {
+      "id": "36100001",
+      "desc": "EKUITAS KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "37000000",
+      "desc": "KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "37100000",
+      "desc": "KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "40000000",
+      "desc": "PENJUALAN DAN PENDAPATAN USAHA"
+    },
+    {
+      "id": "41000000",
+      "desc": "PENJUALAN"
+    },
+    {
+      "id": "42000000",
+      "desc": "PENJUALAN UNIT"
+    },
+    {
+      "id": "42100000",
+      "desc": "PENJUALAN UNIT"
+    },
+    {
+      "id": "42110000",
+      "desc": "PENJUALAN UNIT RESIDENTIAL"
+    },
+    {
+      "id": "42120000",
+      "desc": "PENJUALAN UNIT RESIDENTIAL - TOWER A"
+    },
+    {
+      "id": "42130000",
+      "desc": "PENJUALAN UNIT RUKO MGC"
+    },
+    {
+      "id": "42130001",
+      "desc": "PENJUALAN UNIT APARTEMENT"
+    },
+    {
+      "id": "42130002",
+      "desc": "PENJUALAN UNIT APARTMENT - TOWER A"
+    },
+    {
+      "id": "42130003",
+      "desc": "PENJUALAN UNIT LANDED HOUSE"
+    },
+    {
+      "id": "42130004",
+      "desc": "PENJUALAN UNIT CONDOVILLA"
+    },
+    {
+      "id": "42130005",
+      "desc": "PENJUALAN UNIT TOWNHOUSE"
+    },
+    {
+      "id": "42130006",
+      "desc": "PENJUALAN UNIT STUDENT VILLAGE"
+    },
+    {
+      "id": "42130007",
+      "desc": "PENJUALAN UNIT READY TO BUILD LAND / KAVLING"
+    },
+    {
+      "id": "42140000",
+      "desc": "PENJUALAN UNIT RESIDENTIAL - TOWER B"
+    },
+    {
+      "id": "42150000",
+      "desc": "PENJUALAN UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "42150001",
+      "desc": "PENJUALAN UNIT APARTMENT - TOWER B"
+    },
+    {
+      "id": "42150002",
+      "desc": "PENJUALAN UNIT OFFICE"
+    },
+    {
+      "id": "42150003",
+      "desc": "PENJUALAN UNIT RUKAN"
+    },
+    {
+      "id": "42150004",
+      "desc": "PENJUALAN UNIT KAVLING KOMERSIAL"
+    },
+    {
+      "id": "42150005",
+      "desc": "PENJUALAN UNIT SOHO"
+    },
+    {
+      "id": "42150006",
+      "desc": "PENJUALAN UNIT SHOPHOUSE"
+    },
+    {
+      "id": "42160000",
+      "desc": "PENJUALAN UNIT RESIDENTIAL - TOWER C"
+    },
+    {
+      "id": "42160001",
+      "desc": "PENJUALAN UNIT APARTMENT - TOWER C"
+    },
+    {
+      "id": "42170000",
+      "desc": "PENJUALAN UNIT RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "42170001",
+      "desc": "PENJUALAN UNIT RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "42180000",
+      "desc": "PENJUALAN UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "42180001",
+      "desc": "PENJUALAN UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "42190000",
+      "desc": "PENJUALAN UNIT LAINNYA"
+    },
+    {
+      "id": "42190001",
+      "desc": "PENJUALAN UNIT LAINNYA"
+    },
+    {
+      "id": "43000000",
+      "desc": "PENDAPATAN USAHA"
+    },
+    {
+      "id": "43100000",
+      "desc": "PENDAPATAN SEWA UNIT"
+    },
+    {
+      "id": "43110000",
+      "desc": "PENDAPATAAN SEWA UNIT RESIDENTIAL"
+    },
+    {
+      "id": "43110001",
+      "desc": "PENDAPATAAN SEWA UNIT RESIDENTIAL"
+    },
+    {
+      "id": "43110002",
+      "desc": "PENDAPATAN SEWA APARTMENET"
+    },
+    {
+      "id": "43110003",
+      "desc": "PENDAPATAN SEWA APARTMENT"
+    },
+    {
+      "id": "43110004",
+      "desc": "PENDAPATAN SEWA LANDED HOUSE"
+    },
+    {
+      "id": "43110005",
+      "desc": "PENDAPATAN SEWA CONDOVILLA"
+    },
+    {
+      "id": "43110006",
+      "desc": "PENDAPATAN SEWA RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "43110007",
+      "desc": "PENDAPATAN SEWA TOWNHOUSE"
+    },
+    {
+      "id": "43110008",
+      "desc": "PENDAPATAN SEWA STUDENT VILLAGE"
+    },
+    {
+      "id": "43110009",
+      "desc": "PENDAPATAN SEWA OFFICE"
+    },
+    {
+      "id": "43110010",
+      "desc": "PENDAPATAN SEWA SOHO"
+    },
+    {
+      "id": "43110011",
+      "desc": "PENDAPATAN SEWA SHOPHOUSE"
+    },
+    {
+      "id": "43110012",
+      "desc": "PENDAPATAN HOTEL"
+    },
+    {
+      "id": "43120000",
+      "desc": "PENDAPATAAN SEWA UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "43120001",
+      "desc": "PENDAPATAAN SEWA UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "43200000",
+      "desc": "PENDAPATAN KOMISI"
+    },
+    {
+      "id": "43210000",
+      "desc": "KOMISI PENJUALAN"
+    },
+    {
+      "id": "43210001",
+      "desc": "KOMISI PENJUALAN"
+    },
+    {
+      "id": "43210002",
+      "desc": "PENDAPATAN LAIN-LAIN"
+    },
+    {
+      "id": "43220000",
+      "desc": "PROFIT SHARING"
+    },
+    {
+      "id": "43220001",
+      "desc": "PROFIT SHARING"
+    },
+    {
+      "id": "43230000",
+      "desc": "COST SHARING"
+    },
+    {
+      "id": "43230001",
+      "desc": "COST SHARING"
+    },
+    {
+      "id": "43300000",
+      "desc": "PENDAPATAAN SEWA LAINNYA"
+    },
+    {
+      "id": "43400000",
+      "desc": "PENDAPATAN LAINNYA"
+    },
+    {
+      "id": "43410000",
+      "desc": "PENDAPATAN JASA MANAGEMEN"
+    },
+    {
+      "id": "43420000",
+      "desc": "SEWA LAINNYA"
+    },
+    {
+      "id": "43420001",
+      "desc": "JASA MANAGEMEN PENGEMBANGAN KONSTRUKSI"
+    },
+    {
+      "id": "43420002",
+      "desc": "PENDAPATAN SEWA PERANGKAT"
+    },
+    {
+      "id": "50000000",
+      "desc": "BEBAN POKOK PENJUALAN"
+    },
+    {
+      "id": "51000000",
+      "desc": "BEBAN POKOK PENJUALAN"
+    },
+    {
+      "id": "51100000",
+      "desc": "BEBAN POKOK PENJUALAN UNIT"
+    },
+    {
+      "id": "51110000",
+      "desc": "BEBAN POKOK PENJUALAN RESIDENTIAL"
+    },
+    {
+      "id": "51120000",
+      "desc": "BEBAN POKOK PENJUALAN RUKO CMP"
+    },
+    {
+      "id": "51120001",
+      "desc": "BEBAN POKOK PENJUALAN UNIT APARTMENT"
+    },
+    {
+      "id": "51120002",
+      "desc": "BEBAN POKOK PENJUALAN UNIT LANDED HOUSE"
+    },
+    {
+      "id": "51120003",
+      "desc": "BEBAN POKOK PENJUALAN UNIT RUKO CMP"
+    },
+    {
+      "id": "51120004",
+      "desc": "PERSIAPAN LOKASI & PERSIAPAN KONSTRUKSI - TOWER A"
+    },
+    {
+      "id": "51120005",
+      "desc": "BEBAN POKOK PENJUALAN UNIT CONDOVILLA"
+    },
+    {
+      "id": "51120006",
+      "desc": "TANAH YANG DIKEMBANGKAN - TOWER A"
+    },
+    {
+      "id": "51120007",
+      "desc": "BANGUNAN DALAM PROSES - TOWER A"
+    },
+    {
+      "id": "51120008",
+      "desc": "BEBAN POKOK PENJUALAN UNIT TOWNHOUSE"
+    },
+    {
+      "id": "51120009",
+      "desc": "BEBAN POKOK PENJUALAN UNIT STUDENT VILLAGE"
+    },
+    {
+      "id": "51120010",
+      "desc": "BIAYA PEKERJAAN LUAR - LAND SCAPE & HARD SCAPE - TOWER A"
+    },
+    {
+      "id": "51120011",
+      "desc": "BIAYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK - TOWER A"
+    },
+    {
+      "id": "51120012",
+      "desc": "BEBAN POKOK PENJUALAN UNIT READY TO BUILD LAND / KAVLING"
+    },
+    {
+      "id": "51120013",
+      "desc": "BIAYA PERIJINAN DAN LEGALITAS - TOWER A"
+    },
+    {
+      "id": "51120014",
+      "desc": "BIAYA KONSULTAN - TOWER A"
+    },
+    {
+      "id": "51120015",
+      "desc": "BIAYA YANG DAPAT DIKAPITALISASI - TOWER A"
+    },
+    {
+      "id": "51120016",
+      "desc": "BIAYA PROYEK LAINNYA - TOWER A"
+    },
+    {
+      "id": "51130000",
+      "desc": "BEBAN POKOK PENJUALAN RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "51130001",
+      "desc": "BEBAN POKOK PENJUALAN RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "51130002",
+      "desc": "BEBAN POKOK PENJUALAN UNIT OFFICE"
+    },
+    {
+      "id": "51130003",
+      "desc": "BEBAN POKOK PENJUALAN UNIT RUKAN"
+    },
+    {
+      "id": "51130004",
+      "desc": "PERSIAPAN LOKASI & PERSIAPAN KONSTRUKSI - TOWER B"
+    },
+    {
+      "id": "51130005",
+      "desc": "BEBAN POKOK PENJUALAN UNIT KAVLING KOMERSIAL"
+    },
+    {
+      "id": "51130006",
+      "desc": "BEBAN POKOK PENJUALAN UNIT SOHO"
+    },
+    {
+      "id": "51130007",
+      "desc": "TANAH YANG DIKEMBANGKAN - TOWER B"
+    },
+    {
+      "id": "51130008",
+      "desc": "BANGUNAN DALAM PROSES - TOWER B"
+    },
+    {
+      "id": "51130009",
+      "desc": "BEBAN POKOK PENJUALAN UNIT SHOPHOUSE"
+    },
+    {
+      "id": "51130010",
+      "desc": "BIAYA PEKERJAAN LUAR - LAND SCAPE & HARD SCAPE - TOWER B"
+    },
+    {
+      "id": "51130011",
+      "desc": "BIAYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK - TOWER B"
+    },
+    {
+      "id": "51130012",
+      "desc": "BIAYA PERIJINAN DAN LEGALITAS - TOWER B"
+    },
+    {
+      "id": "51130013",
+      "desc": "BIAYA KONSULTAN - TOWER B"
+    },
+    {
+      "id": "51130014",
+      "desc": "BIAYA YANG DAPAT DIKAPITALISASI - TOWER B"
+    },
+    {
+      "id": "51130015",
+      "desc": "BIAYA PROYEK LAINNYA - TOWER B"
+    },
+    {
+      "id": "51140000",
+      "desc": "BEBAN POKOK PENJUALAN LAINNYA"
+    },
+    {
+      "id": "51150000",
+      "desc": "BEBAN POKOK PENJUALAN RESIDENTIAL - TOWER C"
+    },
+    {
+      "id": "51150001",
+      "desc": "BEBAN POKOK PENJUALAN UNIT LAINNYA"
+    },
+    {
+      "id": "51150002",
+      "desc": "PERSIAPAN LOKASI & PERSIAPAN KONSTRUKSI - TOWER C"
+    },
+    {
+      "id": "51150003",
+      "desc": "TANAH YANG DIKEMBANGKAN - TOWER C"
+    },
+    {
+      "id": "51150004",
+      "desc": "BANGUNAN DALAM PROSES - TOWER C"
+    },
+    {
+      "id": "51150005",
+      "desc": "BIAYA PEKERJAAN LUAR - LAND SCAPE & HARD SCAPE - TOWER C"
+    },
+    {
+      "id": "51150006",
+      "desc": "BIAYA YANG DAPAT DIATRIBUSIKAN PADA PROYEK - TOWER C"
+    },
+    {
+      "id": "51150007",
+      "desc": "BIAYA PERIJINAN DAN LEGALITAS - TOWER C"
+    },
+    {
+      "id": "51150008",
+      "desc": "BIAYA KONSULTAN - TOWER C"
+    },
+    {
+      "id": "51150009",
+      "desc": "BIAYA YANG DAPAT DIKAPITALISASI - TOWER C"
+    },
+    {
+      "id": "51150010",
+      "desc": "BIAYA PROYEK LAINNYA - TOWER C"
+    },
+    {
+      "id": "51160000",
+      "desc": "BEBAN POKOK PENJUALAN RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "51160001",
+      "desc": "BEBAN POKOK PENJUALAN RESIDENTIAL LAINNYA"
+    },
+    {
+      "id": "51170000",
+      "desc": "BEBAN POKOK PENJUALAN UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "51170001",
+      "desc": "BEBAN POKOK PENJUALAN UNIT RETAIL & COMMERCIAL"
+    },
+    {
+      "id": "51180000",
+      "desc": "BEBAN POKOK PENJUALAN UNIT LAINNYA"
+    },
+    {
+      "id": "51200000",
+      "desc": "BEBAN LANGSUNG PENDAPATAN"
+    },
+    {
+      "id": "51210000",
+      "desc": "BEBAN LANGSUNG KOMISI MARKETING"
+    },
+    {
+      "id": "51220000",
+      "desc": "BEBAN LANGSUNG PENDAPATAN"
+    },
+    {
+      "id": "51220001",
+      "desc": "BEBAN KOMISI MARKETING IN-HOUSE"
+    },
+    {
+      "id": "51220002",
+      "desc": "BEBAN LANGSUNG PENDAPATAN"
+    },
+    {
+      "id": "51220003",
+      "desc": "MARKETING IN-HOUSE"
+    },
+    {
+      "id": "51220004",
+      "desc": "BEBAN KOMISI MARKETING AGENT"
+    },
+    {
+      "id": "51220005",
+      "desc": "MARKETING AGENT"
+    },
+    {
+      "id": "51220006",
+      "desc": "BONUS PENJUALAN MARKETING"
+    },
+    {
+      "id": "60000000",
+      "desc": "BEBAN PENJUALAN DAN OPERASIONAL"
+    },
+    {
+      "id": "61000000",
+      "desc": "BEBAN PENJUALAN DAN MARKETING"
+    },
+    {
+      "id": "61100000",
+      "desc": "BEBAN PENJUALAN"
+    },
+    {
+      "id": "61110000",
+      "desc": "BEBAN KOMISI PENJUALAN"
+    },
+    {
+      "id": "61110001",
+      "desc": "BEBAN KOMISI IN-HOUSE"
+    },
+    {
+      "id": "61110002",
+      "desc": "BEBAN KOMISI AGENT"
+    },
+    {
+      "id": "61110003",
+      "desc": "BONUS PENJUALAN MARKETING"
+    },
+    {
+      "id": "61110004",
+      "desc": "BEBAN KOMISI BUYER GET BUYER"
+    },
+    {
+      "id": "61110005",
+      "desc": "BEBAN OVERRIDING"
+    },
+    {
+      "id": "61200000",
+      "desc": "BEBAN MARKETING DAN PROMOSI"
+    },
+    {
+      "id": "61210000",
+      "desc": "BEBAN MARKETING DAN PROMOSI"
+    },
+    {
+      "id": "61210001",
+      "desc": "MEDIA DIGITAL / ONLINE (WEBSITE, TV, RADIO, M-ADS)"
+    },
+    {
+      "id": "61210002",
+      "desc": "MEDIA CETAK (MAJALAH, KORAN)"
+    },
+    {
+      "id": "61210003",
+      "desc": "PERCETAKAN BROSUR, SPANDUK, KATALOG, UMBUL2"
+    },
+    {
+      "id": "61210004",
+      "desc": "SIGNAGE"
+    },
+    {
+      "id": "61210005",
+      "desc": "BILLBOARD"
+    },
+    {
+      "id": "61210006",
+      "desc": "EVENTS & EXIBITION"
+    },
+    {
+      "id": "61210007",
+      "desc": "SEWA PAMERAN"
+    },
+    {
+      "id": "61210008",
+      "desc": "ROADSHOW"
+    },
+    {
+      "id": "61210009",
+      "desc": "TRANSPORTASI DAN AKOMODASI"
+    },
+    {
+      "id": "61210010",
+      "desc": "TRANSPORTASI DAN AKOMODASI MKT"
+    },
+    {
+      "id": "61210011",
+      "desc": "MAKET & SUPPORT"
+    },
+    {
+      "id": "61210012",
+      "desc": "SHOW UNIT"
+    },
+    {
+      "id": "61210013",
+      "desc": "REWARD"
+    },
+    {
+      "id": "61210014",
+      "desc": "REWARD - KONSUMEN"
+    },
+    {
+      "id": "61210015",
+      "desc": "BEBAN MARKETING PROMOSI LAINNYA"
+    },
+    {
+      "id": "61210016",
+      "desc": "BEBAN OPERASIONAL MARKETING"
+    },
+    {
+      "id": "61210017",
+      "desc": "REWARD - KONSUMEN SUBSIDI PEMBAYARAN"
+    },
+    {
+      "id": "61210018",
+      "desc": "REWARD MARKETING"
+    },
+    {
+      "id": "61210019",
+      "desc": "BEBAN CASH BACK PEMBAYARAN"
+    },
+    {
+      "id": "61210020",
+      "desc": "BEBAN PERLENGKAPAN MARKETING"
+    },
+    {
+      "id": "61210021",
+      "desc": "REWARD - OR"
+    },
+    {
+      "id": "61210022",
+      "desc": "REWARD - MARKETING"
+    },
+    {
+      "id": "61210023",
+      "desc": "REWARD CUSTOMER"
+    },
+    {
+      "id": "61210024",
+      "desc": "REWARD - OVER RIDDING"
+    },
+    {
+      "id": "61210025",
+      "desc": "REWARD MARKETING"
+    },
+    {
+      "id": "61210026",
+      "desc": "SUBSIDI DP"
+    },
+    {
+      "id": "61210027",
+      "desc": "REWARD - FURNISH"
+    },
+    {
+      "id": "61210028",
+      "desc": "SUBSIDI BIAYA AKAD KREDIT"
+    },
+    {
+      "id": "61210029",
+      "desc": "MARKETING PATUNGAN RUMAH"
+    },
+    {
+      "id": "62000000",
+      "desc": "BEBAN OPERASIONAL"
+    },
+    {
+      "id": "62000001",
+      "desc": "BEBAN GAJI, THR & BONUS"
+    },
+    {
+      "id": "62000002",
+      "desc": "BEBAN TRANSPORTASI"
+    },
+    {
+      "id": "62000003",
+      "desc": "BEBAN TUNJANGAN TRANSPORTASI"
+    },
+    {
+      "id": "62000004",
+      "desc": "BEBAN PESANGON"
+    },
+    {
+      "id": "62000005",
+      "desc": "BEBAN UANG MAKAN"
+    },
+    {
+      "id": "62000006",
+      "desc": "BEBAN LEMBUR"
+    },
+    {
+      "id": "62000007",
+      "desc": "BEBAN ASURANSI"
+    },
+    {
+      "id": "62000008",
+      "desc": "BEBAN KARYAWAN"
+    },
+    {
+      "id": "62000009",
+      "desc": "BIAYA LEMBUR - PROJECT"
+    },
+    {
+      "id": "62000010",
+      "desc": "BEBAN ASURANSI KESEHATAN KARYAWAN"
+    },
+    {
+      "id": "62000011",
+      "desc": "BEBAN BPJS KESEHATAN"
+    },
+    {
+      "id": "62000012",
+      "desc": "BIAYA TUNJANGAN LAINNYA - PROJECT"
+    },
+    {
+      "id": "62000013",
+      "desc": "BEBAN BPJS KETENAGAKERJAAN"
+    },
+    {
+      "id": "62000014",
+      "desc": "BEBAN BILLING RATE"
+    },
+    {
+      "id": "62000015",
+      "desc": "BEBAN IMBALAN PASCA KERJA"
+    },
+    {
+      "id": "62000016",
+      "desc": "BIAYA PPH 21 - BACK OFFICE"
+    },
+    {
+      "id": "62000017",
+      "desc": "BIAYA TUNJANGAN LAINNYA - BACK OFFICE"
+    },
+    {
+      "id": "62000018",
+      "desc": "BIAYA TUNJANGAN LAINNYA - MARKETING"
+    },
+    {
+      "id": "62010000",
+      "desc": "BEBAN TUNJANGAN KARYAWAN"
+    },
+    {
+      "id": "62010001",
+      "desc": "BEBAN TUNJANGAN KARYAWAN"
+    },
+    {
+      "id": "62010002",
+      "desc": "BEBAN PELATIHAN & SEMINAR"
+    },
+    {
+      "id": "62010003",
+      "desc": "BEBAN PEREKRUTAN KARYAWAN"
+    },
+    {
+      "id": "62010004",
+      "desc": "BEBAN GATHERING, OUTING, TEAM BUILDING"
+    },
+    {
+      "id": "62010005",
+      "desc": "BEBAN SUMBANGAN UNTUK KARYAWAN"
+    },
+    {
+      "id": "62010006",
+      "desc": "BEBAN PPH PS 21"
+    },
+    {
+      "id": "62010007",
+      "desc": "BEBAN PPH PS 21 DITANGGUNG"
+    },
+    {
+      "id": "62010008",
+      "desc": "BEBAN LAINNYA"
+    },
+    {
+      "id": "62100000",
+      "desc": "BEBAN UMUM DAN ADMINISTRASI"
+    },
+    {
+      "id": "62110000",
+      "desc": "BEBAN PEMELIHARAAN & RENOVASI"
+    },
+    {
+      "id": "62110001",
+      "desc": "BEBAN PEMELIHARAAN & RENOVASI BANGUNAN KANTOR"
+    },
+    {
+      "id": "62110002",
+      "desc": "BEBAN PEMELIHARAAN INVENTARIS KANTOR"
+    },
+    {
+      "id": "62110003",
+      "desc": "BEBAN PEMELIHARAAN KENDARAAN KANTOR"
+    },
+    {
+      "id": "62120000",
+      "desc": "BEBAN SEWA"
+    },
+    {
+      "id": "62120001",
+      "desc": "BEBAN SEWA BANGUNAN UNTUK OPERASIONAL KANTOR"
+    },
+    {
+      "id": "62120002",
+      "desc": "BEBAN SEWA RUMAH MESS UNTUK OPERASIONAL"
+    },
+    {
+      "id": "62120003",
+      "desc": "BEBAN SEWA GEDUNG UNTUK ACARA KANTOR"
+    },
+    {
+      "id": "62120004",
+      "desc": "BEBAN SEWA KENDARAAN"
+    },
+    {
+      "id": "62120005",
+      "desc": "BEBAN SEWA LAINNYA"
+    },
+    {
+      "id": "62120006",
+      "desc": "BEBAN SEWA PERALATAN"
+    },
+    {
+      "id": "62120007",
+      "desc": "BEBAN SEWA RUMAH DINAS / MESS KARYAWAN"
+    },
+    {
+      "id": "62120008",
+      "desc": "BEBAN SEWA PERALATAN KANTOR"
+    },
+    {
+      "id": "62130000",
+      "desc": "BEBAN ASURANSI"
+    },
+    {
+      "id": "62130001",
+      "desc": "BEBAN ASURANSI BANGUNAN KANTOR"
+    },
+    {
+      "id": "62130002",
+      "desc": "BEBAN ASURANSI KENDARAAN KANTOR"
+    },
+    {
+      "id": "62130003",
+      "desc": "BEBAN ASURANSI INVENTARIS KANTOR"
+    },
+    {
+      "id": "62140000",
+      "desc": "BEBAN JASA PROFFESIONAL"
+    },
+    {
+      "id": "62140001",
+      "desc": "BEBAN LEGALITAS"
+    },
+    {
+      "id": "62140002",
+      "desc": "BEBAN NOTARIS/PPAT"
+    },
+    {
+      "id": "62140003",
+      "desc": "BEBAN JASA AKUNTAN PUBLIK"
+    },
+    {
+      "id": "62140004",
+      "desc": "BEBAN JASA PENILAI PUBLIK"
+    },
+    {
+      "id": "62140005",
+      "desc": "BEBAN JASA AKTUARIA"
+    },
+    {
+      "id": "62140006",
+      "desc": "BEBAN JASA PENGACARA/KONSULTAN HUKUM"
+    },
+    {
+      "id": "62140007",
+      "desc": "BEBAN JASA KONSULTAN PAJAK"
+    },
+    {
+      "id": "62140008",
+      "desc": "BEBAN JASA PENYELENGGARA ACARA (EO)"
+    },
+    {
+      "id": "62140009",
+      "desc": "BEBAN JASA KONSULTAN SISTEM"
+    },
+    {
+      "id": "62140010",
+      "desc": "BEBAN JASA PENERJEMAH (TRANSLATOR)"
+    },
+    {
+      "id": "62140011",
+      "desc": "BEBAN JASA PENYELENGGARA ACARA (EO)"
+    },
+    {
+      "id": "62140012",
+      "desc": "BEBAN JASA KONSULTAN PAJAK"
+    },
+    {
+      "id": "62140013",
+      "desc": "BEBAN KONSULTAN MANAGEMENT/BISNIS"
+    },
+    {
+      "id": "62140014",
+      "desc": "BEBAN JASA KEAMANAN"
+    },
+    {
+      "id": "62140015",
+      "desc": "BEBAN JASA ANNUAL REPORT"
+    },
+    {
+      "id": "62150000",
+      "desc": "BEBAN TRANSPORTASI & AKOMODASI"
+    },
+    {
+      "id": "62150001",
+      "desc": "BEBAN PERJALANAN DINAS LUAR KOTA"
+    },
+    {
+      "id": "62150002",
+      "desc": "BEBAN PERJALANAN DINAS LUAR NEGERI"
+    },
+    {
+      "id": "62150003",
+      "desc": "BEBAN TRANSPORTASI, BENSIN, TOLL, PARKIR, TAKSI"
+    },
+    {
+      "id": "62160000",
+      "desc": "BEBAN UTILITAS"
+    },
+    {
+      "id": "62160001",
+      "desc": "BEBAN LISTRIK DAN AIR"
+    },
+    {
+      "id": "62160002",
+      "desc": "BEBAN LANGGANAN INTERNET, WEBSITE, TELEPON, PULSA HP"
+    },
+    {
+      "id": "62160003",
+      "desc": "BEBAN LANGGANAN MEDIA ONLINE"
+    },
+    {
+      "id": "62170000",
+      "desc": "BEBAN PERLENGKAPAN & PERALATAN KANTOR"
+    },
+    {
+      "id": "62170001",
+      "desc": "BEBAN STATIONARY (ALAT TULIS, KERTAS, TINTA PRINTER) & PERLENGKAPAN KANTOR"
+    },
+    {
+      "id": "62170002",
+      "desc": "BEBAN MATERAI"
+    },
+    {
+      "id": "62170003",
+      "desc": "BEBAN CETAK, FOTOCOPY"
+    },
+    {
+      "id": "62170004",
+      "desc": "BEBAN KIRIM DOKUMEN/BARANG"
+    },
+    {
+      "id": "62180000",
+      "desc": "BEBAN KEBUTUHAN KANTOR"
+    },
+    {
+      "id": "62180001",
+      "desc": "BEBAN JASA KEBERSIHAN & KEAMANAN KANTOR"
+    },
+    {
+      "id": "62180002",
+      "desc": "SEMINAR DAN TRAINING"
+    },
+    {
+      "id": "62180003",
+      "desc": "BEBAN SUMBANGAN"
+    },
+    {
+      "id": "62180004",
+      "desc": "REKRUTMEN"
+    },
+    {
+      "id": "62180005",
+      "desc": "BEBAN KEBUTUHAN DAPUR KANTOR (KOPI, TEH, SUSU, GULA)"
+    },
+    {
+      "id": "62180006",
+      "desc": "BEBAN JAMUAN/ENTERTAINMENT"
+    },
+    {
+      "id": "62180007",
+      "desc": "BEBAN KEBUTUHAN OPERASIONAL KANTOR"
+    },
+    {
+      "id": "62180008",
+      "desc": "BEBAN OUTSOURCING"
+    },
+    {
+      "id": "62180009",
+      "desc": "BEBAN KEBUTUHAN MEETING"
+    },
+    {
+      "id": "62180010",
+      "desc": "BEBAN KONSUMSI"
+    },
+    {
+      "id": "62180011",
+      "desc": "BEBAN SERAGAM"
+    },
+    {
+      "id": "62180012",
+      "desc": "ACARA TAHUNAN PERUSAHAAN"
+    },
+    {
+      "id": "62180013",
+      "desc": "BEBAN PERLENGKAPAN KANTOR OPERASIONAL"
+    },
+    {
+      "id": "62180014",
+      "desc": "BEBAN KANTOR OPERASIONAL"
+    },
+    {
+      "id": "62180015",
+      "desc": "BEBAN KANTOR BUILDING MANAGEMENT"
+    },
+    {
+      "id": "62180016",
+      "desc": "BEBAN KANTOR HAND OVER"
+    },
+    {
+      "id": "62190000",
+      "desc": "BEBAN PAJAK"
+    },
+    {
+      "id": "62190001",
+      "desc": "BEBAN ADMINISTRASI PAJAK"
+    },
+    {
+      "id": "62190002",
+      "desc": "BEBAN PAJAK DITANGGUNG PERUSAHAAN"
+    },
+    {
+      "id": "62190003",
+      "desc": "BEBAN PAJAK FINAL (PPHTB)"
+    },
+    {
+      "id": "62190004",
+      "desc": "BEBAN PAJAK KENDARAAN"
+    },
+    {
+      "id": "62190005",
+      "desc": "BEBAN PAJAK NON FINAL"
+    },
+    {
+      "id": "62190006",
+      "desc": "BEBAN PAJAK LAINNYA"
+    },
+    {
+      "id": "62191000",
+      "desc": "BEBAN PENYUSUTAN"
+    },
+    {
+      "id": "62191001",
+      "desc": "BEBAN PENYUSUTAN BANGUNAN"
+    },
+    {
+      "id": "62191002",
+      "desc": "BEBAN PENYUSUTAN INVENTARIS KANTOR"
+    },
+    {
+      "id": "62191003",
+      "desc": "BEBAN PENYUSUTAN KENDARAAN KANTOR"
+    },
+    {
+      "id": "62192000",
+      "desc": "BIAYA KOMPREHENSIF LAIN"
+    },
+    {
+      "id": "62192001",
+      "desc": "BIAYA IMBALAN PASKA KERJA"
+    },
+    {
+      "id": "62193000",
+      "desc": "BEBAN PENYUSUTAN"
+    },
+    {
+      "id": "62193001",
+      "desc": "BEBAN PENYUSUTAN INVENTARIS KANTOR"
+    },
+    {
+      "id": "62193002",
+      "desc": "BEBAN PENYUSUTAN KENDARAAN KANTOR"
+    },
+    {
+      "id": "62193003",
+      "desc": "BEBAN PENYUSUTAN INVENTARIS PROYEK"
+    },
+    {
+      "id": "62193004",
+      "desc": "BEBAN PENYUSUTAN PERALATAN KANTOR"
+    },
+    {
+      "id": "62193005",
+      "desc": "BEBAN PENYUSUTAN BANGUNAN OPERASIONAL SITE OFFICE"
+    },
+    {
+      "id": "62194000",
+      "desc": "BEBAN IMBALAN PASCAKERJA"
+    },
+    {
+      "id": "62194001",
+      "desc": "BEBAN IMBALAN PASCAKERJA"
+    },
+    {
+      "id": "62195000",
+      "desc": "BEBAN AMORTISASI"
+    },
+    {
+      "id": "62195001",
+      "desc": "BEBAN AMORTISASI SOFTWARE SISTEM"
+    },
+    {
+      "id": "62195002",
+      "desc": "BEBAN AMORTISASI HAK PATEN"
+    },
+    {
+      "id": "62200000",
+      "desc": "BEBAN REVENUE SHARING"
+    },
+    {
+      "id": "62200001",
+      "desc": "BEBAN REVENUE SHARING - TANAH"
+    },
+    {
+      "id": "62200002",
+      "desc": "BEBAN REVENUE SHARING - BANGUNAN"
+    },
+    {
+      "id": "62300000",
+      "desc": "BEBAN LAINNYA"
+    },
+    {
+      "id": "62310000",
+      "desc": "BEBAN LAINNYA"
+    },
+    {
+      "id": "62310001",
+      "desc": "BEBAN CUSTOMER RELATION"
+    },
+    {
+      "id": "62310002",
+      "desc": "BEBAN SERAH TERIMA"
+    },
+    {
+      "id": "62310003",
+      "desc": "BEBAN ADM BANK"
+    },
+    {
+      "id": "62310004",
+      "desc": "BIAYA KEBIJAKSANAAN"
+    },
+    {
+      "id": "70000000",
+      "desc": "PENDAPATAN (BEBAN) LAIN-LAIN"
+    },
+    {
+      "id": "71000000",
+      "desc": "PENDAPATAN LAIN-LAIN"
+    },
+    {
+      "id": "71100000",
+      "desc": "PENDAPATAN LAIN-LAIN"
+    },
+    {
+      "id": "71110000",
+      "desc": "PENDAPATAN BUNGA"
+    },
+    {
+      "id": "71110001",
+      "desc": "PENDAPATAN BUNGA"
+    },
+    {
+      "id": "71110002",
+      "desc": "PENDAPATAN BUNGA DEPOSITO"
+    },
+    {
+      "id": "71110003",
+      "desc": "PENDAPATAN BUNGA JASA GIRO"
+    },
+    {
+      "id": "71110004",
+      "desc": "PENDAPATAN BUNGA OBLIGASI"
+    },
+    {
+      "id": "71120000",
+      "desc": "PENDAPATAN LAIN-LAIN"
+    },
+    {
+      "id": "71120001",
+      "desc": "PENDAPATAN DENDA PENJUALAN"
+    },
+    {
+      "id": "71120002",
+      "desc": "PENDAPATAN JASA GIRO"
+    },
+    {
+      "id": "71120003",
+      "desc": "PENDAPATAN ADMINISTRASI PENJUALAN"
+    },
+    {
+      "id": "71120004",
+      "desc": "PENDAPATAN ATAS PENJUALAN ASET TETAP"
+    },
+    {
+      "id": "71120005",
+      "desc": "PENDAPATAN INSENTIF KPA"
+    },
+    {
+      "id": "71120006",
+      "desc": "PENDAPATAN KOMPREHENSIF LAIN - PASKA KERJA"
+    },
+    {
+      "id": "71120007",
+      "desc": "PENDAPATAN LAIN-LAIN"
+    },
+    {
+      "id": "71120008",
+      "desc": "REIMBURSMENT (BILLING RATE)"
+    },
+    {
+      "id": "71120009",
+      "desc": "PENDAPATAN BUNGA UANG MUKA PELANGGAN"
+    },
+    {
+      "id": "71120010",
+      "desc": "PENDAPATAN DEVIDEN"
+    },
+    {
+      "id": "71120011",
+      "desc": "BEBAN CADANGAN PENURUNAN INVESTASI LAINNYA"
+    },
+    {
+      "id": "71120012",
+      "desc": "PENDAPATAN SEWA PERANGKAT"
+    },
+    {
+      "id": "71130000",
+      "desc": "BAGIAN ATAS LABA BERSIH VENTURA BERSAMA"
+    },
+    {
+      "id": "71140000",
+      "desc": "BAGIAN LABA BERSIH VENTURA BERSAMA"
+    },
+    {
+      "id": "71140001",
+      "desc": "KSO-1 (BROOKLYN)"
+    },
+    {
+      "id": "71140002",
+      "desc": "KSO-2 (YUKATA)"
+    },
+    {
+      "id": "71150000",
+      "desc": "BAGIAN ATAS LABA BERSIH ASOSIASI"
+    },
+    {
+      "id": "71150001",
+      "desc": "PROFIT SHARING - ONE FIFTEENTH"
+    },
+    {
+      "id": "71150002",
+      "desc": "PROFIT SHARING TD"
+    },
+    {
+      "id": "71150003",
+      "desc": "PROFIT SHARING TMI"
+    },
+    {
+      "id": "71150004",
+      "desc": "REVENUE SHARING - ONE FIFTEENTH"
+    },
+    {
+      "id": "71160000",
+      "desc": "PENDAPATAN REVENUE SHARING"
+    },
+    {
+      "id": "71160001",
+      "desc": "PENDAPATAN REVENUE SHARING ATAS TANAH"
+    },
+    {
+      "id": "71160002",
+      "desc": "PENDAPATAN REVENUE SHARING ATAS BANGUNAN"
+    },
+    {
+      "id": "72000000",
+      "desc": "BEBAN LAIN LAIN"
+    },
+    {
+      "id": "72100000",
+      "desc": "BEBAN BUNGA DAN KEUANGAN"
+    },
+    {
+      "id": "72110000",
+      "desc": "BEBAN BUNGA DAN KEUANGAN"
+    },
+    {
+      "id": "72110001",
+      "desc": "BEBAN BUNGA PINJAMAN"
+    },
+    {
+      "id": "72110002",
+      "desc": "BEBAN PROVISI DAN ADM PINJAMAN"
+    },
+    {
+      "id": "72110003",
+      "desc": "BEBAN ASURANSI ATAS PINJAMAN"
+    },
+    {
+      "id": "72110004",
+      "desc": "BEBAN LINDUNG NILAI ATAS PINJAMAN"
+    },
+    {
+      "id": "72120000",
+      "desc": "BEBAN LAIN-LAIN"
+    },
+    {
+      "id": "72120001",
+      "desc": "PAJAK BUNGA DEPOSITO & JASA GIRO"
+    },
+    {
+      "id": "72120002",
+      "desc": "PAJAK BUNGA JASA GIRO"
+    },
+    {
+      "id": "72120003",
+      "desc": "BEBAN ADMINISTRASI & TRANSFER BANK"
+    },
+    {
+      "id": "72120004",
+      "desc": "BEBAN VIRTUAL ACCOUNT"
+    },
+    {
+      "id": "72120005",
+      "desc": "BEBAN ADMIN EDC"
+    },
+    {
+      "id": "72120006",
+      "desc": "BEBAN DENDA KETERLAMBATAN"
+    },
+    {
+      "id": "72120007",
+      "desc": "BIAYA BUNGA, PROVISI & ADM PINJAMAN"
+    },
+    {
+      "id": "72120008",
+      "desc": "BEBAN ATAS PENCATATAN EFEK DI BURSA INDONESIA"
+    },
+    {
+      "id": "72120009",
+      "desc": "BEBAN LAINNYA"
+    },
+    {
+      "id": "72120010",
+      "desc": "BEBAN PEMBULATAN"
+    },
+    {
+      "id": "72120011",
+      "desc": "BEBAN LAINNYA"
+    },
+    {
+      "id": "72120012",
+      "desc": "SELISIH KURS"
+    },
+    {
+      "id": "72120013",
+      "desc": "BEBAN CADANGAN PENURUNAN NILAI PIUTANG"
+    },
+    {
+      "id": "72120014",
+      "desc": "BEBAN KERUGIAN REVALUASI ASET"
+    },
+    {
+      "id": "72120015",
+      "desc": "PAJAK BUNGA DEPOSITO"
+    },
+    {
+      "id": "72120016",
+      "desc": "BEBAN IMPAIRMENT"
+    },
+    {
+      "id": "72120017",
+      "desc": "BEBAN KERUGIAN ASET"
+    },
+    {
+      "id": "72120018",
+      "desc": "BEBAN KOMPREHENSIF LAIN - PASKA KERJA"
+    },
+    {
+      "id": "72120019",
+      "desc": "BEBAN LAIN-LAIN"
+    },
+    {
+      "id": "72120020",
+      "desc": "BEBAN BUNGA UANG MUKA PELANGGAN"
+    },
+    {
+      "id": "80000000",
+      "desc": "PAJAK PENGHASILAN"
+    },
+    {
+      "id": "81000000",
+      "desc": "PAJAK PENGHASILAN"
+    },
+    {
+      "id": "81100000",
+      "desc": "PAJAK PENGHASILAN"
+    },
+    {
+      "id": "81110000",
+      "desc": "PAJAK PENGHASILAN"
+    },
+    {
+      "id": "81110001",
+      "desc": "PAJAK PPH PENGALIHAN ATAS TANAH DAN BANGUNAN"
+    },
+    {
+      "id": "81110002",
+      "desc": "PAJAK PENGHASILAN BADAN"
+    },
+    {
+      "id": "81110003",
+      "desc": "PAJAK PENGHASILAN BERSIH"
+    },
+    {
+      "id": "81110004",
+      "desc": "PAJAK TANGGUHAN"
+    },
+    {
+      "id": "90000000",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA DAN KEPENTINGAN PENGENDALI & NON PENGENDALI"
+    },
+    {
+      "id": "91000000",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA DAN KEPENTINGAN PENGENDALI & NON PENGENDALI"
+    },
+    {
+      "id": "91100000",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA"
+    },
+    {
+      "id": "91110000",
+      "desc": "PENGHASILAN KOMPREHENSIF LAINNYA"
+    },
+    {
+      "id": "91110001",
+      "desc": "PENGUKURAN KEMBALI ATAS IMBALAN PASKA KERJA"
+    },
+    {
+      "id": "91110002",
+      "desc": "PENGHASILAN ATAS VENTURA BERSAMA"
+    },
+    {
+      "id": "91110003",
+      "desc": "PENGHASILAN KOMPREHENSIF DARI MANFAAT PASCA KERJA"
+    },
+    {
+      "id": "91110004",
+      "desc": "PENGHASILAN KOMPREHENSIF DARI ENTITAS ASOSIASI"
+    },
+    {
+      "id": "91110005",
+      "desc": "REVALUASI ASET TETAP - TANAH KSO YUKATA"
+    },
+    {
+      "id": "91200000",
+      "desc": "KEPENTINGAN PENGENDALI"
+    },
+    {
+      "id": "91210000",
+      "desc": "KEPENTINGAN PENGENDALI"
+    },
+    {
+      "id": "91210001",
+      "desc": "LABA BERSIH TAHUN BERJALAN YANG DIATRIBUSIKAN"
+    },
+    {
+      "id": "91210002",
+      "desc": "LABA KOMPREHENSIF TAHUN BERJALAN YANG DIATRIBUSIKAN"
+    },
+    {
+      "id": "91300000",
+      "desc": "KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "91310000",
+      "desc": "KEPENTINGAN NON PENGENDALI"
+    },
+    {
+      "id": "91310001",
+      "desc": "LABA BERSIH TAHUN BERJALAN YANG DIATRIBUSIKAN"
+    },
+    {
+      "id": "91310002",
+      "desc": "LABA KOMPREHENSIF TAHUN BERJALAN YANG DIATRIBUSIKAN"
+    }
+  ]
+}

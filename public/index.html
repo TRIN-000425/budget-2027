@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2027 Project Planned Budget Planner</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <button class="sidebar-toggle" id="sidebar-toggle" title="Collapse sidebar">
+                    <i data-lucide="chevron-left" class="toggle-icon"></i>
+                </button>
+                <div class="brand-logo">
+                    <i data-lucide="trending-up" class="logo-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Triniti Budget</h1>
+                    <span>2027 Planned Budget</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-tab="dashboard">
+                        <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+                    </li>
+                    <li class="nav-header">Revenue & Sales</li>
+                    <li class="nav-item" data-tab="target-revenue">
+                        <i data-lucide="target"></i><span>Target Revenue</span>
+                    </li>
+                    <li class="nav-item" data-tab="sales-cost">
+                        <i data-lucide="percent"></i><span>Sales & Program Cost</span>
+                    </li>
+                    <li class="nav-item" data-tab="marketing-activity">
+                        <i data-lucide="megaphone"></i><span>Marketing Activity</span>
+                    </li>
+                    <li class="nav-header">Operational Cost</li>
+                    <li class="nav-item" data-tab="dev-land">
+                        <i data-lucide="building-2"></i><span>Dev & Land Cost</span>
+                    </li>
+                    <li class="nav-item" data-tab="employee-hc">
+                        <i data-lucide="wallet"></i><span>Budget Payroll</span>
+                    </li>
+                    <li class="nav-item" data-tab="hc-program-planner">
+                        <i data-lucide="graduation-cap"></i><span>HC Program Planner</span>
+                    </li>
+                    <li class="nav-item" data-tab="ga-others">
+                        <i data-lucide="file-text"></i><span>G&A & Other Expenses</span>
+                    </li>
+                    <li class="nav-item" data-tab="corp-event">
+                        <i data-lucide="award"></i><span>Corporate Event</span>
+                    </li>
+                    <li class="nav-header">Capital & Assets</li>
+                    <li class="nav-item" data-tab="fixed-assets">
+                        <i data-lucide="laptop"></i><span>Fixed Assets (Capex)</span>
+                    </li>
+                    <li class="nav-item" data-tab="business-trip">
+                        <i data-lucide="plane"></i><span>Business Trip</span>
+                    </li>
+                    <li class="nav-header">Summary & Admin</li>
+                    <li class="nav-item" data-tab="summary-budget">
+                        <i data-lucide="pie-chart"></i><span>Consolidated Budget</span>
+                    </li>
+                    <li class="nav-item" data-tab="nik-management" id="nav-nik-mgmt">
+                        <i data-lucide="shield-check"></i><span>Employee NIK Access</span>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="theme-toggle-wrap">
+                    <button class="theme-toggle-btn" id="theme-toggle" title="Toggle light/dark theme">
+                        <i data-lucide="moon" class="theme-icon" id="theme-icon"></i>
+                    </button>
+                </div>
+                <div class="user-profile" id="sidebar-user-profile">
+                    <div class="user-avatar">
+                        <i data-lucide="user-check"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="user-display-name">Not Signed In</span>
+                        <span class="user-role" id="user-display-nik">NIK: -</span>
+                    </div>
+                    <button class="btn-icon-sm" id="logout-btn" title="Sign Out">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="main-header">
+                <button class="menu-toggle" id="menu-toggle" title="Show sidebar" style="display:none;">
+                    <i data-lucide="menu" class="menu-toggle-icon"></i>
+                </button>
+                <div class="header-left">
+                    <div class="selector-group">
+                        <i data-lucide="map-pin" class="sel-icon"></i>
+                        <label for="project-select">Project</label>
+                        <select id="project-select" class="premium-select">
+                            <option value="">Select NIK Project...</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <i data-lucide="building" class="sel-icon"></i>
+                        <label for="company-select">Entity</label>
+                        <select id="company-select" class="premium-select">
+                            <option value="">Select Entity...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="status-indicator">
+                        <span class="indicator-dot synced"></span>
+                        <span class="indicator-text" id="sync-status">Synced</span>
+                    </div>
+                    <button class="btn btn-primary" id="save-btn">
+                        <i data-lucide="save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-secondary" id="export-btn-header">
+                        <i data-lucide="download"></i> Export
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard / View Container -->
+            <div class="content-body">
+                <!-- 1. DASHBOARD OVERVIEW TAB -->
+                <section class="tab-panel active" id="tab-dashboard">
+                    <div class="welcome-banner">
+                        <div class="welcome-text">
+                            <h2>Project Planned Budget Dashboard</h2>
+                            <p>Select a company and project above to load, update, and analyze planning entries for the fiscal year 2027.</p>
+                        </div>
+                        <div class="welcome-stats">
+                            <div class="badge-year">FY 2027</div>
+                        </div>
+                    </div>
+
+                    <!-- Kpi Grid -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card purple">
+                            <div class="kpi-icon">
+                                <i data-lucide="dollar-sign"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Target Revenue</h3>
+                                <span class="kpi-value" id="kpi-revenue">Rp 0.00 Bio</span>
+                                <span class="kpi-subtext" id="kpi-units-sold">0 Units Sold</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card emerald">
+                            <div class="kpi-icon">
+                                <i data-lucide="wallet"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Total Planned Budget</h3>
+                                <span class="kpi-value" id="kpi-total-cost">Rp 0.00 Bio</span>
+                                <span class="kpi-subtext" id="kpi-cost-ratio">0.0% ratio to Revenue</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card amber">
+                            <div class="kpi-icon">
+                                <i data-lucide="bar-chart-2"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Project Cost</h3>
+                                <span class="kpi-value" id="kpi-project-cost">Rp 0.00 Bio</span>
+                                <span class="kpi-subtext" id="kpi-project-cost-ratio">0.0% of total cost</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card cherry">
+                            <div class="kpi-icon">
+                                <i data-lucide="laptop"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Capex Requested</h3>
+                                <span class="kpi-value" id="kpi-capex">Rp 0.00 Bio</span>
+                                <span class="kpi-subtext" id="kpi-capex-count">0 items requested</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Overview Chart/List -->
+                    <div class="dashboard-grid">
+                        <div class="overview-card">
+                            <div class="card-header">
+                                <h3>Cost Breakdown by Module</h3>
+                                <i data-lucide="info" class="icon-hint"></i>
+                            </div>
+                            <div class="card-body">
+                                <div class="breakdown-chart-container">
+                                    <div class="bar-chart-y" id="module-breakdown-bars">
+                                        <!-- Dynamically generated bars -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="overview-card">
+                            <div class="card-header">
+                                <h3>Quick Actions & Shortcuts</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="shortcut-list">
+                                    <button class="shortcut-btn" onclick="switchTab('target-revenue')">
+                                        <i data-lucide="target"></i> Set Marketing Target Revenue
+                                    </button>
+                                    <button class="shortcut-btn" onclick="switchTab('sales-cost')">
+                                        <i data-lucide="percent"></i> Define Sales Inhouse & Agent Cost
+                                    </button>
+                                    <button class="shortcut-btn" onclick="switchTab('dev-land')">
+                                        <i data-lucide="building-2"></i> Update Hard & Soft Project Costs
+                                    </button>
+                                    <button class="shortcut-btn" onclick="switchTab('fixed-assets')">
+                                        <i data-lucide="laptop"></i> Add New Capex Request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. TARGET REVENUE TAB -->
+                <section class="tab-panel" id="tab-target-revenue">
+                    <div class="section-header">
+                        <h2>Target Marketing Revenue (FY 2027)</h2>
+                        <p>Input targets for sales in Unit, Sqm, and set price per sqm to automatically calculate sales values.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-secondary btn-sm" id="add-revenue-cat"><i data-lucide="plus"></i> Add Category</button>
+                            <span class="info-tag">* Values are automatically summed monthly</span>
+                        </div>
+                        <div class="table-container">
+                            <table class="budget-table" id="target-revenue-table">
+                                <!-- Generated Dynamically -->
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. SALES & PROGRAM COST TAB -->
+                <section class="tab-panel" id="tab-sales-cost">
+                    <div class="section-header">
+                        <h2>Sales Cost & Program Sales</h2>
+                        <p>Define commissions, overriding commissions, reward sales, and booking/down payment subsidies.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="card-tabs">
+                            <button class="card-tab active" data-subtab="sales-cost-inhouse">Inhouse Sales Cost</button>
+                            <button class="card-tab" data-subtab="sales-cost-agent">Agent Sales Cost</button>
+                            <button class="card-tab" data-subtab="program-sales">Program Sales Subsidies</button>
+                        </div>
+                        
+                        <div class="subtab-panel active" id="sales-cost-inhouse">
+                            <div class="table-container">
+                                <table class="budget-table" id="inhouse-sales-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="subtab-panel" id="sales-cost-agent">
+                            <div class="table-container">
+                                <table class="budget-table" id="agent-sales-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="subtab-panel" id="program-sales">
+                            <div class="table-container">
+                                <table class="budget-table" id="program-sales-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. MARKETING ACTIVITY TAB -->
+                <section class="tab-panel" id="tab-marketing-activity">
+                    <div class="section-header">
+                        <h2>Marketing Advertising & Promotion</h2>
+                        <p>Input planned budgets for Above-the-Line and Below-the-Line marketing campaigns and events.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="card-tabs">
+                            <button class="card-tab active" data-subtab="marketing-atl">Above-The-Line (ATL)</button>
+                            <button class="card-tab" data-subtab="marketing-btl">Below-The-Line (BTL)</button>
+                        </div>
+
+                        <div class="subtab-panel active" id="marketing-atl">
+                            <div class="table-container">
+                                <table class="budget-table" id="atl-marketing-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="subtab-panel" id="marketing-btl">
+                            <div class="table-container">
+                                <table class="budget-table" id="btl-marketing-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. DEV & LAND COST TAB -->
+                <section class="tab-panel" id="tab-dev-land">
+                    <div class="section-header">
+                        <h2>Development & Land Budget Plan Cost</h2>
+                        <p>Fill in development cost parameters including RAB/SPK values, past realization, and 2027 planned monthly budgets.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="card-tabs">
+                            <button class="card-tab active" data-subtab="dev-land-list">Land & Development Cost Sheets</button>
+                        </div>
+                        <div class="subtab-panel active" id="dev-land-list">
+                            <div class="table-container">
+                                <table class="budget-table" id="dev-land-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. BUDGET PAYROLL TAB -->
+                <section class="tab-panel" id="tab-employee-hc">
+                    <div class="section-header">
+                        <h2>Budget Payroll</h2>
+                        <p>Input payroll components with COA account codes.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="card-tabs">
+                            <button class="card-tab active" data-subtab="employee-expenses">Budget Payroll</button>
+                        </div>
+
+                        <div class="subtab-panel active" id="employee-expenses">
+                            <div class="table-container">
+                                <table class="budget-table" id="employee-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- HC PROGRAM PLANNER TAB -->
+                <section class="tab-panel" id="tab-hc-program-planner">
+                    <div class="section-header">
+                        <h2>HC Program Planner</h2>
+                        <p>Coordinate Human Capital training or recruitment programs.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" id="add-hc-row"><i data-lucide="plus"></i> Add Program Activity</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="dynamic-entry-table" id="hc-program-table">
+                                <thead>
+                                    <tr>
+                                        <th>Topic/Activity</th>
+                                        <th>Institution</th>
+                                        <th>Cost Category</th>
+                                        <th>Qty</th>
+                                        <th>Price / Unit</th>
+                                        <th>Total (IDR)</th>
+                                        <th>Month</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hc-program-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. G&A & OTHER EXPENSES TAB -->
+                <section class="tab-panel" id="tab-ga-others">
+                    <div class="section-header">
+                        <h2>General & Administrative, Others, Finance & Tax Expenses</h2>
+                        <p>Plan corporate operating G&A accounts, non-operating revenues/expenses, interest loans, and tax liabilities.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="card-tabs">
+                            <button class="card-tab active" data-subtab="expenses-ga">G&A (Accounts)</button>
+                            <button class="card-tab" data-subtab="expenses-others">Others Income/Exp</button>
+                            <button class="card-tab" data-subtab="expenses-finance">Finance Expenses</button>
+                            <button class="card-tab" data-subtab="expenses-tax">Tax Expenses</button>
+                        </div>
+
+                        <div class="subtab-panel active" id="expenses-ga">
+                            <div class="table-container">
+                                <table class="budget-table" id="ga-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="subtab-panel" id="expenses-others">
+                            <div class="table-container">
+                                <table class="budget-table" id="others-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="subtab-panel" id="expenses-finance">
+                            <div class="table-container">
+                                <table class="budget-table" id="finance-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="subtab-panel" id="expenses-tax">
+                            <div class="table-container">
+                                <table class="budget-table" id="tax-table">
+                                    <!-- Generated Dynamically -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8. CORPORATE EVENT TAB -->
+                <section class="tab-panel" id="tab-corp-event">
+                    <div class="section-header">
+                        <h2>Corporate Event & Exhibition Planning</h2>
+                        <p>Fill in planned cost parameters for corporate meetings, summits, CSR, exhibitions and general corporate functions.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-container">
+                            <table class="budget-table" id="corp-event-table">
+                                <!-- Generated Dynamically -->
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 9. FIXED ASSETS TAB -->
+                <section class="tab-panel" id="tab-fixed-assets">
+                    <div class="section-header">
+                        <h2>Capex Planning (Fixed Assets)</h2>
+                        <p>Request new capital expenditures (laptops, operational vehicles, office furniture, IT equipment) for 2027.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" id="add-fa-row"><i data-lucide="plus"></i> Request Fixed Asset</button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="dynamic-entry-table" id="fa-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Division</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Type</th>
+                                        <th>Qty</th>
+                                        <th>Price / Unit (IDR)</th>
+                                        <th>Total Value</th>
+                                        <th>Month</th>
+                                        <th>Justification</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fa-list-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 10. BUSINESS TRIP TAB -->
+                <section class="tab-panel" id="tab-business-trip">
+                    <div class="section-header">
+                        <h2>Business Trip Planner</h2>
+                        <p>Plan domestic and international business trips. Daily allowances and lodging will calculate based on destination rates.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" id="add-trip-row"><i data-lucide="plus"></i> Log Business Trip</button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="dynamic-entry-table" id="trip-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee Name</th>
+                                        <th>Division</th>
+                                        <th>Grade/Level</th>
+                                        <th>Destination</th>
+                                        <th>City/Country</th>
+                                        <th>Month</th>
+                                        <th>Duration (Days)</th>
+                                        <th>Flight Cost</th>
+                                        <th>Hotel/Night</th>
+                                        <th>Allowance/Day</th>
+                                        <th>Total Trip Cost</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trip-list-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 11. CONSOLIDATED SUMMARY BUDGET TAB -->
+                <section class="tab-panel" id="tab-summary-budget">
+                    <div class="section-header">
+                        <h2>Consolidated Budget 2027</h2>
+                        <p>View consolidated targets, operational costs, marketing expenses, capex, and finance costs month-by-month.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <span class="info-tag alert-tag"><i data-lucide="info"></i> Values are calculated dynamically from other modules</span>
+                            <button class="btn btn-secondary btn-sm" id="export-summary-btn"><i data-lucide="download"></i> Export data</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="budget-table" id="summary-budget-table">
+                                <!-- Generated Dynamically -->
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <!-- 12. EMPLOYEE NIK ACCESS MANAGEMENT TAB -->
+                <section class="tab-panel" id="tab-nik-management">
+                    <div class="section-header">
+                        <h2>Employee NIK Access & Project Permissions</h2>
+                        <p>Manage employee NIKs and assign allowed projects. Employees can only access budget entries for their authorized projects.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" id="add-nik-btn"><i data-lucide="plus"></i> Add New NIK</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="dynamic-entry-table" id="nik-management-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID (NIK)</th>
+                                        <th>Employee Name</th>
+                                        <th>Allowed Projects</th>
+                                        <th>Allowed Companies</th>
+                                        <th>Role</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="nik-management-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- NIK Login Modal -->
+    <div class="modal" id="nik-login-modal">
+        <div class="modal-content auth-modal-content">
+            <div class="auth-header">
+                <div class="auth-icon-badge">
+                    <i data-lucide="fingerprint"></i>
+                </div>
+                <h3>Employee Verification</h3>
+                <p>Enter your employee NIK to access budget planner</p>
+            </div>
+            <form id="nik-login-form">
+                <div class="form-group">
+                    <label for="nik-input">Employee NIK / ID:</label>
+                    <input type="password" id="nik-input" placeholder="e.g. 1001" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+                    <i data-lucide="log-in"></i> Verify & Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- NIK Edit Modal -->
+    <div class="modal" id="nik-edit-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-nik-edit-modal">&times;</span>
+            <h3><i data-lucide="user-cog"></i> Manage Employee NIK Permissions</h3>
+            <p>Assign or update allowed projects and companies for this employee.</p>
+            <form id="nik-edit-form">
+                <div class="form-group">
+                    <label for="nik-edit-id">Employee ID (NIK):</label>
+                    <input type="text" id="nik-edit-id" placeholder="e.g. 1001" required>
+                </div>
+                <div class="form-group">
+                    <label for="nik-edit-name">Employee Name:</label>
+                    <input type="text" id="nik-edit-name" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="nik-edit-projects">Allowed Projects (comma separated, or ALL):</label>
+                    <input type="text" id="nik-edit-projects" placeholder="e.g. Brooklyn, The Smith, ALL">
+                </div>
+                <div class="form-group">
+                    <label for="nik-edit-companies">Allowed Companies (comma separated, or ALL):</label>
+                    <input type="text" id="nik-edit-companies" placeholder="e.g. ALL">
+                </div>
+                <div class="form-group">
+                    <label for="nik-edit-role">Role:</label>
+                    <select id="nik-edit-role">
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Viewer">Viewer</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-nik-edit-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-nik-edit-btn">Save Permissions</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GAS Web App URL Config Modal -->
+    <div class="modal" id="gas-config-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-gas-modal">&times;</span>
+            <h3><i data-lucide="link"></i> GAS API Configuration</h3>
+            <p>Paste the Google Apps Script Web App URL here (deployed from gas/Code.js). This connects the frontend to your Google Sheet database.</p>
+            <div class="form-group">
+                <label for="gas-url-input">Web App URL:</label>
+                <input type="url" id="gas-url-input" placeholder="https://script.google.com/macros/s/XXXXX/exec">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-gas-btn">Cancel</button>
+                <button class="btn btn-primary" id="save-gas-btn"><i data-lucide="save"></i> Save Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast message container (appended dynamically) -->
+    <script src="app.js"></script>
+</body>
+</html>

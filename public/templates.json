@@ -1,0 +1,1489 @@
+{
+  "ga": [
+    {
+      "code": "62210001",
+      "name": "BEBAN PEMELIHARAAN & RENOVASI BANGUNAN KANTOR"
+    },
+    {
+      "code": "62210002",
+      "name": "BEBAN PEMELIHARAAN INVENTARIS KANTOR"
+    },
+    {
+      "code": "62210003",
+      "name": "BEBAN PEMELIHARAAN KENDARAAN KANTOR"
+    },
+    {
+      "code": "62220001",
+      "name": "BEBAN SEWA BANGUNAN UNTUK OPERASIONAL KANTOR"
+    },
+    {
+      "code": "62220002",
+      "name": "BEBAN SEWA RUMAH MESS UNTUK OPERASIONAL"
+    },
+    {
+      "code": "62220003",
+      "name": "BEBAN SEWA GEDUNG UNTUK ACARA KANTOR"
+    },
+    {
+      "code": "62220004",
+      "name": "BEBAN SEWA KENDARAAN"
+    },
+    {
+      "code": "62220005",
+      "name": "BEBAN SEWA LAINNYA"
+    },
+    {
+      "code": "62220006",
+      "name": "BEBAN SEWA PERALATAN"
+    },
+    {
+      "code": "62220007",
+      "name": "BEBAN SEWA RUMAH DINAS / MESS KARYAWAN"
+    },
+    {
+      "code": "62220008",
+      "name": "BEBAN SEWA PERALATAN KANTOR"
+    },
+    {
+      "code": "62230001",
+      "name": "BEBAN ASURANSI BANGUNAN KANTOR"
+    },
+    {
+      "code": "62230002",
+      "name": "BEBAN ASURANSI KENDARAAN KANTOR"
+    },
+    {
+      "code": "62230003",
+      "name": "BEBAN ASURANSI INVENTARIS KANTOR"
+    },
+    {
+      "code": "62240001",
+      "name": "BEBAN LEGALITAS"
+    },
+    {
+      "code": "62240002",
+      "name": "BEBAN NOTARIS/PPAT"
+    },
+    {
+      "code": "62240003",
+      "name": "BEBAN JASA AKUNTAN PUBLIK"
+    },
+    {
+      "code": "62240004",
+      "name": "BEBAN JASA PENILAI PUBLIK"
+    },
+    {
+      "code": "62240005",
+      "name": "BEBAN JASA AKTUARIA"
+    },
+    {
+      "code": "62240006",
+      "name": "BEBAN JASA PENGACARA/KONSULTAN HUKUM"
+    },
+    {
+      "code": "62240007",
+      "name": "BEBAN JASA KONSULTAN PAJAK"
+    },
+    {
+      "code": "62240008",
+      "name": "BEBAN JASA PENYELENGGARA ACARA (EO)"
+    },
+    {
+      "code": "62240009",
+      "name": "BEBAN JASA KONSULTAN SISTEM"
+    },
+    {
+      "code": "62240010",
+      "name": "BEBAN JASA PENERJEMAH (TRANSLATOR)"
+    },
+    {
+      "code": "62240011",
+      "name": "BEBAN JASA PENYELENGGARA ACARA (EO)"
+    },
+    {
+      "code": "62240012",
+      "name": "BEBAN JASA KONSULTAN PAJAK"
+    },
+    {
+      "code": "62240013",
+      "name": "BEBAN KONSULTAN MANAGEMENT/BISNIS"
+    },
+    {
+      "code": "62240014",
+      "name": "BEBAN JASA KEAMANAN"
+    },
+    {
+      "code": "62240015",
+      "name": "BEBAN JASA ANNUAL REPORT"
+    },
+    {
+      "code": "62250001",
+      "name": "BEBAN PERJALANAN DINAS LUAR KOTA"
+    },
+    {
+      "code": "62250002",
+      "name": "BEBAN PERJALANAN DINAS LUAR NEGERI"
+    },
+    {
+      "code": "62250003",
+      "name": "BEBAN TRANSPORTASI, BENSIN, TOLL, PARKIR, TAKSI"
+    },
+    {
+      "code": "62260001",
+      "name": "BEBAN LISTRIK DAN AIR"
+    },
+    {
+      "code": "62260002",
+      "name": "BEBAN LANGGANAN INTERNET, WEBSITE, TELEPON, PULSA HP"
+    },
+    {
+      "code": "62260003",
+      "name": "BEBAN LANGGANAN MEDIA ONLINE"
+    },
+    {
+      "code": "62270000",
+      "name": "BEBAN PERLENGKAPAN & PERALATAN KANTOR"
+    },
+    {
+      "code": "62270001",
+      "name": "BEBAN STATIONARY (ALAT TULIS, KERTAS, TINTA PRINTER) & PERLENGKAPAN KANTOR"
+    },
+    {
+      "code": "62270002",
+      "name": "BEBAN MATERAI"
+    },
+    {
+      "code": "62270003",
+      "name": "BEBAN CETAK, FOTOCOPY"
+    },
+    {
+      "code": "62270004",
+      "name": "BEBAN KIRIM DOKUMEN/BARANG"
+    },
+    {
+      "code": "62280001",
+      "name": "BEBAN JASA KEBERSIHAN & KEAMANAN KANTOR"
+    },
+    {
+      "code": "62280002",
+      "name": "SEMINAR DAN TRAINING"
+    },
+    {
+      "code": "62280003",
+      "name": "BEBAN SUMBANGAN"
+    },
+    {
+      "code": "62280004",
+      "name": "REKRUTMEN"
+    },
+    {
+      "code": "62280005",
+      "name": "BEBAN KEBUTUHAN DAPUR KANTOR (KOPI, TEH, SUSU, GULA)"
+    },
+    {
+      "code": "62280006",
+      "name": "BEBAN JAMUAN/ENTERTAINMENT"
+    },
+    {
+      "code": "62280007",
+      "name": "BEBAN KEBUTUHAN OPERASIONAL KANTOR"
+    },
+    {
+      "code": "62280008",
+      "name": "BEBAN OUTSOURCING"
+    },
+    {
+      "code": "62280009",
+      "name": "BEBAN KEBUTUHAN MEETING"
+    },
+    {
+      "code": "62280010",
+      "name": "BEBAN KONSUMSI"
+    },
+    {
+      "code": "62280011",
+      "name": "BEBAN SERAGAM"
+    },
+    {
+      "code": "62280012",
+      "name": "ACARA TAHUNAN PERUSAHAAN"
+    },
+    {
+      "code": "62280013",
+      "name": "BEBAN PERLENGKAPAN KANTOR OPERASIONAL"
+    },
+    {
+      "code": "62280014",
+      "name": "BEBAN KANTOR OPERASIONAL"
+    },
+    {
+      "code": "62280015",
+      "name": "BEBAN KANTOR BUILDING MANAGEMENT"
+    },
+    {
+      "code": "62280016",
+      "name": "BEBAN KANTOR HAND OVER"
+    }
+  ],
+  "tax": [
+    {
+      "code": "62290001",
+      "name": "BEBAN ADMINISTRASI PAJAK"
+    },
+    {
+      "code": "62290002",
+      "name": "BEBAN PAJAK DITANGGUNG PERUSAHAAN"
+    },
+    {
+      "code": "62290003",
+      "name": "BEBAN PAJAK FINAL (PPHTB)"
+    },
+    {
+      "code": "62290004",
+      "name": "BEBAN PAJAK KENDARAAN"
+    },
+    {
+      "code": "62290005",
+      "name": "BEBAN PAJAK NON FINAL"
+    },
+    {
+      "code": "62290006",
+      "name": "BEBAN PAJAK LAINNYA"
+    }
+  ],
+  "others": [
+    {
+      "code": "71110001",
+      "name": "PENDAPATAN BUNGA"
+    },
+    {
+      "code": "71110002",
+      "name": "PENDAPATAN BUNGA DEPOSITO"
+    },
+    {
+      "code": "71110003",
+      "name": "PENDAPATAN BUNGA JASA GIRO"
+    },
+    {
+      "code": "71110004",
+      "name": "PENDAPATAN BUNGA OBLIGASI"
+    },
+    {
+      "code": "71120001",
+      "name": "PENDAPATAN DENDA PENJUALAN"
+    },
+    {
+      "code": "71120002",
+      "name": "PENDAPATAN JASA GIRO"
+    },
+    {
+      "code": "71120003",
+      "name": "PENDAPATAN ADMINISTRASI PENJUALAN"
+    },
+    {
+      "code": "71120004",
+      "name": "PENDAPATAN ATAS PENJUALAN ASET TETAP"
+    },
+    {
+      "code": "71120005",
+      "name": "PENDAPATAN INSENTIF KPA"
+    },
+    {
+      "code": "71120006",
+      "name": "PENDAPATAN KOMPREHENSIF LAIN - PASKA KERJA"
+    },
+    {
+      "code": "71120007",
+      "name": "PENDAPATAN LAIN-LAIN"
+    },
+    {
+      "code": "71120008",
+      "name": "REIMBURSMENT (BILLING RATE)"
+    },
+    {
+      "code": "71120009",
+      "name": "PENDAPATAN BUNGA UANG MUKA PELANGGAN"
+    },
+    {
+      "code": "71120010",
+      "name": "PENDAPATAN DEVIDEN"
+    },
+    {
+      "code": "71120011",
+      "name": "BEBAN CADANGAN PENURUNAN INVESTASI LAINNYA"
+    },
+    {
+      "code": "71120012",
+      "name": "PENDAPATAN SEWA PERANGKAT"
+    },
+    {
+      "code": "71140001",
+      "name": "KSO-1 (BROOKLYN)"
+    },
+    {
+      "code": "71150001",
+      "name": "PROFIT SHARING - ONE FIFTEENTH"
+    },
+    {
+      "code": "71150002",
+      "name": "PROFIT SHARING TD"
+    },
+    {
+      "code": "71150003",
+      "name": "PROFIT SHARING TMI"
+    },
+    {
+      "code": "71150004",
+      "name": "REVENUE SHARING - ONE FIFTEENTH"
+    },
+    {
+      "code": "71160001",
+      "name": "PENDAPATAN REVENUE SHARING ATAS TANAH"
+    },
+    {
+      "code": "71160002",
+      "name": "PENDAPATAN REVENUE SHARING ATAS BANGUNAN"
+    },
+    {
+      "code": "72120001",
+      "name": "PAJAK BUNGA DEPOSITO & JASA GIRO"
+    },
+    {
+      "code": "72120002",
+      "name": "PAJAK BUNGA JASA GIRO"
+    },
+    {
+      "code": "72120003",
+      "name": "BEBAN ADMINISTRASI & TRANSFER BANK"
+    },
+    {
+      "code": "72120004",
+      "name": "BEBAN VIRTUAL ACCOUNT"
+    },
+    {
+      "code": "72120005",
+      "name": "BEBAN ADMIN EDC"
+    },
+    {
+      "code": "72120006",
+      "name": "BEBAN DENDA KETERLAMBATAN"
+    },
+    {
+      "code": "72120008",
+      "name": "BEBAN ATAS PENCATATAN EFEK DI BURSA INDONESIA"
+    },
+    {
+      "code": "72120009",
+      "name": "BEBAN LAINNYA"
+    },
+    {
+      "code": "72120010",
+      "name": "BEBAN PEMBULATAN"
+    },
+    {
+      "code": "72120011",
+      "name": "BEBAN LAINNYA"
+    },
+    {
+      "code": "72120012",
+      "name": "SELISIH KURS"
+    },
+    {
+      "code": "72120013",
+      "name": "BEBAN CADANGAN PENURUNAN NILAI PIUTANG"
+    },
+    {
+      "code": "72120014",
+      "name": "BEBAN KERUGIAN REVALUASI ASET"
+    },
+    {
+      "code": "72120016",
+      "name": "BEBAN IMPAIRMENT"
+    },
+    {
+      "code": "72120017",
+      "name": "BEBAN KERUGIAN ASET"
+    },
+    {
+      "code": "72120018",
+      "name": "BEBAN KOMPREHENSIF LAIN - PASKA KERJA"
+    }
+  ],
+  "finance": [
+    {
+      "code": "72110001",
+      "name": "BEBAN BUNGA PINJAMAN"
+    },
+    {
+      "code": "72110002",
+      "name": "BEBAN PROVISI DAN ADM PINJAMAN"
+    },
+    {
+      "code": "72110003",
+      "name": "BEBAN ASURANSI ATAS PINJAMAN"
+    },
+    {
+      "code": "72110004",
+      "name": "BEBAN LINDUNG NILAI ATAS PINJAMAN"
+    },
+    {
+      "code": "72120007",
+      "name": "BIAYA BUNGA, PROVISI & ADM PINJAMAN"
+    },
+    {
+      "code": "72120015",
+      "name": "PAJAK BUNGA DEPOSITO"
+    },
+    {
+      "code": "72120019",
+      "name": "BEBAN LAIN-LAIN"
+    },
+    {
+      "code": "72120020",
+      "name": "BEBAN BUNGA UANG MUKA PELANGGAN"
+    },
+    {
+      "code": "11610010",
+      "name": "UANG MUKA PROYEK"
+    }
+  ],
+  "dev_land": [
+    {
+      "row": 7,
+      "num": "1",
+      "cat": "Land Cost",
+      "subcat": "",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 8,
+      "num": "",
+      "cat": "1.1",
+      "subcat": "Land Improvement Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 9,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 10,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 11,
+      "num": "",
+      "cat": "1.2",
+      "subcat": "Land Acquisition Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 12,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 13,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 15,
+      "num": "2",
+      "cat": "Development Cost",
+      "subcat": "",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 16,
+      "num": "",
+      "cat": "Hard Cost",
+      "subcat": "",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 17,
+      "num": "",
+      "cat": "2.1",
+      "subcat": "Preliminaries",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 18,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 19,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 20,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 21,
+      "num": "",
+      "cat": "2.2",
+      "subcat": "Pre-Construction",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 22,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 23,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 24,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 25,
+      "num": "",
+      "cat": "2.3",
+      "subcat": "Building Construction Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 26,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 27,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 28,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 29,
+      "num": "",
+      "cat": "2.4",
+      "subcat": "Parking Construction Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 30,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 31,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 32,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 33,
+      "num": "",
+      "cat": "2.5",
+      "subcat": "Infrastructure Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 34,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 35,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 36,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 37,
+      "num": "",
+      "cat": "2.6",
+      "subcat": "Facilities Construction Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 38,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 39,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 40,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 41,
+      "num": "",
+      "cat": "2.7",
+      "subcat": "Main Gate Construction Cost",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 42,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 43,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 44,
+      "num": "",
+      "cat": "",
+      "subcat": "c",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 46,
+      "num": "",
+      "cat": "Soft Cost",
+      "subcat": "",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 47,
+      "num": "",
+      "cat": "2.8",
+      "subcat": "Legal, License, & Permits",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 48,
+      "num": "",
+      "cat": "",
+      "subcat": "a",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 49,
+      "num": "",
+      "cat": "",
+      "subcat": "b",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 51,
+      "num": "",
+      "cat": "2.9",
+      "subcat": "Design & Professional Fees",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 52,
+      "num": "",
+      "cat": "",
+      "subcat": "a. Master Planner",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 53,
+      "num": "",
+      "cat": "",
+      "subcat": "b. Architecture",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 54,
+      "num": "",
+      "cat": "",
+      "subcat": "c. Land Survey",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 55,
+      "num": "",
+      "cat": "",
+      "subcat": "d. Consutant",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 56,
+      "num": "",
+      "cat": "",
+      "subcat": "e",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 58,
+      "num": "",
+      "cat": "",
+      "subcat": "TOTAL LAND & DEVELOPMENT COST",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 61,
+      "num": "",
+      "cat": "",
+      "subcat": "Catatan",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 62,
+      "num": "",
+      "cat": "",
+      "subcat": "1. Nilai yang harus diisi sesuai dengan SPK yang sudah disepakati",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 63,
+      "num": "",
+      "cat": "",
+      "subcat": "2. Apabila pekerjaan pembangunan, konsultan belum ada SPK maka diisi berdasarkan nilai RAB terupdate",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 64,
+      "num": "",
+      "cat": "",
+      "subcat": "3. Apabila pekerjaan tersebut sudah berlangsung dari periode sebelumnya dan akan berlanjut di tahun Budget maka nilai Budget yang diisi sesuai dengan jadwal progress pada tahun Budget",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    },
+    {
+      "row": 65,
+      "num": "",
+      "cat": "",
+      "subcat": "4. Agar dilampirkan rencana progress pekerjaan  (Timeline) pada periode tahun Budget",
+      "sqm": 0.0,
+      "cost_sqm": 0.0,
+      "rab_spk": 0.0,
+      "realisasi": 0.0,
+      "best_est": 0.0
+    }
+  ],
+  "marketing": [
+    {
+      "row": 11,
+      "name": "Adv & Promotion - Above-The-Line",
+      "classification": "Main Chart",
+      "type": "main_header"
+    },
+    {
+      "row": 13,
+      "name": "Production:",
+      "classification": "Sub Chart",
+      "type": "sub_header"
+    },
+    {
+      "row": 14,
+      "name": "TV Commercial",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "category_header"
+    },
+    {
+      "row": 15,
+      "name": "Print Ad",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "category_header"
+    },
+    {
+      "row": 16,
+      "name": "Radio Ad/spot/jingle",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "category_header"
+    },
+    {
+      "row": 17,
+      "name": "Website",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "category_header"
+    },
+    {
+      "row": 18,
+      "name": "Other (social media)",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "category_header"
+    },
+    {
+      "row": 21,
+      "name": "Placement:",
+      "classification": "Sub Chart",
+      "type": "sub_header"
+    },
+    {
+      "row": 22,
+      "name": "TV Commercial",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 23,
+      "name": "- Spot, sponsor, bumper",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 24,
+      "name": "- Filler, blocking, TV program",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 27,
+      "name": "Print Ad",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 28,
+      "name": "- Newspaper & tabloid (national, local, area)",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 29,
+      "name": "- Magazine (national, local, area)",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 32,
+      "name": "Radio Ad",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 33,
+      "name": "- Spot & adlibs",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 34,
+      "name": "- Program, blocking, interview/talkshow",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 37,
+      "name": "Website",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 38,
+      "name": "- Hosting fee, maintenance",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 41,
+      "name": "SOCIAL MEDIA",
+      "classification": "",
+      "type": "input"
+    },
+    {
+      "row": 42,
+      "name": "- Airing cost, blasting cost",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 46,
+      "name": "Adv & Promotion - Below-The-Line",
+      "classification": "Main Chart",
+      "type": "main_header"
+    },
+    {
+      "row": 48,
+      "name": "Production:",
+      "classification": "Sub Chart",
+      "type": "sub_header"
+    },
+    {
+      "row": 49,
+      "name": "Out-of-Home",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 50,
+      "name": "- Billboard, neonbox, signboard, baliho, banner (outdoor), project signage & directory",
+      "classification": "Billboard",
+      "type": "input"
+    },
+    {
+      "row": 51,
+      "name": "- Mobile ad, bus ad, taxi ad",
+      "classification": "Billboard",
+      "type": "input"
+    },
+    {
+      "row": 56,
+      "name": "Point-of-Sale & Merchandising",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 57,
+      "name": "- Poster, flyer, brochure, catalogue, city directory, map",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 58,
+      "name": "- In-door banner, roll-up banner, Floor display unit, trade marketing, etc",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 59,
+      "name": "- Corporate merchandise, giveaways, corporate attributes",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 62,
+      "name": "Corporate Presentation",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 63,
+      "name": "- Video presentation, multimedia presentation",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 64,
+      "name": "- Company profile (printed)",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 65,
+      "name": "- Special communication (corp magazine, intranet, newsletter, portal, etc)",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 68,
+      "name": "Event & exhibition",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 69,
+      "name": "- Launching, special events, internal/corporate events",
+      "classification": "Events & Exibition",
+      "type": "input"
+    },
+    {
+      "row": 70,
+      "name": "- Exhibition & expo",
+      "classification": "Events & Exibition",
+      "type": "input"
+    },
+    {
+      "row": 71,
+      "name": "- Sponsorship, co-branding, joint event, etc",
+      "classification": "Events & Exibition",
+      "type": "input"
+    },
+    {
+      "row": 74,
+      "name": "Other (Direct mail,telemkt,sms,viral,etc)",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 75,
+      "name": "- Direct Mail, telemarketing",
+      "classification": "Beban Marketing Promosi Lainnya",
+      "type": "input"
+    },
+    {
+      "row": 76,
+      "name": "- SMS, Viral, social media",
+      "classification": "Beban Marketing Promosi Lainnya",
+      "type": "input"
+    },
+    {
+      "row": 80,
+      "name": "Placement/distribution:",
+      "classification": "Sub Chart",
+      "type": "sub_header"
+    },
+    {
+      "row": 81,
+      "name": "Out-of-Home (location fee, advertisement tax, etc)",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 82,
+      "name": "- Billboard, neonbox, signboard, baliho, banner (outdoor), project signage & directory",
+      "classification": "Beban Marketing Promosi Lainnya",
+      "type": "input"
+    },
+    {
+      "row": 83,
+      "name": "- Mobile ad, bus ad, taxi ad",
+      "classification": "Beban Marketing Promosi Lainnya",
+      "type": "input"
+    },
+    {
+      "row": 86,
+      "name": "Point-of-Sale & Merchandising (cost of distribution)",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 87,
+      "name": "- Poster, flyer, brochure, catalogue, city directory, map",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 88,
+      "name": "- In-door banner, roll-up banner, Floor display unit, trade marketing, etc",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 89,
+      "name": "- Corporate merchandise, giveaways, corporate attributes",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 92,
+      "name": "Corporate Presentation (cost of distribution)",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 93,
+      "name": "- Video presentation, multimedia presentation",
+      "classification": "Media Digital, Online, TV, Radio",
+      "type": "input"
+    },
+    {
+      "row": 94,
+      "name": "- Company profile (printed)",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 95,
+      "name": "- Special communication (corp magazine, intranet, newsletter, portal, etc)",
+      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
+      "type": "input"
+    },
+    {
+      "row": 98,
+      "name": "Other (cost of placement/blast)",
+      "classification": "",
+      "type": "category_header"
+    },
+    {
+      "row": 99,
+      "name": "- Direct Mail, telemarketing",
+      "classification": "Beban Marketing Promosi Lainnya",
+      "type": "input"
+    },
+    {
+      "row": 100,
+      "name": "- SMS, Viral",
+      "classification": "Beban Marketing Promosi Lainnya",
+      "type": "input"
+    }
+  ],
+  "corp_event": [
+    {
+      "row": 30,
+      "activity": "Budget Plan",
+      "classification": "",
+      "qty": 0.0,
+      "price_unit": 0.0,
+      "type": "input"
+    }
+  ],
+  "payroll": [
+    {
+      "code": "62110001",
+      "name": "BEBAN GAJI, THR & BONUS"
+    },
+    {
+      "code": "62110002",
+      "name": "BEBAN TRANSPORTASI"
+    },
+    {
+      "code": "62110003",
+      "name": "BEBAN TUNJANGAN TRANSPORTASI"
+    },
+    {
+      "code": "62110004",
+      "name": "BEBAN PESANGON"
+    },
+    {
+      "code": "62110005",
+      "name": "BEBAN UANG MAKAN"
+    },
+    {
+      "code": "62110006",
+      "name": "BEBAN LEMBUR"
+    },
+    {
+      "code": "62110007",
+      "name": "BEBAN ASURANSI"
+    },
+    {
+      "code": "62110008",
+      "name": "BEBAN KARYAWAN"
+    },
+    {
+      "code": "62110009",
+      "name": "BIAYA LEMBUR - PROJECT"
+    },
+    {
+      "code": "62110010",
+      "name": "BEBAN ASURANSI KESEHATAN KARYAWAN"
+    },
+    {
+      "code": "62110011",
+      "name": "BEBAN BPJS KESEHATAN"
+    },
+    {
+      "code": "62110012",
+      "name": "BIAYA TUNJANGAN LAINNYA - PROJECT"
+    },
+    {
+      "code": "62110013",
+      "name": "BEBAN BPJS KETENAGAKERJAAN"
+    },
+    {
+      "code": "62110014",
+      "name": "BEBAN BILLING RATE"
+    },
+    {
+      "code": "62110015",
+      "name": "BEBAN IMBALAN PASCA KERJA"
+    },
+    {
+      "code": "62110016",
+      "name": "BIAYA PPH 21 - BACK OFFICE"
+    },
+    {
+      "code": "62110017",
+      "name": "BIAYA TUNJANGAN LAINNYA - BACK OFFICE"
+    },
+    {
+      "code": "62110018",
+      "name": "BIAYA TUNJANGAN LAINNYA - MARKETING"
+    },
+    {
+      "code": "62120001",
+      "name": "BEBAN TUNJANGAN KARYAWAN"
+    },
+    {
+      "code": "62120002",
+      "name": "BEBAN PELATIHAN & SEMINAR"
+    },
+    {
+      "code": "62120003",
+      "name": "BEBAN PEREKRUTAN KARYAWAN"
+    },
+    {
+      "code": "62120004",
+      "name": "BEBAN GATHERING, OUTING, TEAM BUILDING"
+    },
+    {
+      "code": "62120005",
+      "name": "BEBAN SUMBANGAN UNTUK KARYAWAN"
+    },
+    {
+      "code": "62120006",
+      "name": "BEBAN PPH PS 21"
+    },
+    {
+      "code": "62120007",
+      "name": "BEBAN PPH PS 21 DITANGGUNG"
+    },
+    {
+      "code": "62120008",
+      "name": "BEBAN LAINNYA"
+    }
+  ]
+}

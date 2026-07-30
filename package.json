@@ -1,0 +1,10 @@
+{
+  "name": "triniti-budget-2027",
+  "version": "1.0.0",
+  "description": "FY 2027 Project Planned Budget Planner",
+  "scripts": {
+    "start": "python -m http.server 5000 --directory public"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
