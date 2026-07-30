@@ -999,8 +999,6 @@ function renderDevLandTable() {
         state.collapsedHeaders = {};
     }
 
-    updateDevLandSubRowLetters();
-
     let html = `
         <thead>
             <tr>
@@ -1229,13 +1227,13 @@ function renderDevLandTable() {
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
-            const descValue = dataRow.name !== undefined && dataRow.name !== item.num ? dataRow.name : (item.subcat || '');
+            const descValue = dataRow.name !== undefined ? dataRow.name : (item.subcat || item.cat || '');
             
             html += `
                 <tr>
                     <td style="font-weight:600; color:var(--text-secondary); text-align:center;">${numDisp}</td>
                     <td>
-                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Item Description" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
+                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Description / Item Name" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
                     </td>
                     <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand('${key}', 'sqm', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand('${key}', 'cost_sqm', this.value)"></td>
@@ -1255,7 +1253,7 @@ function renderDevLandTable() {
             `;
         }
     });
-
+    
     const grandSum = monthlyTotals.reduce((a, b) => a + b, 0);
     
     // YTD cumulative
@@ -1300,47 +1298,27 @@ function updateDevLandName(key, itemIdx, val) {
     updateSyncIndicator(false);
 }
 
-function updateDevLandSubRowLetters() {
-    const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t'];
-    let subIdx = 0;
-    
-    state.templates.dev_land.forEach(item => {
-        const text = (item.subcat || item.cat || '').trim();
-        const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
-        const isHeader = isNote || (item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.type === 'section_header' || item.cat === 'Hard Cost' || item.cat === 'Soft Cost';
-
-        if (isHeader) {
-            subIdx = 0;
-        } else if (item.row) {
-            const letter = letters[subIdx] || `sub_${subIdx+1}`;
-            item.num = letter.includes('.') ? letter : `${letter}.`;
-            subIdx++;
-        }
-    });
-}
-
 function addDevLandSubRow(headerIdx) {
+    const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p'];
+    // Count existing sub-rows under this header
     let insertAt = headerIdx + 1;
-    while (insertAt < state.templates.dev_land.length) {
-        const child = state.templates.dev_land[insertAt];
-        const cText = (child.subcat || child.cat || '').trim();
-        const cIsNote = child.cat === 'Catatan' || cText.startsWith('1. Nilai') || cText.startsWith('2. Apabila') || cText.startsWith('3. Apabila') || cText.startsWith('4. Agar') || cText.startsWith('Catatan') || cText === 'TOTAL LAND & DEVELOPMENT COST';
-        const cIsHeader = cIsNote || (child.cat && child.cat.includes('.')) || (child.num && child.num.includes('.')) || child.type === 'section_header' || child.cat === 'Hard Cost' || child.cat === 'Soft Cost';
-
-        if (cIsHeader) break;
+    let subCount = 0;
+    while (insertAt < state.templates.dev_land.length && !state.templates.dev_land[insertAt].num?.includes('.') && !state.templates.dev_land[insertAt].cat?.includes('.') && state.templates.dev_land[insertAt].type !== 'section_header') {
+        subCount++;
         insertAt++;
     }
-
+    const letter = letters[subCount] || `sub_${subCount+1}`;
+    const name = prompt(`Enter item name for sub-row (${letter}):`, letter);
+    if (name === null) return;
+    
     const key = 'dl_custom_' + Date.now();
     state.templates.dev_land.splice(insertAt, 0, {
-        num: '',
+        num: letter,
         cat: '',
-        subcat: '',
+        subcat: name.trim() || letter,
         row: key
     });
-    
-    updateDevLandSubRowLetters();
-    state.data.dev_land[key] = { name: '', sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    state.data.dev_land[key] = { name: name.trim() || letter, sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
     state.isDirty = true;
     updateSyncIndicator(false);
     renderDevLandTable();
@@ -1352,7 +1330,6 @@ function removeDevLandSubRow(key, itemIdx) {
         delete state.data.dev_land[key];
     }
     state.templates.dev_land.splice(itemIdx, 1);
-    updateDevLandSubRowLetters();
     state.isDirty = true;
     updateSyncIndicator(false);
     renderDevLandTable();
@@ -2066,7 +2043,6 @@ function renderSummaryBudgetTable() {
     const mSalesInhouse = Array(12).fill(0), mSalesAgent = Array(12).fill(0);
     const mSalesProgram = Array(12).fill(0);
     const mMarketingATL = Array(12).fill(0), mMarketingBTL = Array(12).fill(0);
-    const mLandCost = Array(12).fill(0), mHardCost = Array(12).fill(0), mSoftCost = Array(12).fill(0);
     const mDevLand = Array(12).fill(0), mEmployee = Array(12).fill(0);
     const mGA = Array(12).fill(0), mOthers = Array(12).fill(0);
     const mFinance = Array(12).fill(0), mTax = Array(12).fill(0);
@@ -2082,22 +2058,7 @@ function renderSummaryBudgetTable() {
                 if (item.row < 46) mMarketingATL[m] += v; else mMarketingBTL[m] += v;
             }
         });
-        
-        state.templates.dev_land.forEach(item => {
-            if (item.row && state.data.dev_land[item.row]) {
-                const val = state.data.dev_land[item.row].monthly[m] || 0;
-                mDevLand[m] += val;
-                const numStr = item.num || '';
-                if (numStr.startsWith('1.') || item.cat?.includes('Land Cost')) {
-                    mLandCost[m] += val;
-                } else if (numStr.startsWith('2.8') || numStr.startsWith('2.9') || item.subcat?.includes('Soft Cost') || item.cat?.includes('Soft Cost')) {
-                    mSoftCost[m] += val;
-                } else {
-                    mHardCost[m] += val;
-                }
-            }
-        });
-
+        Object.keys(state.data.dev_land).forEach(r => { mDevLand[m] += state.data.dev_land[r].monthly[m]; });
         mEmployee[m] = Object.keys(state.data.payroll_expenses).reduce((s,c)=>s+state.data.payroll_expenses[c][m],0);
         Object.keys(state.data.ga_expenses).forEach(c=>{ mGA[m] += state.data.ga_expenses[c][m]; });
         // Business trip costs go into G&A
@@ -2123,9 +2084,6 @@ function renderSummaryBudgetTable() {
         units:   sum(mUnits),
         sqm:     sum(mSqm),
         revenue: sum(mRevenue),
-        landCost: sum(mLandCost),
-        hardCost: sum(mHardCost),
-        softCost: sum(mSoftCost),
         devland: sum(mDevLand),
         salesComm: sum(mSalesInhouse) + sum(mSalesAgent),
         progSales: sum(mSalesProgram),
@@ -2227,9 +2185,9 @@ function renderSummaryBudgetTable() {
     // ── B. PROJECT COST ──────────────────────────────────────────────────
     html += mainHdr('B. DEVELOPMENT & OPERATIONAL COST');
     html += secHdr('Project Cost');
-    html += row('Land Cost', 'land_cost', bgt27.landCost, true);
-    html += row('Hard Cost (Dev Construction)', 'hard_cost', bgt27.hardCost, true);
-    html += row('Soft Cost (Legal, Permits, Fees)', 'soft_cost', bgt27.softCost, true);
+    html += row('Land Cost', 'land_cost', bgt27.devland, true);
+    html += row('Hard Cost (Dev Construction)', 'hard_cost', 0, true);
+    html += row('Soft Cost (Legal, Permits, Fees)', 'soft_cost', 0, true);
     html += subtotal('Total Project Cost (Rp Bio)', 'total_proj', bgt27.devland);
 
     // ── C. SALES & MARKETING ─────────────────────────────────────────────
