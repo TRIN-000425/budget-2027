@@ -1016,18 +1016,19 @@ function renderDevLandTable() {
     let monthlyTotals = Array(12).fill(0);
     
     state.templates.dev_land.forEach(item => {
-        const isHeader = !item.num && (!item.subcat || item.cat);
-        const isSubHeader = item.cat && (item.cat.includes('.') || item.num.includes('.'));
-        const isSubItem = !item.num && !item.cat && item.subcat;
+        const text = (item.subcat || item.cat || '').trim();
+        const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
 
-        if (item.cat === 'Catatan' || (item.subcat && item.subcat.startsWith('1. Nilai') || (item.subcat && item.subcat.startsWith('TOTAL LAND')))) {
-            // Summary / footer notes
-            if (item.subcat === 'TOTAL LAND & DEVELOPMENT COST') {
-                // Skip here, handled at total
-            } else {
+        if (isNote) {
+            if (text === 'Catatan' || text.startsWith('Catatan')) {
                 html += `
-                    <tr class="row-group-header" style="background:rgba(255,255,255,0.02); color:var(--text-muted)">
-                        <td colspan="21" style="font-size:0.75rem;">${item.subcat || item.cat}</td>
+                    <tr style="background:rgba(255,255,255,0.03); font-weight:700; color:var(--text-secondary)">
+                        <td colspan="21" style="padding-top:16px;">Catatan:</td>
+                    </tr>`;
+            } else if (text.startsWith('1. ') || text.startsWith('2. ') || text.startsWith('3. ') || text.startsWith('4. ')) {
+                html += `
+                    <tr style="background:rgba(255,255,255,0.01); color:var(--text-muted); font-size:0.8rem">
+                        <td colspan="21" style="padding:4px 12px;">${text}</td>
                     </tr>`;
             }
         } else if (!item.num && !item.cat && !item.subcat) {
@@ -1037,7 +1038,7 @@ function renderDevLandTable() {
                 <tr class="row-grand-total" style="background:rgba(139,92,246,0.2) !important">
                     <td colspan="21" style="font-weight:800">${item.cat}</td>
                 </tr>`;
-        } else if (isSubHeader && (!item.subcat || item.num)) {
+        } else if ((item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.'))) {
             const numDisp = item.num || item.cat;
             const titleDisp = item.subcat || item.cat;
             html += `
