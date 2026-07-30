@@ -4,7 +4,7 @@ let state = {
     templates: null,
     selectedCompany: '',
     selectedProject: '',
-    gasUrl: localStorage.getItem('gas_url') || '',
+    gasUrl: localStorage.getItem('gas_url') || 'https://script.google.com/macros/s/AKfycbxg0wEPqmGRFkoj-HDysUW6UV_HKzEZr1LrdgZ_8IBB9BgymAWEXFuvBzppls4Zpgk/exec',
     isDirty: false,
     currentUser: JSON.parse(sessionStorage.getItem('current_user') || 'null'),
     nikList: [],
