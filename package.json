@@ -5,6 +5,7 @@
   "scripts": {
     "start": "python -m http.server 5000 --directory public"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "xlsx": "^0.18.5"
+  }
 }

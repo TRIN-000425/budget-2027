@@ -94,7 +94,8 @@ function getInitialDataStructure() {
         corp_events: {},
         fixed_assets: [],
         business_trip: [],
-        hc_program: []
+        hc_program: [],
+        summary_2026: {}
     };
 }
 
@@ -1636,234 +1637,231 @@ function removeTripRow(idx) {
 // 10. CONSOLIDATED SUMMARY BUDGET TABLE RENDERER
 function renderSummaryBudgetTable() {
     const table = document.getElementById('summary-budget-table');
-    
-    // Perform full calculations across all sheets
-    const mRevenue = Array(12).fill(0);
-    const mUnits = Array(12).fill(0);
-    const mSqm = Array(12).fill(0);
-    
-    state.data.target_revenue.forEach(row => {
-        row.sqm.forEach((s, m) => {
-            mRevenue[m] += s * row.price_sqm;
-            mSqm[m] += s;
-        });
-        row.units.forEach((u, m) => {
-            mUnits[m] += u;
-        });
-    });
-    
-    // Cost monthly trackers
-    const mSalesInhouse = Array(12).fill(0);
-    const mSalesAgent = Array(12).fill(0);
-    const mSalesProgram = Array(12).fill(0);
-    const mMarketingATL = Array(12).fill(0);
-    const mMarketingBTL = Array(12).fill(0);
-    const mDevLand = Array(12).fill(0);
-    const mEmployee = Array(12).fill(0);
-    const mGA = Array(12).fill(0);
-    const mOthers = Array(12).fill(0);
-    const mFinance = Array(12).fill(0);
-    const mTax = Array(12).fill(0);
-    const mCorpEvent = Array(12).fill(0);
-    const mCapex = Array(12).fill(0);
-    
-    // Accumulators
-    for(let m = 0; m < 12; m++) {
-        mSalesInhouse[m] = Object.keys(state.data.sales_cost.inhouse)
-            .filter(k => !k.startsWith('_'))
-            .reduce((sum, k) => sum + state.data.sales_cost.inhouse[k][m], 0);
-        mSalesAgent[m] = Object.keys(state.data.sales_cost.agent)
-            .filter(k => !k.startsWith('_'))
-            .reduce((sum, k) => sum + state.data.sales_cost.agent[k][m], 0);
-        
-        Object.keys(state.data.program_sales).filter(k => !k.startsWith('_')).forEach(k => {
-            mSalesProgram[m] += state.data.program_sales[k][m];
-        });
-        
-        state.templates.marketing.forEach(item => {
-            if (item.type === 'input') {
-                const val = state.data.marketing_activity[item.row] ? state.data.marketing_activity[item.row][m] : 0;
-                if (item.row < 46) mMarketingATL[m] += val;
-                else mMarketingBTL[m] += val;
-            }
-        });
-        
-        Object.keys(state.data.dev_land).forEach(row => {
-            mDevLand[m] += state.data.dev_land[row].monthly[m];
-        });
-        
-        mEmployee[m] = Object.keys(state.data.payroll_expenses).reduce((sum, code) => sum + state.data.payroll_expenses[code][m], 0);
-        
-        // Dynamic dynamic lists allocations
-        state.data.hc_program.forEach(row => {
-            if (row.month == m) {
-                mEmployee[m] += row.qty * row.price;
-            }
-        });
-        
-        Object.keys(state.data.ga_expenses).forEach(code => {
-            mGA[m] += state.data.ga_expenses[code][m];
-        });
-        
-        state.data.business_trip.forEach(row => {
-            if (row.month == m) {
-                const allowancesMap = {
-                    'Director': { 'Local': 1500000, 'Overseas': 2000000 },
-                    'Manager':  { 'Local': 900000,  'Overseas': 1200000 },
-                    'Staff':    { 'Local': 600000,  'Overseas': 800000 }
-                };
-                const hotelRates = {
-                    'Director': { 'Local': 1650000, 'Overseas': 2500000 },
-                    'Manager':  { 'Local': 750000,  'Overseas': 1200000 },
-                    'Staff':    { 'Local': 500000,  'Overseas': 800000 }
-                };
-                const standardFlights = { 'Local': 4000000, 'Overseas': 8000000 };
-                const grade = row.grade || 'Staff';
-                const dest  = row.destination || 'Local';
-                const allowRate    = (allowancesMap[grade]  || allowancesMap['Staff'])[dest]  || 600000;
-                const hotelRate    = (hotelRates[grade]     || hotelRates['Staff'])[dest]     || 500000;
-                const standardFlight = standardFlights[dest] || 4000000;
-                const tripCost = standardFlight + (hotelRate * Math.max(0, row.duration - 1)) + (allowRate * row.duration);
-                mGA[m] += tripCost;
-            }
-        });
-        
-        Object.keys(state.data.others_expenses).forEach(code => {
-            mOthers[m] += state.data.others_expenses[code][m];
-        });
-        
-        Object.keys(state.data.finance_expenses).forEach(code => {
-            mFinance[m] += state.data.finance_expenses[code][m];
-        });
-        
-        Object.keys(state.data.tax_expenses).forEach(code => {
-            mTax[m] += state.data.tax_expenses[code][m];
-        });
-        
-        Object.keys(state.data.corp_events).forEach(row => {
-            mCorpEvent[m] += state.data.corp_events[row].monthly[m];
-        });
-        
-        state.data.fixed_assets.forEach(row => {
-            if (row.month == m) {
-                mCapex[m] += row.qty * row.price;
-            }
-        });
+
+    // ── Initialize 2026 manual input storage if missing ──────────────────
+    if (!state.data.summary_2026) {
+        state.data.summary_2026 = {};
     }
-    
-    // Render HTML structure
+    const s26 = state.data.summary_2026;
+    // Helper: get manual 2026 value for a key, defaulting to 0
+    const g26 = (key) => parseFloat(s26[key] || 0);
+    // Helper: render an editable 2026 input cell
+    const inp26 = (key) => `<td><input type="number" class="table-input" style="width:110px" value="${g26(key)}" onchange="update2026('${key}', this.value)"></td>`;
+    // Helper: read-only computed cell
+    const ro = (val) => `<td class="cell-computed">${val === 0 ? '-' : Math.round(val).toLocaleString('id-ID')}</td>`;
+    // Helper: Bio formatted
+    const bio = (val) => (val / 1e9).toFixed(2);
+    // Helper: diff % badge
+    const diff = (b26, b27) => {
+        if (!b26) return `<td>-</td>`;
+        const pct = ((b27 - b26) / Math.abs(b26) * 100).toFixed(1);
+        const cls = pct > 0 ? 'diff-up' : 'diff-dn';
+        return `<td class="${cls}">${pct > 0 ? '+' : ''}${pct}%</td>`;
+    };
+
+    // ── Compute Budget 2027 monthly totals from all modules ───────────────
+    const mRevenue = Array(12).fill(0), mUnits = Array(12).fill(0), mSqm = Array(12).fill(0);
+    state.data.target_revenue.forEach(row => {
+        row.sqm.forEach((s,m) => { mRevenue[m] += s * row.price_sqm; mSqm[m] += s; });
+        row.units.forEach((u,m) => { mUnits[m] += u; });
+    });
+
+    const mSalesInhouse = Array(12).fill(0), mSalesAgent = Array(12).fill(0);
+    const mSalesProgram = Array(12).fill(0);
+    const mMarketingATL = Array(12).fill(0), mMarketingBTL = Array(12).fill(0);
+    const mDevLand = Array(12).fill(0), mEmployee = Array(12).fill(0);
+    const mGA = Array(12).fill(0), mOthers = Array(12).fill(0);
+    const mFinance = Array(12).fill(0), mTax = Array(12).fill(0);
+    const mCorpEvent = Array(12).fill(0), mCapex = Array(12).fill(0);
+
+    for (let m = 0; m < 12; m++) {
+        mSalesInhouse[m] = Object.keys(state.data.sales_cost.inhouse).filter(k=>!k.startsWith('_')).reduce((s,k)=>s+state.data.sales_cost.inhouse[k][m],0);
+        mSalesAgent[m]   = Object.keys(state.data.sales_cost.agent).filter(k=>!k.startsWith('_')).reduce((s,k)=>s+state.data.sales_cost.agent[k][m],0);
+        Object.keys(state.data.program_sales).filter(k=>!k.startsWith('_')).forEach(k=>{ mSalesProgram[m] += state.data.program_sales[k][m]; });
+        state.templates.marketing.forEach(item => {
+            if (item.type==='input') {
+                const v = state.data.marketing_activity[item.row] ? state.data.marketing_activity[item.row][m] : 0;
+                if (item.row < 46) mMarketingATL[m] += v; else mMarketingBTL[m] += v;
+            }
+        });
+        Object.keys(state.data.dev_land).forEach(r => { mDevLand[m] += state.data.dev_land[r].monthly[m]; });
+        mEmployee[m] = Object.keys(state.data.payroll_expenses).reduce((s,c)=>s+state.data.payroll_expenses[c][m],0);
+        Object.keys(state.data.ga_expenses).forEach(c=>{ mGA[m] += state.data.ga_expenses[c][m]; });
+        // Business trip costs go into G&A
+        const amap = {'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'SPV':{'Local':750000,'Overseas':1000000},'Staff':{'Local':600000,'Overseas':800000}};
+        const hmap = {'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'SPV':{'Local':600000,'Overseas':1000000},'Staff':{'Local':500000,'Overseas':800000}};
+        state.data.business_trip.forEach(r => {
+            if (r.month == m) {
+                const g=r.grade||'Staff', d=r.destination||'Local';
+                const flt = r.ticket_price != null ? r.ticket_price : (d==='Overseas'?8000000:4000000);
+                mGA[m] += flt + ((hmap[g]||hmap.Staff)[d]) * Math.max(0,r.duration-1) + ((amap[g]||amap.Staff)[d]) * r.duration;
+            }
+        });
+        Object.keys(state.data.others_expenses).forEach(c=>{ mOthers[m] += state.data.others_expenses[c][m]; });
+        Object.keys(state.data.finance_expenses).forEach(c=>{ mFinance[m] += state.data.finance_expenses[c][m]; });
+        Object.keys(state.data.tax_expenses).forEach(c=>{ mTax[m] += state.data.tax_expenses[c][m]; });
+        Object.keys(state.data.corp_events).forEach(r=>{ mCorpEvent[m] += state.data.corp_events[r].monthly[m]; });
+        state.data.fixed_assets.forEach(r=>{ if(r.month==m) mCapex[m]+=r.qty*r.price; });
+    }
+
+    // ── Annual sums ───────────────────────────────────────────────────────
+    const sum = arr => arr.reduce((a,b)=>a+b,0);
+    const bgt27 = {
+        units:   sum(mUnits),
+        sqm:     sum(mSqm),
+        revenue: sum(mRevenue),
+        devland: sum(mDevLand),
+        salesComm: sum(mSalesInhouse) + sum(mSalesAgent),
+        progSales: sum(mSalesProgram),
+        marketing: sum(mMarketingATL) + sum(mMarketingBTL),
+        employee:  sum(mEmployee),
+        ga:        sum(mGA),
+        others:    sum(mOthers),
+        finance:   sum(mFinance),
+        tax:       sum(mTax),
+        corpEvent: sum(mCorpEvent),
+        capex:     sum(mCapex),
+    };
+    bgt27.totalProjCost   = bgt27.devland;
+    bgt27.totalSalesMkt   = bgt27.salesComm + bgt27.progSales + bgt27.marketing;
+    bgt27.totalEmpOps     = bgt27.employee + bgt27.ga + bgt27.others + bgt27.finance + bgt27.tax + bgt27.corpEvent;
+    bgt27.totalAllCost    = bgt27.totalProjCost + bgt27.totalSalesMkt + bgt27.totalEmpOps + bgt27.capex;
+
+    // ── Section header helper ─────────────────────────────────────────────
+    const secHdr = (label, colspan=10) =>
+        `<tr class="row-group-header"><td colspan="${colspan}" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
+
+    const mainHdr = (label) =>
+        `<tr class="row-grand-total" style="font-size:0.82rem;background:rgba(139,92,246,0.25)!important">
+            <td colspan="10" style="font-weight:800;letter-spacing:0.04em;">${label}</td>
+        </tr>`;
+
+    // ── Row builder: Description | bgt2026 | act2026 | real2026 | bgt2027 | diff1 | diff2
+    const row = (label, key, b27val, indent=false) => {
+        const b26 = g26(key+'_b26');
+        const a26 = g26(key+'_a26');
+        const r26 = g26(key+'_r26');
+        const labelCell = `<td style="padding-left:${indent?'28px':'10px'}">${label}</td>`;
+        return `<tr>
+            ${labelCell}
+            ${inp26(key+'_b26')}
+            ${inp26(key+'_a26')}
+            ${inp26(key+'_r26')}
+            ${ro(b27val)}
+            ${diff(b26, b27val)}
+            ${diff(a26, b27val)}
+        </tr>`;
+    };
+
+    // ── Subtotal row (bold, read-only all) ───────────────────────────────
+    const subtotal = (label, key, b27val) => {
+        const b26 = g26(key+'_b26');
+        const a26 = g26(key+'_a26');
+        const r26 = g26(key+'_r26');
+        return `<tr class="row-group-total">
+            <td style="font-weight:700">${label}</td>
+            <td class="cell-computed">${b26 ? Math.round(b26).toLocaleString('id-ID') : '-'}</td>
+            <td class="cell-computed">${a26 ? Math.round(a26).toLocaleString('id-ID') : '-'}</td>
+            <td class="cell-computed">${r26 ? Math.round(r26).toLocaleString('id-ID') : '-'}</td>
+            <td class="cell-computed" style="font-weight:800;color:var(--accent-indigo)">${Math.round(b27val).toLocaleString('id-ID')}</td>
+            ${diff(b26, b27val)}
+            ${diff(a26, b27val)}
+        </tr>`;
+    };
+
     let html = `
         <thead>
             <tr>
-                <th>Description</th>
-                <th>Total 2027 (Rp Bio)</th>
-                ${months.map(m => `<th>${m}</th>`).join('')}
+                <th rowspan="2" style="min-width:220px">Description</th>
+                <th style="background:rgba(59,130,246,0.2)">Budget 2026</th>
+                <th style="background:rgba(16,185,129,0.2)">Actual 2026</th>
+                <th style="background:rgba(245,158,11,0.2)">Budget Realization 2026</th>
+                <th style="background:rgba(139,92,246,0.3)">Budget 2027</th>
+                <th>B2026 vs B2027</th>
+                <th>B2027 vs A2026</th>
+            </tr>
+            <tr>
+                <th style="font-size:0.7rem;font-weight:400;background:rgba(59,130,246,0.1)">Manual Input</th>
+                <th style="font-size:0.7rem;font-weight:400;background:rgba(16,185,129,0.1)">Manual Input</th>
+                <th style="font-size:0.7rem;font-weight:400;background:rgba(245,158,11,0.1)">Manual Input</th>
+                <th style="font-size:0.7rem;font-weight:400;background:rgba(139,92,246,0.2)">Auto from Modules</th>
+                <th style="font-size:0.7rem;font-weight:400">∆ %</th>
+                <th style="font-size:0.7rem;font-weight:400">∆ %</th>
             </tr>
         </thead>
         <tbody>
-            <tr class="row-group-header"><td colspan="14">A. TARGET MARKETING REVENUE</td></tr>
-            <tr>
-                <td>└─ Target Unit (Units)</td>
-                <td style="font-weight:700">${mUnits.reduce((a, b) => a + b, 0)}</td>
-                ${mUnits.map(val => `<td>${val}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Target SQM (Sqm)</td>
-                <td style="font-weight:700">${mSqm.reduce((a, b) => a + b, 0).toLocaleString('id-ID')}</td>
-                ${mSqm.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr style="font-weight:700; color:var(--accent-indigo)">
-                <td>└─ Target Sales Value (Rp)</td>
-                <td>${formatShortCurrency(mRevenue.reduce((a, b) => a + b, 0))}</td>
-                ${mRevenue.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <!-- YTD cumulative for revenue -->
-            <tr class="row-ytd">
-                <td>└─ Sales Value YTD</td>
-                <td>${formatShortCurrency(mRevenue.reduce((a, b) => a + b, 0))}</td>
-                ${(() => { const ytd=[]; for(let m=0;m<12;m++){ ytd[m]=(ytd[m-1]||0)+mRevenue[m]; } return ytd.map(v=>`<td>${v.toLocaleString('id-ID')}</td>`).join(''); })()}
-            </tr>
-            
-            <tr class="row-group-header"><td colspan="14">B. OPERATIONAL & PROJECT COSTS</td></tr>
-            <tr>
-                <td>└─ Land & Dev Costs</td>
-                <td style="font-weight:700">${formatShortCurrency(mDevLand.reduce((a, b) => a + b, 0))}</td>
-                ${mDevLand.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Sales Cost (Inhouse & Agent)</td>
-                <td style="font-weight:700">${formatShortCurrency(mSalesInhouse.reduce((a, b) => a + b, 0) + mSalesAgent.reduce((a, b) => a + b, 0))}</td>
-                ${mSalesInhouse.map((val, idx) => `<td>${(val + mSalesAgent[idx]).toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Program Sales Subsidies</td>
-                <td style="font-weight:700">${formatShortCurrency(mSalesProgram.reduce((a, b) => a + b, 0))}</td>
-                ${mSalesProgram.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Marketing ATL & BTL</td>
-                <td style="font-weight:700">${formatShortCurrency(mMarketingATL.reduce((a, b) => a + b, 0) + mMarketingBTL.reduce((a, b) => a + b, 0))}</td>
-                ${mMarketingATL.map((val, idx) => `<td>${(val + mMarketingBTL[idx]).toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Employee & HC Program</td>
-                <td style="font-weight:700">${formatShortCurrency(mEmployee.reduce((a, b) => a + b, 0))}</td>
-                ${mEmployee.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ G&A Expenses (incl. Business Trip)</td>
-                <td style="font-weight:700">${formatShortCurrency(mGA.reduce((a, b) => a + b, 0))}</td>
-                ${mGA.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Corporate Activity / Event</td>
-                <td style="font-weight:700">${formatShortCurrency(mCorpEvent.reduce((a, b) => a + b, 0))}</td>
-                ${mCorpEvent.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Loan Interest & Financials</td>
-                <td style="font-weight:700">${formatShortCurrency(mFinance.reduce((a, b) => a + b, 0))}</td>
-                ${mFinance.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Taxes</td>
-                <td style="font-weight:700">${formatShortCurrency(mTax.reduce((a, b) => a + b, 0))}</td>
-                ${mTax.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            <tr>
-                <td>└─ Fixed Assets (Capex requests)</td>
-                <td style="font-weight:700">${formatShortCurrency(mCapex.reduce((a, b) => a + b, 0))}</td>
-                ${mCapex.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
-            </tr>
-            
-            <tr class="row-grand-total">
-                <td>TOTAL PLANNED BUDGET</td>
-                <td>${formatShortCurrency(
-                    mDevLand.reduce((a,b)=>a+b, 0) + mSalesInhouse.reduce((a,b)=>a+b, 0) + mSalesAgent.reduce((a,b)=>a+b, 0) +
-                    mSalesProgram.reduce((a,b)=>a+b, 0) + mMarketingATL.reduce((a,b)=>a+b, 0) + mMarketingBTL.reduce((a,b)=>a+b, 0) +
-                    mEmployee.reduce((a,b)=>a+b, 0) + mGA.reduce((a,b)=>a+b, 0) + mCorpEvent.reduce((a,b)=>a+b, 0) +
-                    mFinance.reduce((a,b)=>a+b, 0) + mTax.reduce((a,b)=>a+b, 0) + mCapex.reduce((a,b)=>a+b, 0)
-                )}</td>
-                ${mUnits.map((_, idx) => {
-                    const monthCost = mDevLand[idx] + mSalesInhouse[idx] + mSalesAgent[idx] + mSalesProgram[idx] + mMarketingATL[idx] + mMarketingBTL[idx] + mEmployee[idx] + mGA[idx] + mCorpEvent[idx] + mFinance[idx] + mTax[idx] + mCapex[idx];
-                    return `<td>${monthCost.toLocaleString('id-ID')}</td>`;
-                }).join('')}
-            </tr>
-            <!-- YTD cumulative for total budget -->
-            <tr class="row-ytd">
-                <td>TOTAL BUDGET YTD</td>
-                <td>${formatShortCurrency(
-                    mDevLand.reduce((a,b)=>a+b, 0) + mSalesInhouse.reduce((a,b)=>a+b, 0) + mSalesAgent.reduce((a,b)=>a+b, 0) +
-                    mSalesProgram.reduce((a,b)=>a+b, 0) + mMarketingATL.reduce((a,b)=>a+b, 0) + mMarketingBTL.reduce((a,b)=>a+b, 0) +
-                    mEmployee.reduce((a,b)=>a+b, 0) + mGA.reduce((a,b)=>a+b, 0) + mCorpEvent.reduce((a,b)=>a+b, 0) +
-                    mFinance.reduce((a,b)=>a+b, 0) + mTax.reduce((a,b)=>a+b, 0) + mCapex.reduce((a,b)=>a+b, 0)
-                )}</td>
-                ${(() => { const mTotal=[]; const ytd=[]; for(let m=0;m<12;m++){ mTotal[m]=mDevLand[m]+mSalesInhouse[m]+mSalesAgent[m]+mSalesProgram[m]+mMarketingATL[m]+mMarketingBTL[m]+mEmployee[m]+mGA[m]+mCorpEvent[m]+mFinance[m]+mTax[m]+mCapex[m]; ytd[m]=(ytd[m-1]||0)+mTotal[m]; } return ytd.map(v=>`<td>${v.toLocaleString('id-ID')}</td>`).join(''); })()}
-            </tr>
-        </tbody>
     `;
-    
+
+    // ── A. SALES ─────────────────────────────────────────────────────────
+    html += mainHdr('A. TARGET MARKETING REVENUE');
+    html += secHdr('Sales in SQM');
+    state.data.target_revenue.forEach((r,i) => {
+        const sqmSum = r.sqm.reduce((a,b)=>a+b,0);
+        html += row(r.category || `Type ${i+1}`, `sqm_cat${i}`, sqmSum, true);
+    });
+    html += subtotal('TOTAL SALES in SQM', 'total_sqm', bgt27.sqm);
+
+    html += secHdr('Marketing Revenue (Rp Bio)');
+    state.data.target_revenue.forEach((r,i) => {
+        const revSum = r.sqm.reduce((a,b,mi)=>a+b*r.price_sqm,0);
+        html += row(r.category || `Type ${i+1}`, `rev_cat${i}`, revSum, true);
+    });
+    html += subtotal('TOTAL MARKETING REVENUE (Rp Bio)', 'total_rev', bgt27.revenue);
+
+    // ── B. PROJECT COST ──────────────────────────────────────────────────
+    html += mainHdr('B. DEVELOPMENT & OPERATIONAL COST');
+    html += secHdr('Project Cost');
+    html += row('Land Cost', 'land_cost', bgt27.devland, true);
+    html += row('Hard Cost (Dev Construction)', 'hard_cost', 0, true);
+    html += row('Soft Cost (Legal, Permits, Fees)', 'soft_cost', 0, true);
+    html += subtotal('Total Project Cost (Rp Bio)', 'total_proj', bgt27.devland);
+
+    // ── C. SALES & MARKETING ─────────────────────────────────────────────
+    html += secHdr('Sales & Marketing Costs (Rp Bio)');
+    html += row('Sales Commission (Inhouse + Agent)', 'sales_comm', bgt27.salesComm, true);
+    html += row('Program Sales Subsidies', 'prog_sales', bgt27.progSales, true);
+    html += row('Advertising & Promotions (ATL+BTL)', 'marketing', bgt27.marketing, true);
+    html += subtotal('Total Sales & Marketing Costs (Rp Bio)', 'total_sales_mkt', bgt27.totalSalesMkt);
+
+    // ── D. EMPLOYEE & OPERATIONAL ────────────────────────────────────────
+    html += secHdr('Employee & Operational Expenses (Rp Bio)');
+    html += row('Employee Expenses (Payroll)', 'employee', bgt27.employee, true);
+    html += row('General & Administration (incl. Bistrip)', 'ga', bgt27.ga, true);
+    html += row('Others Expenses', 'others', bgt27.others, true);
+    html += row('Finance Expense (Interest Loan)', 'finance', bgt27.finance, true);
+    html += row('Taxes', 'tax', bgt27.tax, true);
+    html += row('Corporate Event & Exhibitions', 'corp_event', bgt27.corpEvent, true);
+    html += subtotal('Total Employee & Operational (Rp Bio)', 'total_emp_ops', bgt27.totalEmpOps);
+
+    // ── E. FIXED ASSETS ──────────────────────────────────────────────────
+    html += secHdr('Capital Expenditure (Capex)');
+    html += row('Purchases of Fixed Assets (Capex)', 'capex', bgt27.capex, true);
+    html += subtotal('Total Purchase Fixed Assets (Rp Bio)', 'total_capex', bgt27.capex);
+
+    // ── GRAND TOTAL ───────────────────────────────────────────────────────
+    const tot26b = g26('total_b26'), tot26a = g26('total_a26'), tot26r = g26('total_r26');
+    html += `
+        <tr class="row-grand-total" style="background:rgba(139,92,246,0.3)!important;font-size:1rem;">
+            <td style="font-weight:900">TOTAL ALL COST (Rp Bio)</td>
+            <td class="cell-computed" style="font-weight:800">${tot26b ? Math.round(tot26b).toLocaleString('id-ID') : '-'}</td>
+            <td class="cell-computed" style="font-weight:800">${tot26a ? Math.round(tot26a).toLocaleString('id-ID') : '-'}</td>
+            <td class="cell-computed" style="font-weight:800">${tot26r ? Math.round(tot26r).toLocaleString('id-ID') : '-'}</td>
+            <td class="cell-computed" style="font-weight:900;color:#a78bfa;font-size:1.05rem">${Math.round(bgt27.totalAllCost).toLocaleString('id-ID')}</td>
+            ${diff(tot26b, bgt27.totalAllCost)}
+            ${diff(tot26a, bgt27.totalAllCost)}
+        </tr>
+    `;
+
+    html += '</tbody>';
     table.innerHTML = html;
+}
+
+function update2026(key, val) {
+    if (!state.data.summary_2026) state.data.summary_2026 = {};
+    state.data.summary_2026[key] = parseFloat(val) || 0;
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderSummaryBudgetTable();
 }
 
 // ----------------------------------------------------
