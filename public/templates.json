@@ -1046,36 +1046,6 @@
       "type": "sub_header"
     },
     {
-      "row": 14,
-      "name": "TV Commercial",
-      "classification": "Media Digital, Online, TV, Radio",
-      "type": "category_header"
-    },
-    {
-      "row": 15,
-      "name": "Print Ad",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "category_header"
-    },
-    {
-      "row": 16,
-      "name": "Radio Ad/spot/jingle",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "category_header"
-    },
-    {
-      "row": 17,
-      "name": "Website",
-      "classification": "Media Digital, Online, TV, Radio",
-      "type": "category_header"
-    },
-    {
-      "row": 18,
-      "name": "Other (social media)",
-      "classification": "Media Digital, Online, TV, Radio",
-      "type": "category_header"
-    },
-    {
       "row": 21,
       "name": "Placement:",
       "classification": "Sub Chart",

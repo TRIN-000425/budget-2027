@@ -686,6 +686,11 @@ function renderGenericRatiosTable(tableId, sourceData, targetSales, typeKey) {
     let html = `
         <thead>
             <tr>
+                <th colspan="15" style="padding:8px 0; background:none; border:none;">
+                    <button class="btn btn-primary btn-sm" onclick="addSalesCostRow('${typeKey}')"><i data-lucide="plus"></i> Add Row</button>
+                </th>
+            </tr>
+            <tr>
                 <th>Cost Component</th>
                 <th>Total 2027</th>
                 ${months.map(m => `<th>${m}</th>`).join('')}
@@ -745,11 +750,6 @@ function renderGenericRatiosTable(tableId, sourceData, targetSales, typeKey) {
             ${salesYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
             <td></td>
         </tr>
-        <tr>
-            <td colspan="15" style="text-align:left; padding:8px 0">
-                <button class="btn btn-sm" onclick="addSalesCostRow('${typeKey}')">+ Add Row</button>
-            </td>
-        </tr>
         </tbody>
     `;
     
@@ -798,6 +798,11 @@ function renderProgramSalesTable(targetSales) {
     
     let html = `
         <thead>
+            <tr>
+                <th colspan="15" style="padding:8px 0; background:none; border:none;">
+                    <button class="btn btn-primary btn-sm" onclick="addProgramSalesRow()"><i data-lucide="plus"></i> Add Program Item</button>
+                </th>
+            </tr>
             <tr>
                 <th>Program Component</th>
                 <th>Total 2027</th>
@@ -857,11 +862,6 @@ function renderProgramSalesTable(targetSales) {
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${progYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
             <td></td>
-        </tr>
-        <tr>
-            <td colspan="15" style="text-align:left; padding:8px 0">
-                <button class="btn btn-sm" onclick="addProgramSalesRow()">+ Add Row</button>
-            </td>
         </tr>
         </tbody>
     `;
@@ -1064,10 +1064,37 @@ function renderDevLandTable() {
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${devYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
         </tr>
+        <tr>
+            <td colspan="21" style="padding:10px 0; background:none; border:none;">
+                <button class="btn btn-primary btn-sm" onclick="addDevLandCategory()"><i data-lucide="plus"></i> Add Category</button>
+            </td>
+        </tr>
         </tbody>
     `;
     
     table.innerHTML = html;
+    refreshIcons();
+}
+
+function addDevLandCategory() {
+    const catName = prompt('Enter category name (e.g. "3. Infrastruktur"):');
+    if (!catName || catName.trim() === '') return;
+    const subName = prompt('Enter sub-category / item name:');
+    if (!subName || subName.trim() === '') return;
+    const key = 'custom_dl_' + Date.now();
+    // Add to templates runtime (session only — saved via budget data)
+    if (!state.templates.dev_land_custom) state.templates.dev_land_custom = [];
+    state.templates.dev_land.push({
+        num: catName.trim(),
+        cat: catName.trim(),
+        subcat: subName.trim(),
+        row: key,
+        sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0
+    });
+    state.data.dev_land[key] = { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderDevLandTable();
 }
 
 function updateDevLand(key, field, val, mIdx = null) {
@@ -1268,6 +1295,11 @@ function renderCorpEventTable() {
     let html = `
         <thead>
             <tr>
+                <th colspan="18" style="padding:8px 0; background:none; border:none;">
+                    <button class="btn btn-primary btn-sm" onclick="addCorpEventCategory()"><i data-lucide="plus"></i> Add Category</button>
+                </th>
+            </tr>
+            <tr>
                 <th>Corporate Event Activity</th>
                 <th>Classification</th>
                 <th>Unit Qty</th>
@@ -1275,6 +1307,7 @@ function renderCorpEventTable() {
                 <th>Estimated Subtotal</th>
                 <th>Total budget</th>
                 ${months.map(m => `<th>${m}</th>`).join('')}
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -1282,9 +1315,16 @@ function renderCorpEventTable() {
     
     let monthlyTotals = Array(12).fill(0);
     
-    state.templates.corp_event.forEach(item => {
+    state.templates.corp_event.forEach((item, itemIdx) => {
         if (item.type === 'header') {
-            html += `<tr class="row-group-header"><td colspan="18">${item.activity}</td></tr>`;
+            html += `
+                <tr class="row-group-header">
+                    <td colspan="17" style="font-weight:700; font-size:0.95rem;">${item.activity}</td>
+                    <td style="background:none;">
+                        <button class="btn btn-secondary btn-sm" onclick="addCorpEventDetail(${itemIdx})" title="Add detail row under this category" style="font-size:0.7rem; padding:3px 8px;"><i data-lucide="plus"></i> Detail</button>
+                        <button class="btn-icon btn-danger" onclick="removeCorpEventCategory(${itemIdx})" title="Remove category">&times;</button>
+                    </td>
+                </tr>`;
         } else {
             const key = item.row;
             const dataRow = state.data.corp_events[key] || { qty: 0, price_unit: 0, monthly: Array(12).fill(0) };
@@ -1295,15 +1335,16 @@ function renderCorpEventTable() {
             html += `
                 <tr>
                     <td style="padding-left:30px;">${item.activity}</td>
-                    <td><span style="font-size:0.75rem; color:var(--text-secondary)">${item.classification}</span></td>
-                    <td><input type="number" class="table-input" style="width:75px" value="${dataRow.qty}" onchange="updateCorpEvent(${key}, 'qty', this.value)"></td>
-                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.price_unit}" onchange="updateCorpEvent(${key}, 'price_unit', this.value)"></td>
+                    <td><span style="font-size:0.75rem; color:var(--text-secondary)">${item.classification || ''}</span></td>
+                    <td><input type="number" class="table-input" style="width:75px" value="${dataRow.qty}" onchange="updateCorpEvent('${key}', 'qty', this.value)"></td>
+                    <td><input type="number" class="table-input" style="width:110px" value="${dataRow.price_unit}" onchange="updateCorpEvent('${key}', 'price_unit', this.value)"></td>
                     <td><span style="font-weight:600">${subtotal.toLocaleString('id-ID')}</span></td>
                     <td><input type="text" class="table-input readonly" readonly value="${monthlySum.toLocaleString('id-ID')}"></td>
                     ${dataRow.monthly.map((val, mIdx) => {
                         monthlyTotals[mIdx] += val;
-                        return `<td><input type="number" class="table-input" value="${val}" onchange="updateCorpEvent(${key}, 'monthly', this.value, ${mIdx})"></td>`;
+                        return `<td><input type="number" class="table-input" value="${val}" onchange="updateCorpEvent('${key}', 'monthly', this.value, ${mIdx})"></td>`;
                     }).join('')}
+                    <td class="action-cell"><button class="btn-delete" onclick="removeCorpEventDetail(${itemIdx})"><i data-lucide="trash-2"></i></button></td>
                 </tr>
             `;
         }
@@ -1320,16 +1361,72 @@ function renderCorpEventTable() {
             <td colspan="5">TOTAL CORPORATE EVENT & EXHIBITIONS</td>
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${monthlyTotals.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+            <td></td>
         </tr>
         <tr class="row-ytd">
             <td colspan="5">CORPORATE EVENT YTD</td>
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${corpYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+            <td></td>
         </tr>
         </tbody>
     `;
     
     table.innerHTML = html;
+    refreshIcons();
+}
+
+function addCorpEventCategory() {
+    const catName = prompt('Enter category title (e.g. "Town Hall Meeting"):');
+    if (!catName || catName.trim() === '') return;
+    state.templates.corp_event.push({ type: 'header', activity: catName.trim(), row: null });
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderCorpEventTable();
+}
+
+function addCorpEventDetail(categoryIdx) {
+    const detailName = prompt('Enter detail activity name:');
+    if (!detailName || detailName.trim() === '') return;
+    const classification = prompt('Classification (e.g. "Internal", "External", "CSR"):') || '';
+    const key = 'ce_custom_' + Date.now();
+    // Insert detail right after the category header (or at end if last)
+    let insertAt = categoryIdx + 1;
+    // Skip past existing detail rows under this header
+    while (insertAt < state.templates.corp_event.length && state.templates.corp_event[insertAt].type !== 'header') {
+        insertAt++;
+    }
+    state.templates.corp_event.splice(insertAt, 0, {
+        type: 'input',
+        activity: detailName.trim(),
+        classification: classification.trim(),
+        row: key
+    });
+    state.data.corp_events[key] = { qty: 0, price_unit: 0, monthly: Array(12).fill(0) };
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderCorpEventTable();
+}
+
+function removeCorpEventCategory(itemIdx) {
+    if (!confirm('Remove this category and all its detail rows?')) return;
+    // Remove header and all following detail rows
+    let end = itemIdx + 1;
+    while (end < state.templates.corp_event.length && state.templates.corp_event[end].type !== 'header') end++;
+    state.templates.corp_event.splice(itemIdx, end - itemIdx);
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderCorpEventTable();
+}
+
+function removeCorpEventDetail(itemIdx) {
+    if (!confirm('Remove this detail row?')) return;
+    const key = state.templates.corp_event[itemIdx].row;
+    if (key) delete state.data.corp_events[key];
+    state.templates.corp_event.splice(itemIdx, 1);
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderCorpEventTable();
 }
 
 function updateCorpEvent(key, field, val, mIdx = null) {
@@ -1443,26 +1540,28 @@ function renderBusinessTripTable() {
         return;
     }
     
-    const levels = ['Director', 'Manager', 'Staff'];
+    const levels = ['Director', 'Manager', 'SPV', 'Staff'];
     const destinations = ['Local', 'Overseas'];
     
     body.innerHTML = state.data.business_trip.map((row, idx) => {
-        // Dynamic rates matching Excel policies (Attachment1 rates)
+        // Dynamic rates matching Excel travel policy (incl. SPV grade)
         const allowances = {
             'Director': { 'Local': 1500000, 'Overseas': 2000000 },
-            'Manager': { 'Local': 900000, 'Overseas': 1200000 },
-            'Staff': { 'Local': 600000, 'Overseas': 800000 }
+            'Manager':  { 'Local': 900000,  'Overseas': 1200000 },
+            'SPV':      { 'Local': 750000,  'Overseas': 1000000 },
+            'Staff':    { 'Local': 600000,  'Overseas': 800000  }
         };
         const hotelRates = {
             'Director': { 'Local': 1650000, 'Overseas': 2500000 },
-            'Manager': { 'Local': 750000, 'Overseas': 1200000 },
-            'Staff': { 'Local': 500000, 'Overseas': 800000 }
+            'Manager':  { 'Local': 750000,  'Overseas': 1200000 },
+            'SPV':      { 'Local': 600000,  'Overseas': 1000000 },
+            'Staff':    { 'Local': 500000,  'Overseas': 800000  }
         };
         const standardFlights = { 'Local': 4000000, 'Overseas': 8000000 };
         
         const standardFlight = standardFlights[row.destination];
-        const standardHotel = hotelRates[row.grade][row.destination];
-        const standardAllowance = allowances[row.grade][row.destination];
+        const standardHotel = (hotelRates[row.grade] || hotelRates['Staff'])[row.destination];
+        const standardAllowance = (allowances[row.grade] || allowances['Staff'])[row.destination];
         
         const totalCost = standardFlight + (standardHotel * Math.max(0, row.duration - 1)) + (standardAllowance * row.duration);
         
@@ -2219,8 +2318,8 @@ function exportBudget() {
         // --- 11. Business Trip ---
         (() => {
             const rows = [['Employee','Division','Grade','Dest.','City','Month','Days','Flight','Hotel/Night','Allowance/Day','Total']];
-            const allowances = {'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'Staff':{'Local':600000,'Overseas':800000}};
-            const hotelRates = {'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'Staff':{'Local':500000,'Overseas':800000}};
+            const allowances = {'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'SPV':{'Local':750000,'Overseas':1000000},'Staff':{'Local':600000,'Overseas':800000}};
+            const hotelRates = {'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'SPV':{'Local':600000,'Overseas':1000000},'Staff':{'Local':500000,'Overseas':800000}};
             const stdFlights = {'Local':4000000,'Overseas':8000000};
             (d.business_trip||[]).forEach(r => {
                 const ticket = (r.ticket_price !== undefined && r.ticket_price !== null) ? r.ticket_price : (stdFlights[r.destination]||4000000);
@@ -2257,8 +2356,8 @@ function exportBudget() {
                 Object.keys(d.ga_expenses).forEach(code=>mga[m]+=d.ga_expenses[code][m]);
                 (d.business_trip||[]).forEach(r=>{
                     if(r.month==m){
-                        const amap={'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'Staff':{'Local':600000,'Overseas':800000}};
-                        const hmap={'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'Staff':{'Local':500000,'Overseas':800000}};
+                        const amap={'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'SPV':{'Local':750000,'Overseas':1000000},'Staff':{'Local':600000,'Overseas':800000}};
+                        const hmap={'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'SPV':{'Local':600000,'Overseas':1000000},'Staff':{'Local':500000,'Overseas':800000}};
                         const sflights={'Local':4000000,'Overseas':8000000};
                         const grade=r.grade||'Staff',dest=r.destination||'Local';
                         const ticket=(r.ticket_price!=null)?r.ticket_price:(sflights[dest]||4000000);
