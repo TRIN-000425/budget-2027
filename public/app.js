@@ -1023,31 +1023,51 @@ function renderDevLandTable() {
     items.forEach((item, idx) => {
         const text = (item.subcat || item.cat || '').trim();
         const isNote = item.cat === 'Catatan' || text.startsWith('1. Nilai') || text.startsWith('2. Apabila') || text.startsWith('3. Apabila') || text.startsWith('4. Agar') || text.startsWith('Catatan') || text === 'TOTAL LAND & DEVELOPMENT COST';
-        const isHeader = isNote || !item.row;
-
-        if (isHeader) {
-            // Find all child input items belonging under this header until the next header
+        const isGroupHeader = (item.cat && item.cat.includes('.')) || (item.num && item.num.includes('.')) || item.cat === 'Hard Cost' || item.cat === 'Soft Cost';
+        const isSectionHeader = item.type === 'section_header' || (item.num && !item.cat.includes('.'));
+        
+        if (isGroupHeader) {
             let childIdx = idx + 1;
             let hSqm = 0, hRab = 0, hReal = 0, hEst = 0;
             const hMonthly = Array(12).fill(0);
 
-            while (childIdx < items.length) {
-                const child = items[childIdx];
-                const cText = (child.subcat || child.cat || '').trim();
-                const cIsNote = child.cat === 'Catatan' || cText.startsWith('1. Nilai') || cText.startsWith('2. Apabila') || cText.startsWith('3. Apabila') || cText.startsWith('4. Agar') || cText.startsWith('Catatan') || cText === 'TOTAL LAND & DEVELOPMENT COST';
-                const cIsHeader = cIsNote || !child.row;
+            if (item.cat === 'Hard Cost' || item.cat === 'Soft Cost') {
+                // Aggregate across all sub-headers in Hard Cost or Soft Cost
+                while (childIdx < items.length) {
+                    const child = items[childIdx];
+                    if (child.type === 'section_header' || child.num === '1' || child.num === '2' || (item.cat === 'Hard Cost' && child.cat === 'Soft Cost')) break;
+                    if (child.row) {
+                        const key = child.row;
+                        const dRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+                        hSqm += parseFloat(dRow.sqm) || 0;
+                        hRab += parseFloat(dRow.rab_spk) || 0;
+                        hReal += parseFloat(dRow.realisasi) || 0;
+                        hEst += parseFloat(dRow.best_est) || 0;
+                        (dRow.monthly || Array(12).fill(0)).forEach((v, m) => hMonthly[m] += v);
+                    }
+                    childIdx++;
+                }
+            } else {
+                // Immediate children under specific sub-header (e.g. 2.8, 2.9)
+                while (childIdx < items.length) {
+                    const child = items[childIdx];
+                    const cText = (child.subcat || child.cat || '').trim();
+                    const cIsNote = child.cat === 'Catatan' || cText.startsWith('1. Nilai') || cText.startsWith('2. Apabila') || cText.startsWith('3. Apabila') || cText.startsWith('4. Agar') || cText.startsWith('Catatan') || cText === 'TOTAL LAND & DEVELOPMENT COST';
+                    const cIsHeader = cIsNote || (child.cat && child.cat.includes('.')) || (child.num && child.num.includes('.')) || child.type === 'section_header' || child.cat === 'Hard Cost' || child.cat === 'Soft Cost';
 
-                if (cIsHeader) break; // Next header encountered
+                    if (cIsHeader) break; // Reached next sub-header
 
-                const key = child.row;
-                const dRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
-                hSqm += parseFloat(dRow.sqm) || 0;
-                hRab += parseFloat(dRow.rab_spk) || 0;
-                hReal += parseFloat(dRow.realisasi) || 0;
-                hEst += parseFloat(dRow.best_est) || 0;
-                (dRow.monthly || Array(12).fill(0)).forEach((v, m) => hMonthly[m] += v);
-
-                childIdx++;
+                    if (child.row) {
+                        const key = child.row;
+                        const dRow = state.data.dev_land[key] || { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
+                        hSqm += parseFloat(dRow.sqm) || 0;
+                        hRab += parseFloat(dRow.rab_spk) || 0;
+                        hReal += parseFloat(dRow.realisasi) || 0;
+                        hEst += parseFloat(dRow.best_est) || 0;
+                        (dRow.monthly || Array(12).fill(0)).forEach((v, m) => hMonthly[m] += v);
+                    }
+                    childIdx++;
+                }
             }
 
             headerSums[idx] = { sqm: hSqm, rab: hRab, real: hReal, est: hEst, monthly: hMonthly };
