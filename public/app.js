@@ -1227,7 +1227,6 @@ function renderDevLandTable() {
             const pctReal = dataRow.rab_spk > 0 ? (totalEstSpent / dataRow.rab_spk) : 0;
             const budgetSum = dataRow.monthly.reduce((a, b) => a + b, 0);
             
-            const numDisp = item.num || '';
             const descValue = dataRow.name !== undefined ? dataRow.name : (item.subcat || item.cat || '');
             
             html += `
