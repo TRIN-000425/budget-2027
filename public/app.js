@@ -1162,7 +1162,8 @@ function renderDevLandTable() {
             const rawKey = isGroupTitle ? `group_${item.cat}` : `hdr_${item.num || itemIdx}_${titleDisp}`;
             const safeKey = rawKey.replace(/[^a-zA-Z0-9_]/g, '_');
             
-            const isCollapsed = !!state.collapsedHeaders[safeKey];
+            // Default to collapsed unless explicitly expanded (true = collapsed)
+            const isCollapsed = state.collapsedHeaders[safeKey] !== false;
 
             if (isGroupTitle) {
                 activeSubCollapsed = isCollapsed;
@@ -1202,7 +1203,7 @@ function renderDevLandTable() {
         } else {
             // Input rows
             const numDisp = item.num || '';
-            let currentSubCollapsed = false;
+            let currentSubCollapsed = true;
 
             // Find parent sub-header collapse status for this row
             for (let i = itemIdx - 1; i >= 0; i--) {
@@ -1211,7 +1212,7 @@ function renderDevLandTable() {
                     const pNum = prev.num || prev.cat;
                     const pTitle = prev.subcat || prev.cat;
                     const pKey = `hdr_${pNum}_${pTitle}`.replace(/[^a-zA-Z0-9_]/g, '_');
-                    currentSubCollapsed = !!state.collapsedHeaders[pKey];
+                    currentSubCollapsed = state.collapsedHeaders[pKey] !== false;
                     break;
                 }
             }
