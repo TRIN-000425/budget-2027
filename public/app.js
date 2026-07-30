@@ -431,13 +431,13 @@ function renderDashboardOverview() {
     document.getElementById('kpi-units-sold').innerText = `${sums.totalUnitsSold} Units Sold`;
     
     document.getElementById('kpi-total-cost').innerText = formatShortCurrency(sums.totalCostVal);
-    document.getElementById('kpi-cost-ratio').innerText = formatPercent(sums.totalRevenueVal > 0 ? (sums.totalCostVal / sums.totalRevenueVal) : 0);
+    document.getElementById('kpi-cost-ratio').innerText = formatPercent(sums.totalRevenueVal > 0 ? (sums.totalCostVal / sums.totalRevenueVal) : 0) + ' ratio to Revenue';
     
     document.getElementById('kpi-project-cost').innerText = formatShortCurrency(sums.projectCostVal);
-    document.getElementById('kpi-project-cost-ratio').innerText = formatPercent(sums.totalCostVal > 0 ? (sums.projectCostVal / sums.totalCostVal) : 0);
+    document.getElementById('kpi-project-cost-ratio').innerText = formatPercent(sums.totalCostVal > 0 ? (sums.projectCostVal / sums.totalCostVal) : 0) + ' of total cost';
     
     document.getElementById('kpi-capex').innerText = formatShortCurrency(sums.capexCostVal);
-    document.getElementById('kpi-capex-count').innerText = `${state.data.fixed_assets.length} items requested`;
+    document.getElementById('kpi-capex-count').innerText = `${(state.data.fixed_assets || []).length} items requested`;
     
     // Draw chart bars
     const breakdown = [
@@ -448,11 +448,13 @@ function renderDashboardOverview() {
         { name: 'Fixed Assets', val: sums.capexCostVal, color: 'cherry' }
     ];
     
-    const maxVal = Math.max(...breakdown.map(b => b.val), 1);
+    const maxVal = Math.max(...breakdown.map(b => b.val), 0);
     
     const barsContainer = document.getElementById('module-breakdown-bars');
+    if (!barsContainer) return;
+
     barsContainer.innerHTML = breakdown.map(item => {
-        const pct = (item.val / maxVal) * 100;
+        const pct = maxVal > 0 ? Math.min(100, Math.max(3, (item.val / maxVal) * 100)) : 0;
         return `
             <div class="chart-bar-row">
                 <span class="label">${item.name}</span>
