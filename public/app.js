@@ -2331,9 +2331,12 @@ function exportBudget() {
             XLSX.utils.book_append_sheet(wb, ws, 'Business Trip');
         })();
 
-        // --- 12. Summary ---
+        // --- 12. Summary Budget (Original Template Format) ---
         (() => {
-            // Compute all monthly totals
+            const s26 = d.summary_2026 || {};
+            const g26 = (k) => parseFloat(s26[k] || 0);
+
+            // Monthly trackers
             const mRev=Array(12).fill(0), mUnits=Array(12).fill(0), mSqm=Array(12).fill(0);
             d.target_revenue.forEach(r => {
                 r.sqm.forEach((s,m)=>{ mRev[m]+=s*r.price_sqm; mSqm[m]+=s; });
@@ -2370,31 +2373,61 @@ function exportBudget() {
                 Object.keys(d.corp_events).forEach(row=>mcorp[m]+=d.corp_events[row].monthly[m]);
                 (d.fixed_assets||[]).forEach(r=>{if(r.month==m)mcapex[m]+=r.qty*r.price;});
             }
-            const rows = [['Description','Total 2027 (Rp)',...months]];
-            rows.push(['A. TARGET REVENUE','','','','','','','','','','','','','']);
-            rows.push(['  Units',mUnits.reduce((a,b)=>a+b,0),...mUnits]);
-            rows.push(['  Sqm',mSqm.reduce((a,b)=>a+b,0),...mSqm]);
-            rows.push(['  Sales Value',mRev.reduce((a,b)=>a+b,0),...mRev]);
-            rows.push(['B. OPERATIONAL COSTS','','','','','','','','','','','','','']);
-            rows.push(['  Land & Dev',mdev.reduce((a,b)=>a+b,0),...mdev]);
-            rows.push(['  Sales Cost (Inh+Agent)',sinhouse.reduce((a,b)=>a+b,0)+sagent.reduce((a,b)=>a+b,0),...sinhouse.map((v,i)=>v+sagent[i])]);
-            rows.push(['  Program Sales',sprogram.reduce((a,b)=>a+b,0),...sprogram]);
-            rows.push(['  Marketing',matl.reduce((a,b)=>a+b,0)+mbtl.reduce((a,b)=>a+b,0),...matl.map((v,i)=>v+mbtl[i])]);
-            rows.push(['  Employee + HC',memp.reduce((a,b)=>a+b,0),...memp]);
-            rows.push(['  G&A (incl. Trip)',mga.reduce((a,b)=>a+b,0),...mga]);
-            rows.push(['  Others',mother.reduce((a,b)=>a+b,0),...mother]);
-            rows.push(['  Finance',mfin.reduce((a,b)=>a+b,0),...mfin]);
-            rows.push(['  Tax',mtax.reduce((a,b)=>a+b,0),...mtax]);
-            rows.push(['  Corporate Event',mcorp.reduce((a,b)=>a+b,0),...mcorp]);
-            rows.push(['  Fixed Assets',mcapex.reduce((a,b)=>a+b,0),...mcapex]);
-            const totalCost = [...Array(12).keys()].map(m=>mdev[m]+sinhouse[m]+sagent[m]+sprogram[m]+matl[m]+mbtl[m]+memp[m]+mga[m]+mother[m]+mfin[m]+mtax[m]+mcorp[m]+mcapex[m]);
-            const totalSum = totalCost.reduce((a,b)=>a+b,0);
-            rows.push(['TOTAL BUDGET',totalSum,...totalCost]);
-            const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+totalCost[m];
-            rows.push(['BUDGET YTD',totalSum,...ytd]);
+
+            const sum = arr => arr.reduce((a,b)=>a+b,0);
+            const b27 = {
+                sqm: sum(mSqm),
+                revenue: sum(mRev),
+                devland: sum(mdev),
+                salesComm: sum(sinhouse) + sum(sagent),
+                progSales: sum(sprogram),
+                marketing: sum(matl) + sum(mbtl),
+                employee: sum(memp),
+                ga: sum(mga),
+                others: sum(mother),
+                finance: sum(mfin),
+                tax: sum(mtax),
+                corpEvent: sum(mcorp),
+                capex: sum(mcapex)
+            };
+            b27.totalProj = b27.devland;
+            b27.totalSalesMkt = b27.salesComm + b27.progSales + b27.marketing;
+            b27.totalEmpOps = b27.employee + b27.ga + b27.others + b27.finance + b27.tax + b27.corpEvent;
+            b27.totalAllCost = b27.totalProj + b27.totalSalesMkt + b27.totalEmpOps + b27.capex;
+
+            const calcPct = (b26, b27val) => b26 ? ((b27val - b26) / Math.abs(b26) * 100).toFixed(1) + '%' : '-';
+
+            const rows = [
+                ['Description', 'BUDGET 2026', 'ACTUAL 2026', 'Budget Realization 2026', 'BUDGET 2027', 'B2026 vs B2027', 'B2027 vs A2026'],
+                ['A. TARGET MARKETING REVENUE', '', '', '', '', '', ''],
+                ['Sales in SQM', '', '', '', '', '', '']
+            ];
+
+            d.target_revenue.forEach((r, i) => {
+                const sqmSum = r.sqm.reduce((a,b)=>a+b,0);
+                const k = `sqm_cat${i}`;
+                rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), g26(k+'_r26'), sqmSum, calcPct(g26(k+'_b26'), sqmSum), calcPct(g26(k+'_a26'), sqmSum)]);
+            });
+            rows.push(['TOTAL SALES in SQM', g26('total_sqm_b26'), g26('total_sqm_a26'), g26('total_sqm_r26'), b27.sqm, calcPct(g26('total_sqm_b26'), b27.sqm), calcPct(g26('total_sqm_a26'), b27.sqm)]);
+
+            rows.push(['Marketing Revenue (Rp)', '', '', '', '', '', '']);
+            d.target_revenue.forEach((r, i) => {
+                const revSum = r.sqm.reduce((a,b,mi)=>a+b*r.price_sqm,0);
+                const k = `rev_cat${i}`;
+                rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), g26(k+'_r26'), revSum, calcPct(g26(k+'_b26'), revSum), calcPct(g26(k+'_a26'), revSum)]);
+            });
+            rows.push(['TOTAL MARKETING REVENUE (Rp)', g26('total_rev_b26'), g26('total_rev_a26'), g26('total_rev_r26'), b27.revenue, calcPct(g26('total_rev_b26'), b27.revenue), calcPct(g26('total_rev_a26'), b27.revenue)]);
+
+            rows.push(['B. DEVELOPMENT & OPERATIONAL COST', '', '', '', '', '', '']);
+            rows.push(['Total Project Cost (Land & Dev)', g26('total_proj_b26'), g26('total_proj_a26'), g26('total_proj_r26'), b27.devland, calcPct(g26('total_proj_b26'), b27.devland), calcPct(g26('total_proj_a26'), b27.devland)]);
+            rows.push(['Total Sales & Marketing Costs', g26('total_sales_mkt_b26'), g26('total_sales_mkt_a26'), g26('total_sales_mkt_r26'), b27.totalSalesMkt, calcPct(g26('total_sales_mkt_b26'), b27.totalSalesMkt), calcPct(g26('total_sales_mkt_a26'), b27.totalSalesMkt)]);
+            rows.push(['Total Employee & Operational Expenses', g26('total_emp_ops_b26'), g26('total_emp_ops_a26'), g26('total_emp_ops_r26'), b27.totalEmpOps, calcPct(g26('total_emp_ops_b26'), b27.totalEmpOps), calcPct(g26('total_emp_ops_a26'), b27.totalEmpOps)]);
+            rows.push(['Total Purchase Fixed Assets (Capex)', g26('total_capex_b26'), g26('total_capex_a26'), g26('total_capex_r26'), b27.capex, calcPct(g26('total_capex_b26'), b27.capex), calcPct(g26('total_capex_a26'), b27.capex)]);
+            rows.push(['TOTAL ALL COST (Rp)', g26('total_b26'), g26('total_a26'), g26('total_r26'), b27.totalAllCost, calcPct(g26('total_b26'), b27.totalAllCost), calcPct(g26('total_a26'), b27.totalAllCost)]);
+
             const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:32},{wch:16},...Array(12).fill({wch:14})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Summary');
+            ws['!cols'] = [{wch:38},{wch:18},{wch:18},{wch:22},{wch:18},{wch:16},{wch:16}];
+            XLSX.utils.book_append_sheet(wb, ws, 'SUMMARY BUDGET');
         })();
 
         // Write file
