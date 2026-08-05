@@ -324,6 +324,7 @@ function getBudgetSummary(scope, department, project) {
   const deptStr = department ? String(department).trim().toLowerCase() : '';
   const projStr = project ? String(project).trim().toLowerCase() : '';
   const matches = [];
+  const entries = [];
   for (let i = 0; i < budgetRows.length; i++) {
     const rowDept = String(budgetRows[i][4] || '').trim().toLowerCase();
     const rowProj = String(budgetRows[i][1] || '');
@@ -336,10 +337,13 @@ function getBudgetSummary(scope, department, project) {
     if (!ok) continue;
     try {
       const parsed = JSON.parse(budgetRows[i][3]);
-      if (parsed && typeof parsed === 'object') matches.push(parsed);
+      if (parsed && typeof parsed === 'object') {
+        matches.push(parsed);
+        entries.push({ company: budgetRows[i][0] || '', project: budgetRows[i][1] || '', department: budgetRows[i][4] || '', data: parsed });
+      }
     } catch (e) {}
   }
-  return { data: mergeBudgetData(matches), meta: { rows: matches.length } };
+  return { data: mergeBudgetData(matches), meta: { rows: matches.length, entries: entries } };
 }
 
 // ---------------- HTTP server ----------------

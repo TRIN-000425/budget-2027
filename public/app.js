@@ -2714,96 +2714,151 @@ async function renderConsolidatedSummary(tabId) {
     scopeEl.textContent = 'Aggregating ' + scopeLabel + '...';
     table.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading summary...</td></tr>`;
 
-    let merged = null, rowCount = 0;
+    let merged = null, rowCount = 0, entries = [];
     if (state.mockMode) {
         // Mock mode is browser-only: summarize the CURRENT in-memory data, never the backend
         merged = state.data;
         rowCount = 1;
+        entries = [{
+            company: state.selectedCompany || '',
+            project: state.selectedProject || '',
+            department: isDeptView ? (state.currentUser.department || '') : (getActiveDepartment() || ''),
+            data: state.data
+        }];
         scopeLabel += ' · mock data (browser only)';
     } else if (state.gasUrl) {
         try {
             const res = await fetchGasGet(`${state.gasUrl}?action=summary&scope=${scope}${params}`);
             const json = await res.json();
-            if (json.status === 'success' && json.data) { merged = json.data; rowCount = (json.meta && json.meta.rows) || 0; }
+            if (json.status === 'success' && json.data) {
+                merged = json.data;
+                rowCount = (json.meta && json.meta.rows) || 0;
+                entries = (json.meta && json.meta.entries) || [];
+            }
         } catch (err) {
             if (!isAbortError(err)) console.error(err);
         }
     }
     if (!merged || Object.keys(merged).length === 0) {
         scopeEl.textContent = 'No saved budget entries found for ' + scopeLabel + '.';
-        table.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-secondary);">No saved budget data to summarize. Save budgets first (or check the backend connection).</td></tr>`;
+        table.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:24px; color:var(--text-secondary);">No saved budget data to summarize. Save budgets first (or check the backend connection).</td></tr>`;
         return;
     }
     scopeEl.textContent = 'Scope: ' + scopeLabel + ' · ' + rowCount + ' saved entr' + (rowCount === 1 ? 'y' : 'ies') + ' aggregated';
 
-    const T = computeMonthlyTotals(merged);
     const sum = arr => arr.reduce((a, b) => a + b, 0);
+    // One annual number per category line (no months in this view)
+    const annual = T => ({
+        revenue: sum(T.mRevenue), units: sum(T.mUnits), sqm: sum(T.mSqm),
+        devLand: sum(T.mDevLand),
+        salesInhouse: sum(T.mSalesInhouse), salesAgent: sum(T.mSalesAgent), salesProgram: sum(T.mSalesProgram),
+        mktATL: sum(T.mMarketingATL), mktBTL: sum(T.mMarketingBTL),
+        payroll: sum(T.mEmployee), ga: sum(T.mGA), others: sum(T.mOthers),
+        finance: sum(T.mFinance), tax: sum(T.mTax), corpEvent: sum(T.mCorpEvent),
+        capex: sum(T.mCapex)
+    });
+    const withSubtotals = A => {
+        const salesMktg = A.salesInhouse + A.salesAgent + A.salesProgram + A.mktATL + A.mktBTL;
+        const empOps = A.payroll + A.ga + A.others + A.finance + A.tax + A.corpEvent;
+        return { salesMktg, empOps, totalCost: A.devLand + salesMktg + empOps + A.capex };
+    };
+    const ratioOf = A => (A.revenue > 0 ? (withSubtotals(A).totalCost / A.revenue * 100) : 0);
 
-    // Subtotals
-    const salesMktg = T.mSalesInhouse.map((v, m) => v + T.mSalesAgent[m] + T.mSalesProgram[m] + T.mMarketingATL[m] + T.mMarketingBTL[m]);
-    const empOps = T.mEmployee.map((v, m) => v + T.mGA[m] + T.mOthers[m] + T.mFinance[m] + T.mTax[m] + T.mCorpEvent[m]);
-    const totalCost = T.mDevLand.map((v, m) => v + salesMktg[m] + empOps[m] + T.mCapex[m]);
+    const mergedA = annual(computeMonthlyTotals(merged));
 
-    const cells = arr => arr.map(v => `<td class="cell-computed">${formatShortCurrency(v)}</td>`).join('');
-    const cellsNum = arr => arr.map(v => `<td class="cell-computed">${Math.round(v).toLocaleString('id-ID')}</td>`).join('');
-    const secHdr = label => `<tr class="row-group-header"><td colspan="14" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
+    // One column per group: FAT view -> per division; All Projects view -> per project
+    const groups = [];
+    const groupMap = {};
+    const companies = new Set();
+    entries.forEach(e => {
+        if (e.company) companies.add(e.company);
+        const key = isDeptView ? (e.company + '||' + e.project) : (e.department || '(none)');
+        if (!groupMap[key]) {
+            groupMap[key] = { company: e.company || '', label: isDeptView ? (e.project || '(no project)') : (e.department || '(none)'), totals: null, count: 0 };
+            groups.push(groupMap[key]);
+        }
+        const A = annual(computeMonthlyTotals(e.data || {}));
+        const g = groupMap[key];
+        if (!g.totals) g.totals = A;
+        else Object.keys(A).forEach(k => { g.totals[k] += A[k]; });
+        g.count++;
+    });
+    // Same project name under different companies -> disambiguate with the company prefix
+    if (isDeptView && companies.size > 1) groups.forEach(g => { if (g.company) g.label = g.company + ' / ' + g.label; });
+
+    const money = v => formatShortCurrency(v);
+    const num = v => Math.round(v).toLocaleString('id-ID');
 
     let html = `
         <thead>
             <tr>
                 <th style="min-width:200px">Category</th>
-                ${months.map(m => `<th>${m}</th>`).join('')}
-                <th>Total 2027</th>
+                <th style="min-width:130px; background:var(--accent-purple); color:#fff;">TOTAL 2027</th>
+                ${groups.map(g => `<th style="min-width:130px">${esc(g.label)}${g.count > 1 ? ' <span style="opacity:.55;font-weight:500">(' + g.count + ')</span>' : ''}</th>`).join('')}
             </tr>
         </thead>
         <tbody>`;
 
+    const secHdr = label => `<tr class="row-group-header"><td colspan="${2 + groups.length}" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
+    const row = (label, getVal, fmt, cls, style) => {
+        html += `<tr${cls ? ' class="' + cls + '"' : ''}><td${style ? ' style="' + style + '"' : ''}>${label}</td><td class="cell-computed" style="font-weight:700">${fmt(getVal(mergedA))}</td>${groups.map(g => `<td class="cell-computed">${fmt(getVal(g.totals))}</td>`).join('')}</tr>`;
+    };
+
     // Revenue block
-    html += `<tr class="row-grand-total"><td style="font-weight:800">Target Revenue</td>${cells(T.mRevenue)}<td style="font-weight:800">${formatShortCurrency(sum(T.mRevenue))}</td></tr>`;
-    html += `<tr><td style="padding-left:28px">Units Sold</td>${cellsNum(T.mUnits)}<td class="cell-computed">${Math.round(sum(T.mUnits)).toLocaleString('id-ID')}</td></tr>`;
-    html += `<tr><td style="padding-left:28px">Sqm Sold</td>${cellsNum(T.mSqm)}<td class="cell-computed">${Math.round(sum(T.mSqm)).toLocaleString('id-ID')}</td></tr>`;
+    row('Target Revenue', A => A.revenue, money, 'row-grand-total', 'style="font-weight:800"');
+    row('Units Sold', A => A.units, num, '', 'style="padding-left:28px"');
+    row('Sqm Sold', A => A.sqm, num, '', 'style="padding-left:28px"');
 
     // Cost blocks
     html += secHdr('Project Cost');
-    html += `<tr><td>Dev & Land Cost</td>${cells(T.mDevLand)}<td class="cell-computed">${formatShortCurrency(sum(T.mDevLand))}</td></tr>`;
+    row('Dev & Land Cost', A => A.devLand, money);
     html += secHdr('Sales & Marketing');
-    [['Sales Inhouse', T.mSalesInhouse], ['Sales Agent', T.mSalesAgent], ['Program Sales', T.mSalesProgram], ['Marketing ATL', T.mMarketingATL], ['Marketing BTL', T.mMarketingBTL]].forEach(r => {
-        html += `<tr><td style="padding-left:28px">${r[0]}</td>${cells(r[1])}<td class="cell-computed">${formatShortCurrency(sum(r[1]))}</td></tr>`;
-    });
-    html += `<tr class="row-group-total"><td style="font-weight:700">Sales & Marketing Total</td>${cells(salesMktg)}<td style="font-weight:800">${formatShortCurrency(sum(salesMktg))}</td></tr>`;
+    [['Sales Inhouse', A => A.salesInhouse], ['Sales Agent', A => A.salesAgent], ['Program Sales', A => A.salesProgram], ['Marketing ATL', A => A.mktATL], ['Marketing BTL', A => A.mktBTL]].forEach(r => row(r[0], r[1], money, '', 'style="padding-left:28px"'));
+    row('Sales & Marketing Total', A => withSubtotals(A).salesMktg, money, 'row-group-total', 'style="font-weight:700"');
     html += secHdr('Employee & Operations');
-    [['Payroll', T.mEmployee], ['G&A (incl. Business Trip)', T.mGA], ['Others', T.mOthers], ['Finance', T.mFinance], ['Tax', T.mTax], ['Corporate Event', T.mCorpEvent]].forEach(r => {
-        html += `<tr><td style="padding-left:28px">${r[0]}</td>${cells(r[1])}<td class="cell-computed">${formatShortCurrency(sum(r[1]))}</td></tr>`;
-    });
-    html += `<tr class="row-group-total"><td style="font-weight:700">Employee & Operations Total</td>${cells(empOps)}<td style="font-weight:800">${formatShortCurrency(sum(empOps))}</td></tr>`;
+    [['Payroll', A => A.payroll], ['G&A (incl. Business Trip)', A => A.ga], ['Others', A => A.others], ['Finance', A => A.finance], ['Tax', A => A.tax], ['Corporate Event', A => A.corpEvent]].forEach(r => row(r[0], r[1], money, '', 'style="padding-left:28px"'));
+    row('Employee & Operations Total', A => withSubtotals(A).empOps, money, 'row-group-total', 'style="font-weight:700"');
     html += secHdr('Capital');
-    html += `<tr><td>Capex (Fixed Assets)</td>${cells(T.mCapex)}<td class="cell-computed">${formatShortCurrency(sum(T.mCapex))}</td></tr>`;
+    row('Capex (Fixed Assets)', A => A.capex, money);
 
     // Grand total + ratio
-    html += `<tr class="row-grand-total"><td style="font-weight:800">TOTAL BUDGET 2027</td>${cells(totalCost)}<td style="font-weight:800;color:var(--accent-purple)">${formatShortCurrency(sum(totalCost))}</td></tr>`;
-    const ratio = sum(T.mRevenue) > 0 ? (sum(totalCost) / sum(T.mRevenue) * 100).toFixed(1) : '0.0';
-    html += `<tr><td colspan="13" style="text-align:right;padding-right:12px;color:var(--text-secondary);">Cost / Revenue Ratio</td><td class="cell-computed" style="font-weight:700">${ratio}%</td></tr>`;
+    row('TOTAL BUDGET 2027', A => withSubtotals(A).totalCost, money, 'row-grand-total', 'style="font-weight:800"');
+    html += `<tr><td colspan="${1 + groups.length}" style="text-align:right;padding-right:12px;color:var(--text-secondary);">Cost / Revenue Ratio</td><td class="cell-computed" style="font-weight:700">${ratioOf(mergedA).toFixed(1)}%</td>${groups.map(g => `<td class="cell-computed">${ratioOf(g.totals).toFixed(1)}%</td>`).join('')}</tr>`;
     html += '</tbody>';
 
     table.innerHTML = html;
 
-    // Cache 2D rows for export
-    const rows2d = [['Category', ...months, 'Total 2027']];
-    const pushRow = (label, arr, isNum) => rows2d.push([label, ...arr.map(v => isNum ? Math.round(v) : Math.round(v)), isNum ? Math.round(sum(arr)) : Math.round(sum(arr))]);
-    pushRow('Target Revenue (Sales Value)', T.mRevenue, false);
-    pushRow('Units Sold', T.mUnits, true);
-    pushRow('Sqm Sold', T.mSqm, true);
-    [['Sales Inhouse', T.mSalesInhouse], ['Sales Agent', T.mSalesAgent], ['Program Sales', T.mSalesProgram], ['Marketing ATL', T.mMarketingATL], ['Marketing BTL', T.mMarketingBTL]].forEach(r => pushRow(r[0], r[1], false));
-    pushRow('Sales & Marketing Total', salesMktg, false);
-    [['Dev & Land Cost', T.mDevLand], ['Payroll', T.mEmployee], ['G&A (incl. Business Trip)', T.mGA], ['Others', T.mOthers], ['Finance', T.mFinance], ['Tax', T.mTax], ['Corporate Event', T.mCorpEvent]].forEach(r => pushRow(r[0], r[1], false));
-    pushRow('Employee & Operations Total', empOps, false);
-    pushRow('Capex (Fixed Assets)', T.mCapex, false);
-    pushRow('TOTAL BUDGET 2027', totalCost, false);
-    rows2d.push(['Cost / Revenue Ratio (%)', ...Array(12).fill(''), parseFloat(ratio)]);
+    // Cache 2D rows for export (Category | TOTAL 2027 | per-group columns)
+    const rows2d = [['Category', 'TOTAL 2027', ...groups.map(g => g.label)]];
+    const pushRow = (label, getVal, isNum) => {
+        const r = [label, isNum ? Math.round(getVal(mergedA)) : getVal(mergedA)];
+        groups.forEach(g => r.push(isNum ? Math.round(getVal(g.totals)) : getVal(g.totals)));
+        rows2d.push(r);
+    };
+    pushRow('Target Revenue', A => A.revenue);
+    pushRow('Units Sold', A => A.units, true);
+    pushRow('Sqm Sold', A => A.sqm, true);
+    pushRow('Dev & Land Cost', A => A.devLand);
+    pushRow('Sales Inhouse', A => A.salesInhouse);
+    pushRow('Sales Agent', A => A.salesAgent);
+    pushRow('Program Sales', A => A.salesProgram);
+    pushRow('Marketing ATL', A => A.mktATL);
+    pushRow('Marketing BTL', A => A.mktBTL);
+    pushRow('Sales & Marketing Total', A => withSubtotals(A).salesMktg);
+    pushRow('Payroll', A => A.payroll);
+    pushRow('G&A (incl. Business Trip)', A => A.ga);
+    pushRow('Others', A => A.others);
+    pushRow('Finance', A => A.finance);
+    pushRow('Tax', A => A.tax);
+    pushRow('Corporate Event', A => A.corpEvent);
+    pushRow('Employee & Operations Total', A => withSubtotals(A).empOps);
+    pushRow('Capex (Fixed Assets)', A => A.capex);
+    pushRow('TOTAL BUDGET 2027', A => withSubtotals(A).totalCost);
+    rows2d.push(['Cost / Revenue Ratio (%)', parseFloat(ratioOf(mergedA).toFixed(1)), ...groups.map(g => parseFloat(ratioOf(g.totals).toFixed(1)))]);
     const namePart = isDeptView
         ? 'Dept_' + (scopeLabel.split('—')[0].trim().replace(/\s+/g, '_'))
         : 'Consolidated_' + (state.selectedProject || '').replace(/\s+/g, '_');
-    state.consolidatedExport = { filename: namePart + '_FY2027.xlsx', rows: rows2d };
+    state.consolidatedExport = { filename: namePart + '_FY2027.xlsx', rows: rows2d, colCount: rows2d[0].length };
 }
 
 async function exportConsolidatedSummary() {
@@ -2816,7 +2871,8 @@ async function exportConsolidatedSummary() {
             return;
         }
         const infoLine = 'ENTITAS: ' + (state.selectedCompany || '') + '   |   PROJECT: ' + (state.selectedProject || '');
-        await writeStyledWorkbook([{ name: 'Summary', title: 'CONSOLIDATED SUMMARY', infoLine, rows: data.rows, opts: { cols: [{ wch: 30 }, ...Array(12).fill({ wch: 12 }), { wch: 14 }] } }], data.filename);
+        const colCount = data.colCount || 14;
+        await writeStyledWorkbook([{ name: 'Summary', title: 'CONSOLIDATED SUMMARY', infoLine, rows: data.rows, opts: { cols: [{ wch: 38 }, ...Array(Math.max(colCount - 1, 0)).fill({ wch: 18 })] } }], data.filename);
         showToast('Summary exported to Excel.', 'emerald');
     } catch (err) {
         console.error(err);

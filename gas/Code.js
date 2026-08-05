@@ -591,6 +591,7 @@ function getBudgetSummary(scope, department, project) {
   const sheet = getDatabaseSheet();
   const rows = sheet.getDataRange().getValues();
   const matches = [];
+  const entries = []; // per-row breakdown so the frontend can render one column per division (FAT) or per project (dept view)
   const deptStr = department ? String(department).trim().toLowerCase() : '';
   const projStr = project ? String(project).trim().toLowerCase() : '';
 
@@ -612,7 +613,15 @@ function getBudgetSummary(scope, department, project) {
 
     try {
       const parsed = JSON.parse(rows[i][3]);
-      if (parsed && typeof parsed === 'object') matches.push(parsed);
+      if (parsed && typeof parsed === 'object') {
+        matches.push(parsed);
+        entries.push({
+          company: rows[i][0] || '',
+          project: rows[i][1] || '',
+          department: rows[i][4] || '',
+          data: parsed
+        });
+      }
     } catch (err) {
       // skip corrupt row
     }
@@ -620,7 +629,7 @@ function getBudgetSummary(scope, department, project) {
 
   return {
     data: mergeBudgetData(matches),
-    meta: { rows: matches.length }
+    meta: { rows: matches.length, entries: entries }
   };
 }
 
