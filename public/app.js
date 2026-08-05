@@ -446,6 +446,18 @@ function updateCompanyDropdownForProject(projectName) {
     
     compSel.innerHTML = entities.map(c => `<option value="${c}">${c}</option>`).join('');
     state.selectedCompany = compSel.value;
+    // Consolidated (FAT) view: entity scope picker (Super Admin only)
+    const fatSel = document.getElementById('fat-summary-entity');
+    if (fatSel) {
+        const allEntities = mapping[projectName] || state.metadata.companies || [];
+        fatSel.innerHTML = `<option value="">ALL ENTITIES</option>` + allEntities.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (state.summaryEntity === undefined) {
+            try { state.summaryEntity = localStorage.getItem('budget_summary_entity') || ''; }
+            catch (e) { state.summaryEntity = ''; }
+        }
+        fatSel.value = allEntities.includes(state.summaryEntity) ? state.summaryEntity : '';
+        fatSel.style.display = isSuperAdmin() ? '' : 'none';
+    }
 }
 
 // Initialize templates into structure
@@ -540,6 +552,13 @@ function setupEventListeners() {
         state.summaryDept = e.target.value || '';
         try { localStorage.setItem('budget_summary_dept', state.summaryDept); } catch (err) {}
         renderConsolidatedSummary('dept-summary');
+    });
+
+    // Consolidated view entity scope (Super Admin: ALL ENTITIES or one entity)
+    document.getElementById('fat-summary-entity').addEventListener('change', (e) => {
+        state.summaryEntity = e.target.value || '';
+        try { localStorage.setItem('budget_summary_entity', state.summaryEntity); } catch (err) {}
+        renderConsolidatedSummary('fat-summary');
     });
     
     // Navigation items
@@ -2727,9 +2746,25 @@ async function renderConsolidatedSummary(tabId) {
             table.innerHTML = '';
             return;
         }
-        scopeLabel = state.selectedProject + ' — all divisions';
+        // Super Admin: entity scope for the Consolidated view ('' = ALL ENTITIES)
+        if (isSuperAdmin() && state.summaryEntity === undefined) {
+            try { state.summaryEntity = localStorage.getItem('budget_summary_entity') || ''; }
+            catch (e) { state.summaryEntity = ''; }
+        }
+        const fatSel = document.getElementById('fat-summary-entity');
+        if (fatSel) {
+            const mapping = state.metadata.projectCompanyMapping || {};
+            const allEntities = mapping[state.selectedProject] || state.metadata.companies || [];
+            fatSel.style.display = isSuperAdmin() ? '' : 'none';
+            if (allEntities.includes(state.summaryEntity)) { fatSel.value = state.summaryEntity; }
+            else if (state.summaryEntity) { state.summaryEntity = ''; fatSel.value = ''; }
+            else { fatSel.value = ''; }
+        }
+        const ent = isSuperAdmin() ? (state.summaryEntity || '') : '';
+        scopeLabel = state.selectedProject + (ent ? ' · ' + ent : '') + ' — all divisions';
         params = `&project=${encodeURIComponent(state.selectedProject)}`;
     }
+    const entFilter = isSuperAdmin() ? (state.summaryEntity || '') : '';
     scopeEl.textContent = 'Aggregating ' + scopeLabel + '...';
     table.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading summary...</td></tr>`;
 
@@ -2745,7 +2780,7 @@ async function renderConsolidatedSummary(tabId) {
             if (!k || k.indexOf('draft_') !== 0) continue;
             try {
                 const meta = parseDraftKey(k);
-                if (isDeptView ? (targetDept === '' || meta.dept === targetDept) : (meta.project === state.selectedProject)) {
+                if (isDeptView ? (targetDept === '' || meta.dept === targetDept) : (meta.project === state.selectedProject && (!entFilter || meta.company === entFilter))) {
                     rows.push({ company: meta.company, project: meta.project, dept: meta.dept, data: JSON.parse(localStorage.getItem(k)) });
                 }
             } catch (e) { /* skip unreadable draft */ }
@@ -2773,6 +2808,23 @@ async function renderConsolidatedSummary(tabId) {
                 merged = json.data;
                 rowCount = (json.meta && json.meta.rows) || 0;
                 entries = (json.meta && json.meta.entries) || [];
+                // Super Admin entity filter: rebuild the merged totals from the
+                // filtered rows only (server returns every entity of the project)
+                if (entFilter && entries.length) {
+                    const filtered = entries.filter(e => e.company === entFilter);
+                    if (filtered.length > 0) {
+                        mergedTotals = null;
+                        filtered.forEach((e, idx) => {
+                            const T = computeMonthlyTotals(e.data || {});
+                            if (!mergedTotals) mergedTotals = Object.keys(T).reduce((acc, k) => { acc[k] = T[k].slice(); return acc; }, {});
+                            else Object.keys(T).forEach(k => { mergedTotals[k].forEach((v, m) => { mergedTotals[k][m] += T[k][m]; }); });
+                        });
+                        entries = filtered;
+                        rowCount = filtered.length;
+                    } else {
+                        merged = null; // entity has no saved rows -> empty state
+                    }
+                }
             } else {
                 scopeEl.textContent = 'Backend returned an error for ' + scopeLabel + '. Check the GAS backend connection.';
                 table.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:24px; color:var(--text-secondary);">Backend error: ${esc(json.message || 'unknown')}</td></tr>`;
@@ -2785,7 +2837,7 @@ async function renderConsolidatedSummary(tabId) {
             return;
         }
     }
-    if ((!merged || Object.keys(merged).length === 0) && !mockTotals) {
+    if ((!merged || Object.keys(merged).length === 0) && !mockTotals && !mergedTotals) {
         scopeEl.textContent = 'No saved budget entries found for ' + scopeLabel + '.';
         table.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:24px; color:var(--text-secondary);">No saved budget data to summarize. Save budgets first (or check the backend connection).</td></tr>`;
         return;
@@ -2810,7 +2862,7 @@ async function renderConsolidatedSummary(tabId) {
     };
     const ratioOf = A => (A.revenue > 0 ? (withSubtotals(A).totalCost / A.revenue * 100) : 0);
 
-    const mergedA = annual(mockTotals || computeMonthlyTotals(merged));
+    const mergedA = annual(mockTotals || mergedTotals || computeMonthlyTotals(merged));
 
     // One column per group: FAT view -> per division; All Projects view -> per project
     const groups = [];
@@ -3859,6 +3911,7 @@ const MOCK_SEED_ROWS = [
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'PROC'],
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'QS'],
     ['PT Triniti Menara Gading', 'Collins Boulevard', 'SALES'],
+    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES'],
     ['PT Triniti Menara Gading', 'Collins Boulevard', 'LEGAL'],
     ['PT Triniti Menara Gading', 'Collins Boulevard', 'HC&GA'],
     ['JO Triniti Sentul', 'Sequoia Hills', 'SALES'],
@@ -3878,14 +3931,14 @@ const MOCK_SEED_ROWS = [
 function seedMockDrafts() {
     // One-time migration: if the seed version marker is missing, drop stale drafts
     // (e.g. rows seeded under wrong company-project pairs) before reseeding.
-    if (!localStorage.getItem('budget_mock_seed_v2')) {
+    if (!localStorage.getItem('budget_mock_seed_v4')) {
         const stale = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k && k.indexOf('draft_') === 0) stale.push(k);
         }
         stale.forEach(k => localStorage.removeItem(k));
-        localStorage.setItem('budget_mock_seed_v2', '1');
+        localStorage.setItem('budget_mock_seed_v4', '1');
     }
     const keys = [];
     MOCK_SEED_ROWS.forEach(([company, project, dept]) => {

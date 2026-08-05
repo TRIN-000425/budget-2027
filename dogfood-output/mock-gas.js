@@ -105,6 +105,11 @@ const collins = seedBudget('PT Triniti Menara Gading', 'Collins Boulevard', 'SAL
 collins.target_revenue[0].units = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 collins.target_revenue[0].sqm = [80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 budgetRows.push(['PT Triniti Menara Gading', 'Collins Boulevard', iso, JSON.stringify(collins), 'SALES']);
+// Collins 2nd entity (real mapping: Gading + Serpong) so the FAT entity picker can filter
+const collinsSerpong = seedBudget('PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES');
+collinsSerpong.target_revenue[0].units = [2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+collinsSerpong.target_revenue[0].sqm = [100, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+budgetRows.push(['PT Triniti Menara Serpong', 'Collins Boulevard', iso, JSON.stringify(collinsSerpong), 'SALES']);
 // Legacy row with NO division (migration fallback test)
 const legacy = seedBudget('JO Triniti Sentul', 'Sequoia Hills', '');
 legacy.target_revenue[0].units = [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
