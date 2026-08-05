@@ -2714,18 +2714,36 @@ async function renderConsolidatedSummary(tabId) {
     scopeEl.textContent = 'Aggregating ' + scopeLabel + '...';
     table.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading summary...</td></tr>`;
 
-    let merged = null, rowCount = 0, entries = [];
+    let merged = null, rowCount = 0, entries = [], mockTotals = null;
     if (state.mockMode) {
-        // Mock mode is browser-only: summarize the CURRENT in-memory data, never the backend
-        merged = state.data;
-        rowCount = 1;
-        entries = [{
-            company: state.selectedCompany || '',
-            project: state.selectedProject || '',
-            department: isDeptView ? (state.currentUser.department || '') : (getActiveDepartment() || ''),
-            data: state.data
-        }];
-        scopeLabel += ' · mock data (browser only)';
+        // Mock mode is browser-only: aggregate the seeded local drafts (draft_* keys)
+        // so the view shows ALL projects (dept view) / ALL divisions (FAT view)
+        const targetDept = isDeptView ? (isSuperAdmin() ? state.selectedDepartment : (state.currentUser.department || '')) : '';
+        const rows = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k || k.indexOf('draft_') !== 0) continue;
+            try {
+                const meta = parseDraftKey(k);
+                if (isDeptView ? (meta.dept === targetDept) : (meta.project === state.selectedProject)) {
+                    rows.push({ company: meta.company, project: meta.project, dept: meta.dept, data: JSON.parse(localStorage.getItem(k)) });
+                }
+            } catch (e) { /* skip unreadable draft */ }
+        }
+        if (rows.length > 0) {
+            entries = rows.map(r => ({ company: r.company, project: r.project, department: r.dept, data: r.data }));
+            rowCount = rows.length;
+            // Merged totals = element-wise sum of per-row totals
+            const T0 = computeMonthlyTotals(rows[0].data);
+            mockTotals = {};
+            Object.keys(T0).forEach(k => { mockTotals[k] = T0[k].slice(); });
+            for (let i = 1; i < rows.length; i++) {
+                const Ti = computeMonthlyTotals(rows[i].data);
+                Object.keys(mockTotals).forEach(k => { mockTotals[k].forEach((v, m) => { mockTotals[k][m] += Ti[k][m]; }); });
+            }
+            merged = {};
+            scopeLabel += ' · mock data (browser only)';
+        }
     } else if (state.gasUrl) {
         try {
             // GAS cold starts are slow: give the summary (heaviest call) a long window
@@ -2747,7 +2765,7 @@ async function renderConsolidatedSummary(tabId) {
             return;
         }
     }
-    if (!merged || Object.keys(merged).length === 0) {
+    if ((!merged || Object.keys(merged).length === 0) && !mockTotals) {
         scopeEl.textContent = 'No saved budget entries found for ' + scopeLabel + '.';
         table.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:24px; color:var(--text-secondary);">No saved budget data to summarize. Save budgets first (or check the backend connection).</td></tr>`;
         return;
@@ -2772,7 +2790,7 @@ async function renderConsolidatedSummary(tabId) {
     };
     const ratioOf = A => (A.revenue > 0 ? (withSubtotals(A).totalCost / A.revenue * 100) : 0);
 
-    const mergedA = annual(computeMonthlyTotals(merged));
+    const mergedA = annual(mockTotals || computeMonthlyTotals(merged));
 
     // One column per group: FAT view -> per division; All Projects view -> per project
     const groups = [];
@@ -3581,8 +3599,8 @@ function seededRand(seedStr) {
 }
 
 // Build a realistic full budget for the current project/division
-function generateMockBudget() {
-    const seed = (state.selectedProject || 'Demo') + '|' + (getActiveDepartment() || '');
+function generateMockBudget(seedOverride) {
+    const seed = seedOverride || (state.selectedProject || 'Demo') + '|' + (getActiveDepartment() || '');
     const rnd = seededRand(seed);
     const d = getInitialDataStructure();
     const monthRamp = (base, jitter) => Array.from({ length: 12 }, (_, m) =>
@@ -3678,7 +3696,18 @@ function generateMockBudget() {
 
 function loadMockData() {
     state.mockMode = true;
-    state.data = generateMockBudget();
+    seedMockDrafts();
+    const key = localDraftKey();
+    const stored = localStorage.getItem(key);
+    if (stored) {
+        try { state.data = JSON.parse(stored); }
+        catch (e) { state.data = generateMockBudget(); }
+    } else {
+        // Fall back to the first seeded draft so the mock DB is always populated
+        const firstKey = MOCK_SEED_ROWS.map(r => 'draft_' + [r[0], r[1], r[2]].map(encodeURIComponent).join('~'))[0];
+        const first = localStorage.getItem(firstKey);
+        state.data = first ? JSON.parse(first) : generateMockBudget();
+    }
     saveLocalMockData();
     state.isDirty = false;
     updateSyncIndicator(true);
@@ -3788,7 +3817,57 @@ function exitPreview() {
 // Local mock data handlers — draft key is scoped by division so two departments
 // sharing a project never see each other's browser drafts
 function localDraftKey() {
-    return `draft_${state.selectedCompany}_${state.selectedProject}_${getActiveDepartment() || ''}`;
+    return 'draft_' + [state.selectedCompany, state.selectedProject, getActiveDepartment() || ''].map(encodeURIComponent).join('~');
+}
+
+// Reverse of localDraftKey: { company, project, dept } for a 'draft_...' localStorage key
+function parseDraftKey(key) {
+    const parts = key.slice(6).split('~').map(decodeURIComponent);
+    return { company: parts[0] || '', project: parts[1] || '', dept: parts[2] || '' };
+}
+
+// Mock-mode "database": one browser-only draft per (company, project, division).
+// Mirrors the rows seeded in the local QA mock server so the consolidated views
+// show ALL projects/divisions while in mock mode (never touches the backend).
+const MOCK_SEED_ROWS = [
+    ['PT Puri Triniti Batam', 'Marcs Boulevard', 'SALES'],
+    ['PT Puri Triniti Batam', 'Marcs Boulevard', 'MARKETING'],
+    ['PT Puri Triniti Batam', 'Marcs Boulevard', 'IT'],
+    ['PT Puri Triniti Batam', 'Marcs Boulevard', 'PROC'],
+    ['PT Puri Triniti Batam', 'Marcs Boulevard', 'QS'],
+    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES'],
+    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'LEGAL'],
+    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'HC&GA'],
+    ['PT Triniti Menara Gading', 'Sequoia Hills', 'SALES'],
+    ['PT Triniti Menara Gading', 'Sequoia Hills', ''],
+    ['PT Triniti Menara Gading', 'District East', 'COO'],
+    ['PT Triniti Menara Gading', 'District East', 'CORSEC'],
+    ['PT Triniti Menara Gading', 'District East', 'GCR'],
+    ['PT Triniti Menara Gading', 'District East', 'TECHPLAN'],
+    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'COLL'],
+    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'FAT'],
+    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'PAYROLL'],
+    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'PROJECT'],
+    ['PT Triniti Menara Serpong', 'SW & TS', 'BOD'],
+    ['PT Perintis Triniti Properti Tbk', 'Head Office', 'CORFIN']
+];
+
+function seedMockDrafts() {
+    const keys = [];
+    MOCK_SEED_ROWS.forEach(([company, project, dept]) => {
+        const key = 'draft_' + [company, project, dept].map(encodeURIComponent).join('~');
+        if (localStorage.getItem(key)) { keys.push(key); return; }
+        const d = generateMockBudget(project + '|' + dept);
+        // Back-office divisions (everything except SALES/MARKETING) carry no revenue:
+        // zero the sales-side modules so their columns show costs only (ratio 0.0%)
+        if (dept !== 'SALES' && dept !== 'MARKETING') {
+            d.target_revenue.forEach(row => { row.units = Array(12).fill(0); row.sqm = Array(12).fill(0); });
+            d.marketing_activity = {};
+        }
+        localStorage.setItem(key, JSON.stringify(d));
+        keys.push(key);
+    });
+    return keys;
 }
 
 function loadLocalMockData() {
