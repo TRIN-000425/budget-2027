@@ -534,6 +534,13 @@ function setupEventListeners() {
         state.selectedDepartment = e.target.value;
         triggerDataLoad();
     });
+
+    // All Projects summary division scope (Super Admin: ALL DIVISIONS or one division)
+    document.getElementById('dept-summary-division').addEventListener('change', (e) => {
+        state.summaryDept = e.target.value || '';
+        try { localStorage.setItem('budget_summary_dept', state.summaryDept); } catch (err) {}
+        renderConsolidatedSummary('dept-summary');
+    });
     
     // Navigation items
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
@@ -2692,15 +2699,27 @@ async function renderConsolidatedSummary(tabId) {
 
     let scope, params = '', scopeLabel;
     if (isDeptView) {
-        scope = 'dept';
-        const dept = isSuperAdmin() ? state.selectedDepartment : (state.currentUser.department || '');
-        if (!dept) {
-            scopeEl.textContent = 'No division assigned. Ask a super admin to assign your division.';
-            table.innerHTML = '';
-            return;
+        // Super Admin: division scope for the All Projects summary ('' = ALL DIVISIONS),
+        // persisted per session. Dept Heads always see their own division.
+        if (isSuperAdmin() && state.summaryDept === undefined) {
+            try { state.summaryDept = localStorage.getItem('budget_summary_dept') || ''; }
+            catch (e) { state.summaryDept = ''; }
         }
-        scopeLabel = dept + ' — all projects';
-        params = `&department=${encodeURIComponent(dept)}`;
+        const dept = isSuperAdmin() ? (state.summaryDept || '') : (state.currentUser.department || '');
+        const scopeSel = document.getElementById('dept-summary-division');
+        if (scopeSel) {
+            scopeSel.style.display = isSuperAdmin() ? '' : 'none';
+            scopeSel.value = dept;
+        }
+        if (!dept) {
+            scope = 'all';
+            params = '';
+            scopeLabel = 'ALL DIVISIONS — all projects';
+        } else {
+            scope = 'dept';
+            params = `&department=${encodeURIComponent(dept)}`;
+            scopeLabel = dept + ' — all projects';
+        }
     } else {
         scope = 'project';
         if (!state.selectedProject) {
@@ -2718,14 +2737,15 @@ async function renderConsolidatedSummary(tabId) {
     if (state.mockMode) {
         // Mock mode is browser-only: aggregate the seeded local drafts (draft_* keys)
         // so the view shows ALL projects (dept view) / ALL divisions (FAT view)
-        const targetDept = isDeptView ? (isSuperAdmin() ? state.selectedDepartment : (state.currentUser.department || '')) : '';
+        // Super Admin: '' = ALL DIVISIONS (every row); Dept Heads: their own division
+        const targetDept = isDeptView ? (isSuperAdmin() ? (state.summaryDept || '') : (state.currentUser.department || '')) : '';
         const rows = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (!k || k.indexOf('draft_') !== 0) continue;
             try {
                 const meta = parseDraftKey(k);
-                if (isDeptView ? (meta.dept === targetDept) : (meta.project === state.selectedProject)) {
+                if (isDeptView ? (targetDept === '' || meta.dept === targetDept) : (meta.project === state.selectedProject)) {
                     rows.push({ company: meta.company, project: meta.project, dept: meta.dept, data: JSON.parse(localStorage.getItem(k)) });
                 }
             } catch (e) { /* skip unreadable draft */ }
@@ -4046,6 +4066,17 @@ function populateDeptSelector() {
         return;
     }
     deptSel.innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+    // All Projects summary scope (Super Admin only): ALL DIVISIONS + per-division
+    const summarySel = document.getElementById('dept-summary-division');
+    if (summarySel) {
+        summarySel.innerHTML = `<option value="">ALL DIVISIONS</option>` + depts.map(d => `<option value="${d}">${d}</option>`).join('');
+        if (state.summaryDept === undefined) {
+            try { state.summaryDept = localStorage.getItem('budget_summary_dept') || ''; }
+            catch (e) { state.summaryDept = ''; }
+        }
+        summarySel.value = state.summaryDept || '';
+        summarySel.style.display = isSuperAdmin() ? '' : 'none';
+    }
     // Keep previous selection if still valid, else first dept
     if (depts.includes(state.selectedDepartment)) {
         deptSel.value = state.selectedDepartment;
