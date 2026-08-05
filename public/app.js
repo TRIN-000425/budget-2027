@@ -2688,6 +2688,10 @@ async function renderConsolidatedSummary(tabId) {
     const table = document.getElementById(isDeptView ? 'dept-summary-table' : 'fat-summary-table');
     const scopeEl = document.getElementById(isDeptView ? 'dept-summary-scope' : 'fat-summary-scope');
     if (!table) return;
+    if (!state.showProjectEntities) {
+        try { state.showProjectEntities = JSON.parse(localStorage.getItem('budget_show_entities')) || {}; }
+        catch (e) { state.showProjectEntities = {}; }
+    }
     state.consolidatedExport = null;
 
     let scope, params = '', scopeLabel;
@@ -2792,42 +2796,95 @@ async function renderConsolidatedSummary(tabId) {
 
     const mergedA = annual(mockTotals || computeMonthlyTotals(merged));
 
-    // One column per group: FAT view -> per division; All Projects view -> per project
-    const groups = [];
-    const groupMap = {};
-    const companies = new Set();
-    entries.forEach(e => {
-        if (e.company) companies.add(e.company);
-        const key = isDeptView ? (e.company + '||' + e.project) : (e.department || '(none)');
-        if (!groupMap[key]) {
-            groupMap[key] = { company: e.company || '', label: isDeptView ? (e.project || '(no project)') : (e.department || '(none)'), totals: null, count: 0 };
-            groups.push(groupMap[key]);
-        }
-        const A = annual(computeMonthlyTotals(e.data || {}));
-        const g = groupMap[key];
-        if (!g.totals) g.totals = A;
-        else Object.keys(A).forEach(k => { g.totals[k] += A[k]; });
-        g.count++;
-    });
-    // Same project name under different companies -> disambiguate with the company prefix
-    if (isDeptView && companies.size > 1) groups.forEach(g => { if (g.company) g.label = g.company + ' / ' + g.label; });
+    // Column model: TOTAL 2027 first, then one block per group.
+    // All Projects view: group = project, with entity sub-columns when a project has
+    // multiple entities (Collins, Sequoia) plus a project TOTAL; entity columns toggleable.
+    // FAT view: group = division (flat).
+    const colGetters = [];       // per-column totals objects (excluding TOTAL 2027)
+    const header1 = [{ text: 'TOTAL 2027', rowspan: 2, total: true }]; // row 1: project/division names
+    const header2 = [];          // row 2: entity names / TOTAL (All Projects view only)
+    const exportH1 = ['TOTAL 2027'];
+    const exportH2 = [''];
+    if (isDeptView) {
+        const projects = [];
+        const projectMap = {};
+        entries.forEach(e => {
+            const pName = e.project || '(no project)';
+            if (!projectMap[pName]) { projectMap[pName] = { name: pName, entities: [], entityMap: {}, total: null }; projects.push(projectMap[pName]); }
+            const P = projectMap[pName];
+            const cName = e.company || '';
+            if (!P.entityMap[cName]) { P.entityMap[cName] = { company: cName, totals: null, count: 0 }; P.entities.push(P.entityMap[cName]); }
+            const A = annual(computeMonthlyTotals(e.data || {}));
+            const ent = P.entityMap[cName];
+            if (!ent.totals) ent.totals = A;
+            else Object.keys(A).forEach(k => { ent.totals[k] += A[k]; });
+            ent.count++;
+            if (!P.total) P.total = Object.keys(A).reduce((acc, k) => { acc[k] = A[k]; return acc; }, {});
+            else Object.keys(A).forEach(k => { P.total[k] += A[k]; });
+        });
+        // Deterministic column order: projects and entities alphabetical
+        // (project names coincide with metadata order)
+        projects.sort((a, b) => a.name.localeCompare(b.name));
+        projects.forEach(P => {
+            P.entities.sort((a, b) => a.company.localeCompare(b.company));
+            const multi = P.entities.length > 1;
+            const show = multi && state.showProjectEntities[P.name] !== false;
+            const btn = multi ? `<button class="btn-icon-xs" onclick="toggleProjectEntities('${esc(P.name)}')" title="${show ? 'Hide entity columns' : 'Show entity columns'}"><i data-lucide="${show ? 'eye' : 'eye-off'}" class="icon-xs"></i></button> ` : '';
+            if (multi && show) {
+                header1.push({ text: btn + esc(P.name), colspan: P.entities.length + 1 });
+                P.entities.forEach(e => {
+                    header2.push({ text: esc(e.company || '(none)') });
+                    colGetters.push(e.totals);
+                    exportH1.push(P.name); exportH2.push(e.company || '(none)');
+                });
+                header2.push({ text: 'TOTAL' });
+                colGetters.push(P.total);
+                exportH1.push(P.name); exportH2.push('TOTAL');
+            } else {
+                header1.push({ text: btn + esc(P.name), rowspan: 2 });
+                colGetters.push(P.total);
+                exportH1.push(P.name); exportH2.push(multi ? 'TOTAL' : (P.entities[0] ? P.entities[0].company : '(none)'));
+            }
+        });
+    } else {
+        const groups = [];
+        const groupMap = {};
+        entries.forEach(e => {
+            const key = e.department || '(none)';
+            if (!groupMap[key]) { groupMap[key] = { label: key, totals: null, count: 0 }; groups.push(groupMap[key]); }
+            const A = annual(computeMonthlyTotals(e.data || {}));
+            const g = groupMap[key];
+            if (!g.totals) g.totals = A;
+            else Object.keys(A).forEach(k => { g.totals[k] += A[k]; });
+            g.count++;
+        });
+        groups.forEach(g => {
+            header1.push({ text: esc(g.label) + (g.count > 1 ? ' <span style="opacity:.55;font-weight:500">(' + g.count + ')</span>' : '') });
+            colGetters.push(g.totals);
+            exportH1.push(g.label); exportH2.push('');
+        });
+    }
 
     const money = v => formatShortCurrency(v);
     const num = v => Math.round(v).toLocaleString('id-ID');
 
-    let html = `
-        <thead>
-            <tr>
-                <th style="min-width:200px">Category</th>
-                <th style="min-width:130px; background:var(--accent-purple); color:#fff;">TOTAL 2027</th>
-                ${groups.map(g => `<th style="min-width:130px">${esc(g.label)}${g.count > 1 ? ' <span style="opacity:.55;font-weight:500">(' + g.count + ')</span>' : ''}</th>`).join('')}
-            </tr>
-        </thead>
-        <tbody>`;
+    let html = `<thead><tr><th style="min-width:200px">Category</th>`;
+    header1.forEach(c => {
+        const style = 'min-width:130px' + (c.total ? '; background:var(--accent-purple); color:#fff;' : '');
+        html += `<th style="${style}"${c.rowspan ? ' rowspan="' + c.rowspan + '"' : ''}${c.colspan ? ' colspan="' + c.colspan + '"' : ''}>${c.text}</th>`;
+    });
+    html += '</tr>';
+    if (header2.length) {
+        html += '<tr>';
+        header2.forEach(c => { html += `<th style="min-width:130px; font-weight:600;">${c.text}</th>`; });
+        html += '</tr>';
+    }
+    html += '</thead><tbody>';
 
-    const secHdr = label => `<tr class="row-group-header"><td colspan="${2 + groups.length}" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
+    const colCount = 2 + colGetters.length;
+    const secHdr = label => `<tr class="row-group-header"><td colspan="${colCount}" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
     const row = (label, getVal, fmt, cls, style) => {
-        html += `<tr${cls ? ' class="' + cls + '"' : ''}><td${style ? ' style="' + style + '"' : ''}>${label}</td><td class="cell-computed" style="font-weight:700">${fmt(getVal(mergedA))}</td>${groups.map(g => `<td class="cell-computed">${fmt(getVal(g.totals))}</td>`).join('')}</tr>`;
+        html += `<tr${cls ? ' class="' + cls + '"' : ''}><td${style ? ' style="' + style + '"' : ''}>${label}</td><td class="cell-computed" style="font-weight:700">${fmt(getVal(mergedA))}</td>${colGetters.map(g => `<td class="cell-computed">${fmt(getVal(g))}</td>`).join('')}</tr>`;
     };
 
     // Revenue block
@@ -2849,16 +2906,16 @@ async function renderConsolidatedSummary(tabId) {
 
     // Grand total + ratio
     row('TOTAL BUDGET 2027', A => withSubtotals(A).totalCost, money, 'row-grand-total', 'style="font-weight:800"');
-    html += `<tr><td colspan="${1 + groups.length}" style="text-align:right;padding-right:12px;color:var(--text-secondary);">Cost / Revenue Ratio</td><td class="cell-computed" style="font-weight:700">${ratioOf(mergedA).toFixed(1)}%</td>${groups.map(g => `<td class="cell-computed">${ratioOf(g.totals).toFixed(1)}%</td>`).join('')}</tr>`;
+    html += `<tr><td colspan="${1 + colGetters.length}" style="text-align:right;padding-right:12px;color:var(--text-secondary);">Cost / Revenue Ratio</td><td class="cell-computed" style="font-weight:700">${ratioOf(mergedA).toFixed(1)}%</td>${colGetters.map(g => `<td class="cell-computed">${ratioOf(g).toFixed(1)}%</td>`).join('')}</tr>`;
     html += '</tbody>';
 
     table.innerHTML = html;
 
-    // Cache 2D rows for export (Category | TOTAL 2027 | per-group columns)
-    const rows2d = [['Category', 'TOTAL 2027', ...groups.map(g => g.label)]];
+    // Cache 2D rows for export: two header rows (project + entity), then data rows
+    const rows2d = [['Category', ...exportH1], ['', ...exportH2]];
     const pushRow = (label, getVal, isNum) => {
         const r = [label, isNum ? Math.round(getVal(mergedA)) : getVal(mergedA)];
-        groups.forEach(g => r.push(isNum ? Math.round(getVal(g.totals)) : getVal(g.totals)));
+        colGetters.forEach(g => r.push(isNum ? Math.round(getVal(g)) : getVal(g)));
         rows2d.push(r);
     };
     pushRow('Target Revenue', A => A.revenue);
@@ -2880,11 +2937,19 @@ async function renderConsolidatedSummary(tabId) {
     pushRow('Employee & Operations Total', A => withSubtotals(A).empOps);
     pushRow('Capex (Fixed Assets)', A => A.capex);
     pushRow('TOTAL BUDGET 2027', A => withSubtotals(A).totalCost);
-    rows2d.push(['Cost / Revenue Ratio (%)', parseFloat(ratioOf(mergedA).toFixed(1)), ...groups.map(g => parseFloat(ratioOf(g.totals).toFixed(1)))]);
+    rows2d.push(['Cost / Revenue Ratio (%)', parseFloat(ratioOf(mergedA).toFixed(1)), ...colGetters.map(g => parseFloat(ratioOf(g).toFixed(1)))]);
     const namePart = isDeptView
         ? 'Dept_' + (scopeLabel.split('—')[0].trim().replace(/\s+/g, '_'))
         : 'Consolidated_' + (state.selectedProject || '').replace(/\s+/g, '_');
     state.consolidatedExport = { filename: namePart + '_FY2027.xlsx', rows: rows2d, colCount: rows2d[0].length };
+}
+
+// Toggle per-project entity columns (Collins / Sequoia) in the All Projects view
+function toggleProjectEntities(projectName) {
+    if (!state.showProjectEntities) state.showProjectEntities = {};
+    state.showProjectEntities[projectName] = state.showProjectEntities[projectName] === false;
+    try { localStorage.setItem('budget_show_entities', JSON.stringify(state.showProjectEntities)); } catch (e) {}
+    renderConsolidatedSummary('dept-summary');
 }
 
 async function exportConsolidatedSummary() {
@@ -3839,9 +3904,11 @@ const MOCK_SEED_ROWS = [
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'PROC'],
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'QS'],
     ['PT Triniti Menara Gading', 'Collins Boulevard', 'SALES'],
+    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES'],
     ['PT Triniti Menara Gading', 'Collins Boulevard', 'LEGAL'],
     ['PT Triniti Menara Gading', 'Collins Boulevard', 'HC&GA'],
     ['JO Triniti Sentul', 'Sequoia Hills', 'SALES'],
+    ['PT Triniti Garam Properti', 'Sequoia Hills', 'SALES'],
     ['JO Triniti Sentul', 'Sequoia Hills', ''],
     ['PT Triniti Dinamik', 'District East', 'COO'],
     ['PT Triniti Dinamik', 'District East', 'CORSEC'],
@@ -3858,14 +3925,14 @@ const MOCK_SEED_ROWS = [
 function seedMockDrafts() {
     // One-time migration: if the seed version marker is missing, drop stale drafts
     // (e.g. rows seeded under wrong company-project pairs) before reseeding.
-    if (!localStorage.getItem('budget_mock_seed_v2')) {
+    if (!localStorage.getItem('budget_mock_seed_v3')) {
         const stale = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k && k.indexOf('draft_') === 0) stale.push(k);
         }
         stale.forEach(k => localStorage.removeItem(k));
-        localStorage.setItem('budget_mock_seed_v2', '1');
+        localStorage.setItem('budget_mock_seed_v3', '1');
     }
     const keys = [];
     MOCK_SEED_ROWS.forEach(([company, project, dept]) => {

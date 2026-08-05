@@ -105,6 +105,11 @@ const collins = seedBudget('PT Triniti Menara Gading', 'Collins Boulevard', 'SAL
 collins.target_revenue[0].units = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 collins.target_revenue[0].sqm = [80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 budgetRows.push(['PT Triniti Menara Gading', 'Collins Boulevard', iso, JSON.stringify(collins), 'SALES']);
+// Collins 2nd entity (real mapping: Gading + Serpong)
+const collinsSerpong = seedBudget('PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES');
+collinsSerpong.target_revenue[0].units = [2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+collinsSerpong.target_revenue[0].sqm = [100, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+budgetRows.push(['PT Triniti Menara Serpong', 'Collins Boulevard', iso, JSON.stringify(collinsSerpong), 'SALES']);
 // Legacy row with NO division (migration fallback test)
 const legacy = seedBudget('JO Triniti Sentul', 'Sequoia Hills', '');
 legacy.target_revenue[0].units = [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -146,11 +151,15 @@ pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'QS', 0.7);
 // Collins Boulevard (PT Triniti Menara Gading): SALES + LEGAL + HC&GA
 pushOp('PT Triniti Menara Gading', 'Collins Boulevard', 'LEGAL', 0.8);
 pushOp('PT Triniti Menara Gading', 'Collins Boulevard', 'HC&GA', 0.9);
-// Sequoia Hills (JO Triniti Sentul): SALES + legacy(no dept)
+// Sequoia Hills (JO Triniti Sentul + PT Triniti Garam Properti): SALES + legacy(no dept)
 const seqSales = seedBudget('JO Triniti Sentul', 'Sequoia Hills', 'SALES');
 seqSales.target_revenue[0].units = [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 seqSales.target_revenue[0].sqm = [120, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 budgetRows.push(['JO Triniti Sentul', 'Sequoia Hills', iso, JSON.stringify(seqSales), 'SALES']);
+const seqGaram = seedBudget('PT Triniti Garam Properti', 'Sequoia Hills', 'SALES');
+seqGaram.target_revenue[0].units = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+seqGaram.target_revenue[0].sqm = [70, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+budgetRows.push(['PT Triniti Garam Properti', 'Sequoia Hills', iso, JSON.stringify(seqGaram), 'SALES']);
 // District East (PT Triniti Dinamik): COO + CORSEC + GCR + TECHPLAN
 pushOp('PT Triniti Dinamik', 'District East', 'COO', 1.5);
 pushOp('PT Triniti Dinamik', 'District East', 'CORSEC', 0.5);
