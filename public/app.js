@@ -3035,10 +3035,11 @@ async function triggerDataLoad() {
         const stored = localStorage.getItem(key);
         if (stored) {
             try { state.data = JSON.parse(stored); }
-            catch (e) { state.data = generateMockBudget(); saveLocalMockData(); }
+            catch (e) { state.data = generateMockBudget(); }
         } else {
+            // Show generated data WITHOUT saving: visiting a selection must not create
+            // a budget row (same as the live backend) — only explicit Saves persist
             state.data = generateMockBudget();
-            saveLocalMockData();
         }
         state.isDirty = false;
         updateSyncIndicator(true);
@@ -3703,12 +3704,13 @@ function loadMockData() {
         try { state.data = JSON.parse(stored); }
         catch (e) { state.data = generateMockBudget(); }
     } else {
-        // Fall back to the first seeded draft so the mock DB is always populated
+        // Fall back to the first seeded draft so the mock DB is always populated.
+        // NOT saved to the current selection key: only an explicit Save persists there
+        // (visiting a selection must not create a budget row).
         const firstKey = MOCK_SEED_ROWS.map(r => 'draft_' + [r[0], r[1], r[2]].map(encodeURIComponent).join('~'))[0];
         const first = localStorage.getItem(firstKey);
         state.data = first ? JSON.parse(first) : generateMockBudget();
     }
-    saveLocalMockData();
     state.isDirty = false;
     updateSyncIndicator(true);
     updateMockButton();
