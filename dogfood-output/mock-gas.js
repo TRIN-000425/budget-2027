@@ -43,7 +43,9 @@ empRows = [
   emp('2005', 'Dodi User Mkt', 'Marcs Boulevard', 'PT Puri Triniti Batam', 'User', 'MARKETING'),
   emp('3001', 'Fatma FAT Manager', 'Marcs Boulevard', 'PT Puri Triniti Batam', 'FAT', 'FAT'),
   emp('2006', 'Citra CORFIN User', 'Head Office', 'PT Perintis Triniti Properti Tbk', 'User', 'CORFIN'),
-  emp('2007', 'Rudi Other DeptHead', 'ALL', 'ALL', 'DeptHead', 'CORFIN')
+  emp('2007', 'Rudi Other DeptHead', 'ALL', 'ALL', 'DeptHead', 'CORFIN'),
+  emp('2008', 'Ivan IT Head', 'ALL', 'ALL', 'DeptHead', 'IT'),
+  emp('2009', 'Lia Legal Head', 'ALL', 'ALL', 'DeptHead', 'LEGAL')
 ];
 
 // ---- Budget data builder (mirrors frontend getInitialDataStructure) ----
@@ -111,9 +113,56 @@ budgetRows.push(['JO Triniti Sentul', 'Sequoia Hills', iso, JSON.stringify(legac
 // CORFIN Head Office row
 const corfin = initData();
 corfin.ga_expenses['62210001'] = [10000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-corfin.finance_expenses['5.3.01.01'] = [80000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+corfin.finance_expenses['72110001'] = [80000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 corfin.business_trip = [{ id: 'trip_corfin', employee: 'Citra', grade: 'Manager', destination: 'Overseas', city: 'Singapore', division: 'CORFIN', duration: 5, month: 3, ticket_price: 8000000 }];
 budgetRows.push(['PT Perintis Triniti Properti Tbk', 'Head Office', iso, JSON.stringify(corfin), 'CORFIN']);
+
+// ---- Extra divisions & projects (real COA codes so module tabs render too) ----
+// Back-office style budget: payroll + GA + others + tax + trip + capex, no revenue.
+function seedOpBudget(company, project, division, scale) {
+  const d = initData();
+  const s = scale || 1;
+  d.payroll_expenses['62110001'] = [Math.round(150000000 * s), Math.round(150000000 * s), Math.round(150000000 * s), 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  d.ga_expenses['62210001'] = [Math.round(5000000 * s), Math.round(5000000 * s), Math.round(5000000 * s), 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  d.others_expenses['71110001'] = [Math.round(3000000 * s), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  d.tax_expenses['62290001'] = [Math.round(2500000 * s), Math.round(2500000 * s), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  d.finance_expenses['72110001'] = [Math.round(2000000 * s), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  d.fixed_assets = [
+    { id: 'fa_' + division + '_1', category: 'IT Hardware & Software', desc: 'Laptop', division: division, justification: 'Must To Have', new_replace: 'New', qty: Math.max(1, Math.round(2 * s)), price: 18000000, month: 3 },
+    { id: 'fa_' + division + '_2', category: 'Peralatan Kantor', desc: 'Printer', division: division, justification: 'Nice To Have', new_replace: 'New', qty: 1, price: 5000000, month: 5 }
+  ];
+  d.business_trip = [
+    { id: 'trip_' + division, employee: division + ' Staff', grade: 'Staff', destination: 'Local', city: 'Jakarta', division: division, duration: 2, month: 4, ticket_price: 2500000 }
+  ];
+  return d;
+}
+const pushOp = (company, project, division, scale) =>
+  budgetRows.push([company, project, iso, JSON.stringify(seedOpBudget(company, project, division, scale)), division]);
+
+// Marcs Boulevard (PT Puri Triniti Batam): SALES + MARKETING + IT + PROC + QS
+pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'IT', 1.0);
+pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'PROC', 0.6);
+pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'QS', 0.7);
+// Collins Boulevard (PT Triniti Menara Serpong): SALES + LEGAL + HC&GA
+pushOp('PT Triniti Menara Serpong', 'Collins Boulevard', 'LEGAL', 0.8);
+pushOp('PT Triniti Menara Serpong', 'Collins Boulevard', 'HC&GA', 0.9);
+// Sequoia Hills (PT Triniti Menara Gading): SALES + legacy(no dept)
+const seqSales = seedBudget('PT Triniti Menara Gading', 'Sequoia Hills', 'SALES');
+seqSales.target_revenue[0].units = [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+seqSales.target_revenue[0].sqm = [120, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+budgetRows.push(['PT Triniti Menara Gading', 'Sequoia Hills', iso, JSON.stringify(seqSales), 'SALES']);
+// District East (PT Triniti Menara Gading): COO + CORSEC + GCR + TECHPLAN
+pushOp('PT Triniti Menara Gading', 'District East', 'COO', 1.5);
+pushOp('PT Triniti Menara Gading', 'District East', 'CORSEC', 0.5);
+pushOp('PT Triniti Menara Gading', 'District East', 'GCR', 0.4);
+pushOp('PT Triniti Menara Gading', 'District East', 'TECHPLAN', 0.6);
+// Holdwell Business Park (PT Triniti Menara Gading): COLL + FAT + PAYROLL + PROJECT
+pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'COLL', 0.8);
+pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'FAT', 1.0);
+pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'PAYROLL', 0.5);
+pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'PROJECT', 0.7);
+// SW & TS (PT Triniti Menara Serpong): BOD
+pushOp('PT Triniti Menara Serpong', 'SW & TS', 'BOD', 2.0);
 
 // ---------------- faithful ports of Code.js logic ----------------
 function verifyNikLogin(nik) {
