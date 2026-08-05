@@ -101,10 +101,10 @@ mktData.marketing_activity[82] = [20000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 mktData.marketing_activity[87] = [15000000, 15000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 mktData.corp_events['ce_seed'] = { qty: 1, price_unit: 50000000, monthly: [0, 50000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] };
 budgetRows.push(['PT Puri Triniti Batam', 'Marcs Boulevard', iso, JSON.stringify(mktData), 'MARKETING']);
-const collins = seedBudget('PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES');
+const collins = seedBudget('PT Triniti Menara Gading', 'Collins Boulevard', 'SALES');
 collins.target_revenue[0].units = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 collins.target_revenue[0].sqm = [80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-budgetRows.push(['PT Triniti Menara Serpong', 'Collins Boulevard', iso, JSON.stringify(collins), 'SALES']);
+budgetRows.push(['PT Triniti Menara Gading', 'Collins Boulevard', iso, JSON.stringify(collins), 'SALES']);
 // Legacy row with NO division (migration fallback test)
 const legacy = seedBudget('JO Triniti Sentul', 'Sequoia Hills', '');
 legacy.target_revenue[0].units = [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -143,26 +143,26 @@ const pushOp = (company, project, division, scale) =>
 pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'IT', 1.0);
 pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'PROC', 0.6);
 pushOp('PT Puri Triniti Batam', 'Marcs Boulevard', 'QS', 0.7);
-// Collins Boulevard (PT Triniti Menara Serpong): SALES + LEGAL + HC&GA
-pushOp('PT Triniti Menara Serpong', 'Collins Boulevard', 'LEGAL', 0.8);
-pushOp('PT Triniti Menara Serpong', 'Collins Boulevard', 'HC&GA', 0.9);
-// Sequoia Hills (PT Triniti Menara Gading): SALES + legacy(no dept)
-const seqSales = seedBudget('PT Triniti Menara Gading', 'Sequoia Hills', 'SALES');
+// Collins Boulevard (PT Triniti Menara Gading): SALES + LEGAL + HC&GA
+pushOp('PT Triniti Menara Gading', 'Collins Boulevard', 'LEGAL', 0.8);
+pushOp('PT Triniti Menara Gading', 'Collins Boulevard', 'HC&GA', 0.9);
+// Sequoia Hills (JO Triniti Sentul): SALES + legacy(no dept)
+const seqSales = seedBudget('JO Triniti Sentul', 'Sequoia Hills', 'SALES');
 seqSales.target_revenue[0].units = [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 seqSales.target_revenue[0].sqm = [120, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-budgetRows.push(['PT Triniti Menara Gading', 'Sequoia Hills', iso, JSON.stringify(seqSales), 'SALES']);
-// District East (PT Triniti Menara Gading): COO + CORSEC + GCR + TECHPLAN
-pushOp('PT Triniti Menara Gading', 'District East', 'COO', 1.5);
-pushOp('PT Triniti Menara Gading', 'District East', 'CORSEC', 0.5);
-pushOp('PT Triniti Menara Gading', 'District East', 'GCR', 0.4);
-pushOp('PT Triniti Menara Gading', 'District East', 'TECHPLAN', 0.6);
-// Holdwell Business Park (PT Triniti Menara Gading): COLL + FAT + PAYROLL + PROJECT
-pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'COLL', 0.8);
-pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'FAT', 1.0);
-pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'PAYROLL', 0.5);
-pushOp('PT Triniti Menara Gading', 'Holdwell Business Park', 'PROJECT', 0.7);
-// SW & TS (PT Triniti Menara Serpong): BOD
-pushOp('PT Triniti Menara Serpong', 'SW & TS', 'BOD', 2.0);
+budgetRows.push(['JO Triniti Sentul', 'Sequoia Hills', iso, JSON.stringify(seqSales), 'SALES']);
+// District East (PT Triniti Dinamik): COO + CORSEC + GCR + TECHPLAN
+pushOp('PT Triniti Dinamik', 'District East', 'COO', 1.5);
+pushOp('PT Triniti Dinamik', 'District East', 'CORSEC', 0.5);
+pushOp('PT Triniti Dinamik', 'District East', 'GCR', 0.4);
+pushOp('PT Triniti Dinamik', 'District East', 'TECHPLAN', 0.6);
+// Holdwell Business Park (PT Perintis Triniti Properti Tbk - Lampung): COLL + FAT + PAYROLL + PROJECT
+pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'COLL', 0.8);
+pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'FAT', 1.0);
+pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PAYROLL', 0.5);
+pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PROJECT', 0.7);
+// SW & TS (4P): BOD
+pushOp('4P', 'SW & TS', 'BOD', 2.0);
 
 // ---------------- faithful ports of Code.js logic ----------------
 function verifyNikLogin(nik) {

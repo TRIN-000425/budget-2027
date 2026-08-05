@@ -3829,6 +3829,7 @@ function parseDraftKey(key) {
 }
 
 // Mock-mode "database": one browser-only draft per (company, project, division).
+// Company-project pairs follow the REAL projectCompanyMapping in metadata.json.
 // Mirrors the rows seeded in the local QA mock server so the consolidated views
 // show ALL projects/divisions while in mock mode (never touches the backend).
 const MOCK_SEED_ROWS = [
@@ -3837,24 +3838,35 @@ const MOCK_SEED_ROWS = [
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'IT'],
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'PROC'],
     ['PT Puri Triniti Batam', 'Marcs Boulevard', 'QS'],
-    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'SALES'],
-    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'LEGAL'],
-    ['PT Triniti Menara Serpong', 'Collins Boulevard', 'HC&GA'],
-    ['PT Triniti Menara Gading', 'Sequoia Hills', 'SALES'],
-    ['PT Triniti Menara Gading', 'Sequoia Hills', ''],
-    ['PT Triniti Menara Gading', 'District East', 'COO'],
-    ['PT Triniti Menara Gading', 'District East', 'CORSEC'],
-    ['PT Triniti Menara Gading', 'District East', 'GCR'],
-    ['PT Triniti Menara Gading', 'District East', 'TECHPLAN'],
-    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'COLL'],
-    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'FAT'],
-    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'PAYROLL'],
-    ['PT Triniti Menara Gading', 'Holdwell Business Park', 'PROJECT'],
-    ['PT Triniti Menara Serpong', 'SW & TS', 'BOD'],
+    ['PT Triniti Menara Gading', 'Collins Boulevard', 'SALES'],
+    ['PT Triniti Menara Gading', 'Collins Boulevard', 'LEGAL'],
+    ['PT Triniti Menara Gading', 'Collins Boulevard', 'HC&GA'],
+    ['JO Triniti Sentul', 'Sequoia Hills', 'SALES'],
+    ['JO Triniti Sentul', 'Sequoia Hills', ''],
+    ['PT Triniti Dinamik', 'District East', 'COO'],
+    ['PT Triniti Dinamik', 'District East', 'CORSEC'],
+    ['PT Triniti Dinamik', 'District East', 'GCR'],
+    ['PT Triniti Dinamik', 'District East', 'TECHPLAN'],
+    ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'COLL'],
+    ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'FAT'],
+    ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PAYROLL'],
+    ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PROJECT'],
+    ['4P', 'SW & TS', 'BOD'],
     ['PT Perintis Triniti Properti Tbk', 'Head Office', 'CORFIN']
 ];
 
 function seedMockDrafts() {
+    // One-time migration: if the seed version marker is missing, drop stale drafts
+    // (e.g. rows seeded under wrong company-project pairs) before reseeding.
+    if (!localStorage.getItem('budget_mock_seed_v2')) {
+        const stale = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.indexOf('draft_') === 0) stale.push(k);
+        }
+        stale.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('budget_mock_seed_v2', '1');
+    }
     const keys = [];
     MOCK_SEED_ROWS.forEach(([company, project, dept]) => {
         const key = 'draft_' + [company, project, dept].map(encodeURIComponent).join('~');
