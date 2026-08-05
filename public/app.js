@@ -417,6 +417,8 @@ function initDropdowns() {
         // Never fall back to ALL projects on an empty scope — show an empty state instead
         projSel.innerHTML = `<option value="">No accessible projects</option>`;
         state.selectedProject = '';
+        const fatProjEmpty = document.getElementById('fat-summary-project');
+        if (fatProjEmpty) { fatProjEmpty.innerHTML = `<option value="">No accessible projects</option>`; fatProjEmpty.value = ''; }
         compSel.innerHTML = `<option value="">Select Entity...</option>`;
         state.selectedCompany = '';
         showToast('Your account has no accessible projects for this selection.', 'amber');
@@ -425,6 +427,9 @@ function initDropdowns() {
     
     projSel.innerHTML = allowedProjs.map(p => `<option value="${p}">${p}</option>`).join('');
     state.selectedProject = projSel.value;
+    // Mirror the project list into the Consolidated (All Divisions) panel picker
+    const fatProj = document.getElementById('fat-summary-project');
+    if (fatProj) { fatProj.innerHTML = projSel.innerHTML; fatProj.value = state.selectedProject; }
     
     // Populate company entities based on selected project
     updateCompanyDropdownForProject(state.selectedProject);
@@ -528,6 +533,8 @@ function setupEventListeners() {
         if (!confirmDiscardDraft()) { e.target.value = prev; return; }
         state.selectedProject = e.target.value;
         updateCompanyDropdownForProject(state.selectedProject);
+        const fatProjMain = document.getElementById('fat-summary-project');
+        if (fatProjMain) fatProjMain.value = state.selectedProject;
         triggerDataLoad();
     });
     
@@ -552,6 +559,17 @@ function setupEventListeners() {
         state.summaryDept = e.target.value || '';
         try { localStorage.setItem('budget_summary_dept', state.summaryDept); } catch (err) {}
         renderConsolidatedSummary('dept-summary');
+    });
+
+    // Consolidated view project picker (mirrors the top PROJECT dropdown, both ways)
+    document.getElementById('fat-summary-project').addEventListener('change', (e) => {
+        const prev = state.selectedProject;
+        if (!confirmDiscardDraft()) { e.target.value = prev; return; }
+        state.selectedProject = e.target.value;
+        const mainSel = document.getElementById('project-select');
+        if (mainSel) mainSel.value = state.selectedProject;
+        updateCompanyDropdownForProject(state.selectedProject);
+        triggerDataLoad();
     });
 
     // Consolidated view entity scope (Super Admin: ALL ENTITIES or one entity)
@@ -2760,6 +2778,8 @@ async function renderConsolidatedSummary(tabId) {
             else if (state.summaryEntity) { state.summaryEntity = ''; fatSel.value = ''; }
             else { fatSel.value = ''; }
         }
+        const fatProjSel = document.getElementById('fat-summary-project');
+        if (fatProjSel) fatProjSel.value = state.selectedProject || '';
         const ent = isSuperAdmin() ? (state.summaryEntity || '') : '';
         scopeLabel = state.selectedProject + (ent ? ' · ' + ent : '') + ' — all divisions';
         params = `&project=${encodeURIComponent(state.selectedProject)}`;

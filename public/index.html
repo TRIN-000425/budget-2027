@@ -618,7 +618,10 @@
                     <div class="premium-card">
                         <div class="table-actions">
                             <span class="info-tag"><i data-lucide="info"></i> Read-only rollup of all divisions for the selected project</span>
-                            <label style="display:flex; align-items:center; gap:6px; margin-left:auto; font-size:0.8rem; color:var(--text-secondary);">Entity:
+                            <label style="display:flex; align-items:center; gap:6px; margin-left:auto; font-size:0.8rem; color:var(--text-secondary);">Project:
+                                <select id="fat-summary-project" style="max-width:220px;" title="Switch project for this summary (synced with the top PROJECT dropdown)"></select>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--text-secondary);">Entity:
                                 <select id="fat-summary-entity" style="display:none; max-width:230px;" title="Entity scope of the Consolidated view (Super Admin)"></select>
                             </label>
                             <button class="btn btn-secondary btn-sm" id="export-fat-summary-btn"><i data-lucide="download"></i> Export Summary</button>
