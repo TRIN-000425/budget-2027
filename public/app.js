@@ -2728,15 +2728,23 @@ async function renderConsolidatedSummary(tabId) {
         scopeLabel += ' · mock data (browser only)';
     } else if (state.gasUrl) {
         try {
-            const res = await fetchGasGet(`${state.gasUrl}?action=summary&scope=${scope}${params}`);
+            // GAS cold starts are slow: give the summary (heaviest call) a long window
+            const res = await fetchGasGet(`${state.gasUrl}?action=summary&scope=${scope}${params}`, 45000);
             const json = await res.json();
             if (json.status === 'success' && json.data) {
                 merged = json.data;
                 rowCount = (json.meta && json.meta.rows) || 0;
                 entries = (json.meta && json.meta.entries) || [];
+            } else {
+                scopeEl.textContent = 'Backend returned an error for ' + scopeLabel + '. Check the GAS backend connection.';
+                table.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:24px; color:var(--text-secondary);">Backend error: ${esc(json.message || 'unknown')}</td></tr>`;
+                return;
             }
         } catch (err) {
             if (!isAbortError(err)) console.error(err);
+            scopeEl.textContent = 'Failed to load summary for ' + scopeLabel + '. Check the backend connection and try again.';
+            table.innerHTML = `<tr><td colspan="20" style="text-align:center; padding:24px; color:var(--text-secondary);">Failed to load summary. If the backend is cold-starting, click the tab again in a few seconds.</td></tr>`;
+            return;
         }
     }
     if (!merged || Object.keys(merged).length === 0) {
