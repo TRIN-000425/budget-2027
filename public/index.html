@@ -16,6 +16,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- SheetJS for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- ExcelJS for styled Excel export (SheetJS community build cannot write fills/fonts) -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -42,44 +44,50 @@
                         <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
                     </li>
                     <li class="nav-header">Revenue & Sales</li>
-                    <li class="nav-item" data-tab="target-revenue">
+                    <li class="nav-item" data-tab="target-revenue" data-module="target-revenue">
                         <i data-lucide="target"></i><span>Target Revenue</span>
                     </li>
-                    <li class="nav-item" data-tab="sales-cost">
+                    <li class="nav-item" data-tab="sales-cost" data-module="sales-cost">
                         <i data-lucide="percent"></i><span>Sales & Program Cost</span>
                     </li>
-                    <li class="nav-item" data-tab="marketing-activity">
+                    <li class="nav-item" data-tab="marketing-activity" data-module="marketing-activity">
                         <i data-lucide="megaphone"></i><span>Marketing Activity</span>
                     </li>
                     <li class="nav-header">Operational Cost</li>
-                    <li class="nav-item" data-tab="dev-land">
+                    <li class="nav-item" data-tab="dev-land" data-module="dev-land">
                         <i data-lucide="building-2"></i><span>Dev & Land Cost</span>
                     </li>
-                    <li class="nav-item" data-tab="employee-hc">
+                    <li class="nav-item" data-tab="employee-hc" data-module="employee-hc">
                         <i data-lucide="wallet"></i><span>Budget Payroll</span>
                     </li>
-                    <li class="nav-item" data-tab="hc-program-planner">
-                        <i data-lucide="graduation-cap"></i><span>HC Program Planner</span>
-                    </li>
-                    <li class="nav-item" data-tab="ga-others">
+                    <li class="nav-item" data-tab="ga-others" data-module="ga-others">
                         <i data-lucide="file-text"></i><span>G&A & Other Expenses</span>
                     </li>
-                    <li class="nav-item" data-tab="corp-event">
+                    <li class="nav-item" data-tab="corp-event" data-module="corp-event">
                         <i data-lucide="award"></i><span>Corporate Event</span>
                     </li>
                     <li class="nav-header">Capital & Assets</li>
-                    <li class="nav-item" data-tab="fixed-assets">
+                    <li class="nav-item" data-tab="fixed-assets" data-module="fixed-assets">
                         <i data-lucide="laptop"></i><span>Fixed Assets (Capex)</span>
                     </li>
-                    <li class="nav-item" data-tab="business-trip">
+                    <li class="nav-item" data-tab="business-trip" data-module="business-trip">
                         <i data-lucide="plane"></i><span>Business Trip</span>
                     </li>
                     <li class="nav-header">Summary & Admin</li>
                     <li class="nav-item" data-tab="summary-budget">
                         <i data-lucide="pie-chart"></i><span>Consolidated Budget</span>
                     </li>
-                    <li class="nav-item" data-tab="nik-management" id="nav-nik-mgmt">
-                        <i data-lucide="shield-check"></i><span>Employee NIK Access</span>
+                    <li class="nav-item" data-tab="dept-summary" id="nav-dept-summary" style="display:none;">
+                        <i data-lucide="chart-column"></i><span>All Projects Summary</span>
+                    </li>
+                    <li class="nav-item" data-tab="fat-summary" id="nav-fat-summary" style="display:none;">
+                        <i data-lucide="chart-pie"></i><span>Consolidated (All Depts)</span>
+                    </li>
+                    <li class="nav-item" data-tab="departments" id="nav-dept-mgmt" style="display:none;">
+                        <i data-lucide="building-2"></i><span>Divisions</span>
+                    </li>
+                    <li class="nav-item" data-tab="nik-management" id="nav-nik-mgmt" style="display:none;">
+                        <i data-lucide="shield-check"></i><span>Employee Access</span>
                     </li>
                 </ul>
             </nav>
@@ -128,20 +136,45 @@
                             <option value="">Select Entity...</option>
                         </select>
                     </div>
+                    <div class="selector-group" id="dept-selector-group" style="display:none;">
+                        <i data-lucide="layers" class="sel-icon"></i>
+                        <label for="dept-select">Dept</label>
+                        <select id="dept-select" class="premium-select">
+                            <option value="">Select Dept...</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="header-right">
                     <div class="status-indicator">
                         <span class="indicator-dot synced"></span>
                         <span class="indicator-text" id="sync-status">Synced</span>
                     </div>
-                    <button class="btn btn-primary" id="save-btn">
+                    <button type="button" class="btn btn-secondary btn-sm" id="mock-btn" style="display:none;" title="Load browser-only sample data (no backend)">
+                        <i data-lucide="flask-conical"></i> Mock
+                    </button>
+                    <select id="viewas-select" class="premium-select" style="display:none; width:auto;" title="Preview the app as another role">
+                        <option value="">View as…</option>
+                        <option value="Admin">Super Admin</option>
+                        <option value="DeptHead">Dept Head</option>
+                        <option value="User">User</option>
+                        <option value="FAT">FAT Manager</option>
+                        <option value="Viewer">Viewer</option>
+                    </select>
+                    <button type="button" class="btn btn-primary" id="save-btn">
                         <i data-lucide="save"></i> Save Changes
                     </button>
-                    <button class="btn btn-secondary" id="export-btn-header">
+                    <button type="button" class="btn btn-secondary" id="export-btn-header">
                         <i data-lucide="download"></i> Export
                     </button>
                 </div>
             </header>
+
+            <!-- Role preview banner (super admin "View as") -->
+            <div id="preview-banner" style="display:none;">
+                <i data-lucide="eye"></i>
+                <span>Previewing as <b id="preview-banner-text"></b></span>
+                <button type="button" class="btn btn-secondary btn-sm" id="exit-preview-btn"><i data-lucide="x"></i> Exit Preview</button>
+            </div>
 
             <!-- Dashboard / View Container -->
             <div class="content-body">
@@ -379,39 +412,6 @@
                     </div>
                 </section>
 
-                <!-- HC PROGRAM PLANNER TAB -->
-                <section class="tab-panel" id="tab-hc-program-planner">
-                    <div class="section-header">
-                        <h2>HC Program Planner</h2>
-                        <p>Coordinate Human Capital training or recruitment programs.</p>
-                    </div>
-
-                    <div class="premium-card">
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" id="add-hc-row"><i data-lucide="plus"></i> Add Program Activity</button>
-                        </div>
-                        <div class="table-container">
-                            <table class="dynamic-entry-table" id="hc-program-table">
-                                <thead>
-                                    <tr>
-                                        <th>Topic/Activity</th>
-                                        <th>Institution</th>
-                                        <th>Cost Category</th>
-                                        <th>Qty</th>
-                                        <th>Price / Unit</th>
-                                        <th>Total (IDR)</th>
-                                        <th>Month</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="hc-program-body">
-                                    <!-- Dynamic rows -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- 7. G&A & OTHER EXPENSES TAB -->
                 <section class="tab-panel" id="tab-ga-others">
                     <div class="section-header">
@@ -558,10 +558,26 @@
                         <p>View consolidated targets, operational costs, marketing expenses, capex, and finance costs month-by-month.</p>
                     </div>
 
-                    <div class="premium-card">
                         <div class="table-actions">
                             <span class="info-tag alert-tag"><i data-lucide="info"></i> Values are calculated dynamically from other modules</span>
-                            <button class="btn btn-secondary btn-sm" id="export-summary-btn"><i data-lucide="download"></i> Export data</button>
+                            <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+                                <label for="summary-ytd-select" style="font-size:0.82rem; font-weight:600; color:var(--text-secondary);">Period / YTD:</label>
+                                <select id="summary-ytd-select" class="form-select" style="font-size:0.82rem; padding:4px 10px; width:auto;">
+                                    <option value="12" selected>Full Year 2027 (Jan - Dec)</option>
+                                    <option value="1">YTD Jan</option>
+                                    <option value="2">YTD Feb</option>
+                                    <option value="3">YTD Mar (Q1)</option>
+                                    <option value="4">YTD Apr</option>
+                                    <option value="5">YTD May</option>
+                                    <option value="6">YTD Jun (Q2)</option>
+                                    <option value="7">YTD Jul</option>
+                                    <option value="8">YTD Aug</option>
+                                    <option value="9">YTD Sep (Q3)</option>
+                                    <option value="10">YTD Oct</option>
+                                    <option value="11">YTD Nov</option>
+                                </select>
+                                <button class="btn btn-secondary btn-sm" id="export-summary-btn"><i data-lucide="download"></i> Export data</button>
+                            </div>
                         </div>
                         <div class="table-container">
                             <table class="budget-table" id="summary-budget-table">
@@ -570,16 +586,54 @@
                         </div>
                     </div>
                 </section>
-                <!-- 12. EMPLOYEE NIK ACCESS MANAGEMENT TAB -->
-                <section class="tab-panel" id="tab-nik-management">
+                <!-- 12. DEPT HEAD: ALL PROJECTS SUMMARY TAB -->
+                <section class="tab-panel" id="tab-dept-summary">
                     <div class="section-header">
-                        <h2>Employee NIK Access & Project Permissions</h2>
-                        <p>Manage employee NIKs and assign allowed projects. Employees can only access budget entries for their authorized projects.</p>
+                        <h2>Division Summary — All Projects</h2>
+                        <p id="dept-summary-scope">Aggregating your division's budget across every project...</p>
                     </div>
 
                     <div class="premium-card">
                         <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" id="add-nik-btn"><i data-lucide="plus"></i> Add New NIK</button>
+                            <span class="info-tag"><i data-lucide="info"></i> Read-only rollup of your division across all projects & modules</span>
+                            <button class="btn btn-secondary btn-sm" id="export-dept-summary-btn"><i data-lucide="download"></i> Export Summary</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="budget-table" id="dept-summary-table">
+                                <!-- Generated Dynamically -->
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <!-- 13. FAT MANAGER: CONSOLIDATED ALL-DEPARTMENTS TAB -->
+                <section class="tab-panel" id="tab-fat-summary">
+                    <div class="section-header">
+                        <h2>Consolidated Summary — All Divisions</h2>
+                        <p id="fat-summary-scope">Aggregating every division's budget for the selected project...</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <span class="info-tag"><i data-lucide="info"></i> Read-only rollup of all divisions for the selected project</span>
+                            <button class="btn btn-secondary btn-sm" id="export-fat-summary-btn"><i data-lucide="download"></i> Export Summary</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="budget-table" id="fat-summary-table">
+                                <!-- Generated Dynamically -->
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <!-- 14. EMPLOYEE ACCESS MANAGEMENT TAB -->
+                <section class="tab-panel" id="tab-nik-management">
+                    <div class="section-header">
+                        <h2>Employee Access & Project Permissions</h2>
+                        <p id="nik-mgmt-subtitle">Manage employee NIKs and assign allowed projects. Employees can only access budget entries for their authorized projects and division.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" id="add-nik-btn"><i data-lucide="plus"></i> Add New Employee</button>
                         </div>
                         <div class="table-container">
                             <table class="dynamic-entry-table" id="nik-management-table">
@@ -587,6 +641,7 @@
                                     <tr>
                                         <th>Employee ID (NIK)</th>
                                         <th>Employee Name</th>
+                                        <th>Division</th>
                                         <th>Allowed Projects</th>
                                         <th>Allowed Companies</th>
                                         <th>Role</th>
@@ -595,6 +650,36 @@
                                     </tr>
                                 </thead>
                                 <tbody id="nik-management-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <!-- 13. DEPARTMENTS MANAGEMENT TAB (SUPER ADMIN ONLY) -->
+                <section class="tab-panel" id="tab-departments">
+                    <div class="section-header">
+                        <h2>Division Module & Project Access</h2>
+                        <p>Define what each division can see: which budget modules are open for the division, and which projects the division may work on. Division heads can only assign their team to projects within this scope.</p>
+                    </div>
+
+                    <div class="premium-card">
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" id="add-dept-btn"><i data-lucide="plus"></i> Add New Division</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="dynamic-entry-table" id="dept-management-table">
+                                <thead>
+                                    <tr>
+                                        <th>Division</th>
+                                        <th>Allowed Modules</th>
+                                        <th>Allowed Projects</th>
+                                        <th>Allowed Companies</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dept-management-body">
                                     <!-- Dynamic rows -->
                                 </tbody>
                             </table>
@@ -631,9 +716,9 @@
     <div class="modal" id="nik-edit-modal">
         <div class="modal-content">
             <span class="close-modal" id="close-nik-edit-modal">&times;</span>
-            <h3><i data-lucide="user-cog"></i> Manage Employee NIK Permissions</h3>
-            <p>Assign or update allowed projects and companies for this employee.</p>
-            <form id="nik-edit-form">
+            <h3><i data-lucide="user-cog"></i> Manage Employee Permissions</h3>
+            <p>Assign division, role, and allowed projects for this employee.</p>
+            <form id="nik-edit-form" onsubmit="return false">
                 <div class="form-group">
                     <label for="nik-edit-id">Employee ID (NIK):</label>
                     <input type="text" id="nik-edit-id" placeholder="e.g. 1001" required>
@@ -643,24 +728,71 @@
                     <input type="text" id="nik-edit-name" placeholder="e.g. John Doe" required>
                 </div>
                 <div class="form-group">
-                    <label for="nik-edit-projects">Allowed Projects (comma separated, or ALL):</label>
-                    <input type="text" id="nik-edit-projects" placeholder="e.g. Brooklyn, The Smith, ALL">
+                    <label for="nik-edit-dept">Division:</label>
+                    <select id="nik-edit-dept">
+                        <option value="">-- No Division --</option>
+                    </select>
+                    <small style="color:var(--text-secondary);">Division heads manage their own team. Super admin sets what the division can see (modules & projects).</small>
                 </div>
                 <div class="form-group">
-                    <label for="nik-edit-companies">Allowed Companies (comma separated, or ALL):</label>
-                    <input type="text" id="nik-edit-companies" placeholder="e.g. ALL">
+                    <label>Allowed Projects:</label>
+                    <div class="checkbox-grid" id="nik-project-checkboxes">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <small style="color:var(--text-secondary);">Select projects. All selected (or none) = ALL access. Dept heads can only assign projects within the division scope.</small>
+                </div>
+                <div class="form-group">
+                    <label>Allowed Companies:</label>
+                    <div class="checkbox-grid" id="nik-company-checkboxes">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <small style="color:var(--text-secondary);">Auto-derived from the selected projects. Adjust as needed. All selected (or none) = ALL access.</small>
                 </div>
                 <div class="form-group">
                     <label for="nik-edit-role">Role:</label>
                     <select id="nik-edit-role">
                         <option value="User">User</option>
-                        <option value="Admin">Admin</option>
+                        <option value="DeptHead">Dept Head</option>
                         <option value="Viewer">Viewer</option>
+                        <option value="Admin">Super Admin</option>
                     </select>
+                    <small style="color:var(--text-secondary);">Dept Head: manages own team & assigns projects within division scope. Super Admin: manages everything.</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-nik-edit-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="save-nik-edit-btn">Save Permissions</button>
+                    <button type="button" class="btn btn-primary" id="save-nik-edit-btn">Save Permissions</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Division Edit Modal -->
+    <div class="modal" id="dept-edit-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-dept-edit-modal">&times;</span>
+            <h3><i data-lucide="building-2"></i> Manage Division Access</h3>
+            <p>Set which budget modules this division can open, and which projects the division may work on.</p>
+            <form id="dept-edit-form" onsubmit="return false">
+                <div class="form-group">
+                    <label for="dept-edit-name">Division Name:</label>
+                    <input type="text" id="dept-edit-name" placeholder="e.g. Marketing" required>
+                </div>
+                <div class="form-group">
+                    <label>Allowed Modules (what this division can see):</label>
+                    <div class="checkbox-grid" id="dept-module-checkboxes">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Allowed Projects (division scope):</label>
+                    <div class="checkbox-grid" id="dept-project-checkboxes">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <small style="color:var(--text-secondary);">Division heads can only assign their team to projects within this scope.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-dept-edit-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-dept-edit-btn">Save Division</button>
                 </div>
             </form>
         </div>

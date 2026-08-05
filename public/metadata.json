@@ -1,43 +1,34 @@
 {
   "companies": [
+    "4P",
+    "JO Triniti Sentul",
     "PT Perintis Triniti Properti Tbk",
+    "PT Perintis Triniti Properti Tbk - Lampung",
     "PT Puri Triniti Batam",
     "PT Sirius Terang Cemerlang",
     "PT Triniti Dinamik",
     "PT Triniti Garam Properti",
     "PT Triniti Menara Gading",
     "PT Triniti Menara Serpong",
-    "PT Triniti Pilar Gemilang",
-    "Pilih Perusahaan",
-    "Sentul - JO"
+    "PT Triniti Pilar Gemilang"
   ],
   "projects": [
-    "Brooklyn",
     "Collins Boulevard",
     "District East",
     "Head Office",
-    "Lampung-Holdwell Business Park",
-    "Lampung-Noble Spring Residence",
-    "Marc's Boulevard",
-    "Sentul-19ha",
-    "Sentul-72ha",
-    "Springwood",
-    "The Smith",
-    "Yukata"
+    "Holdwell Business Park",
+    "Marcs Boulevard",
+    "Sequoia Hills",
+    "SW & TS"
   ],
   "projectCompanyMapping": {
-    "Brooklyn": ["PT Sirius Terang Cemerlang"],
-    "Collins Boulevard": ["PT Puri Triniti Batam"],
-    "District East": ["PT Perintis Triniti Properti Tbk"],
-    "Head Office": ["PT Perintis Triniti Properti Tbk"],
-    "Lampung-Holdwell Business Park": ["PT Triniti Garam Properti"],
-    "Lampung-Noble Spring Residence": ["PT Triniti Garam Properti"],
-    "Marc's Boulevard": ["PT Triniti Dinamik", "PT Triniti Pilar Gemilang"],
-    "Sentul-19ha": ["Sentul - JO"],
-    "Sentul-72ha": ["Sentul - JO", "PT Perintis Triniti Properti Tbk"],
-    "Springwood": ["PT Triniti Dinamik"],
-    "The Smith": ["PT Triniti Dinamik", "PT Triniti Menara Gading"],
-    "Yukata": ["PT Triniti Menara Serpong"]
+    "Collins Boulevard": ["PT Triniti Menara Gading", "PT Triniti Menara Serpong"],
+    "District East": ["PT Triniti Dinamik"],
+    "Head Office": ["PT Perintis Triniti Properti Tbk", "PT Sirius Terang Cemerlang", "PT Triniti Pilar Gemilang"],
+    "Holdwell Business Park": ["PT Perintis Triniti Properti Tbk - Lampung"],
+    "Marcs Boulevard": ["PT Puri Triniti Batam"],
+    "Sequoia Hills": ["JO Triniti Sentul", "PT Triniti Garam Properti"],
+    "SW & TS": ["4P"]
   },
   "currencies": [
     "CNY",

@@ -136,6 +136,54 @@ body {
     display: none;
 }
 
+/* Spinner for the Saving... button state */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.spin {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+/* Super admin role-preview banner */
+#preview-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(245, 158, 11, 0.12);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+#preview-banner i {
+    color: var(--accent-amber);
+    flex-shrink: 0;
+}
+#preview-banner .btn {
+    margin-left: auto;
+}
+
+/* Floating tooltip for collapsed sidebar nav items */
+.nav-tooltip {
+    position: fixed;
+    transform: translateY(-50%);
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    display: none;
+    pointer-events: none;
+}
+
 /* Sidebar toggle button (inside sidebar) */
 .sidebar-toggle {
     position: absolute;
@@ -1411,6 +1459,12 @@ body.light .budget-table tr.row-group-total td {
     background-color: var(--accent-indigo-glow);
     color: var(--accent-indigo);
     border-color: rgba(99, 102, 241, 0.3);
+}
+
+.badge-cherry {
+    background-color: var(--accent-cherry-glow);
+    color: var(--accent-cherry);
+    border-color: rgba(244, 63, 94, 0.3);
 }
 
 .checkbox-grid {

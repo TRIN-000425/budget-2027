@@ -4,12 +4,160 @@ let state = {
     templates: null,
     selectedCompany: '',
     selectedProject: '',
+    selectedDepartment: '',
     gasUrl: localStorage.getItem('gas_url') || 'https://script.google.com/macros/s/AKfycbxg0wEPqmGRFkoj-HDysUW6UV_HKzEZr1LrdgZ_8IBB9BgymAWEXFuvBzppls4Zpgk/exec',
     isDirty: false,
-    currentUser: JSON.parse(sessionStorage.getItem('current_user') || 'null'),
+    currentUser: JSON.parse(sessionStorage.getItem('current_user_v2') || 'null'),
     nikList: [],
+    departments: [],
+    mockMode: false,
+    realUser: null,
     data: getInitialDataStructure()
 };
+
+// Budget module keys & friendly labels (department access is set at this granularity)
+const BUDGET_MODULES = [
+    { key: 'target-revenue',       label: 'Target Revenue' },
+    { key: 'sales-cost',           label: 'Sales & Program Cost' },
+    { key: 'marketing-activity',   label: 'Marketing Activity' },
+    { key: 'dev-land',             label: 'Dev & Land Cost' },
+    { key: 'employee-hc',          label: 'Budget Payroll' },
+    { key: 'ga-others',            label: 'G&A & Other Expenses' },
+    { key: 'corp-event',           label: 'Corporate Event' },
+    { key: 'fixed-assets',         label: 'Fixed Assets (Capex)' },
+    { key: 'business-trip',        label: 'Business Trip' }
+];
+
+// Permission helpers
+const isSuperAdmin = () => state.currentUser && state.currentUser.role === 'Admin';
+const isDeptHead   = () => state.currentUser && state.currentUser.role === 'DeptHead';
+const isFAT        = () => state.currentUser && state.currentUser.role === 'FAT';
+const canManageUsers = () => state.currentUser && (isSuperAdmin() || isDeptHead());
+
+function parseCsvList(str) {
+    if (!str) return [];
+    return String(str).split(',').map(s => s.trim()).filter(Boolean);
+}
+
+// Fetch with timeout so a hanging backend can never freeze the UI.
+// GAS cold starts (first call after idle) can take 8-15s, so the default is generous.
+async function fetchWithTimeout(url, options, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+// Timeout aborts are an EXPECTED fallback path, not a real error
+function isAbortError(err) {
+    return err && (err.name === 'AbortError' || err.code === 20);
+}
+
+// GAS GET with cold-start resilience: retry once if the first attempt times out
+async function fetchGasGet(url, timeoutMs = 15000) {
+    try {
+        return await fetchWithTimeout(url, {}, timeoutMs);
+    } catch (err) {
+        if (isAbortError(err)) {
+            // First hit after deploy/idle is slow - retry once before giving up
+            return await fetchWithTimeout(url, {}, timeoutMs);
+        }
+        throw err;
+    }
+}
+
+// Effective projects a user may open:
+// Admin -> ALL; User/DeptHead -> their assigned projects, capped by department scope
+function getEffectiveAllowedProjects() {
+    if (!state.currentUser) return 'ALL';
+    if (isSuperAdmin()) return 'ALL';
+    const userList = state.currentUser.allowedProjects && state.currentUser.allowedProjects !== 'ALL'
+        ? parseCsvList(state.currentUser.allowedProjects) : null;
+    const deptList = state.currentUser.deptAllowedProjects && state.currentUser.deptAllowedProjects !== 'ALL'
+        ? parseCsvList(state.currentUser.deptAllowedProjects) : null;
+    if (!userList) return deptList ? deptList : 'ALL';
+    if (!deptList) return userList;
+    return userList.filter(p => deptList.map(d => d.toLowerCase()).includes(p.toLowerCase()));
+}
+
+// Effective companies, derived the same way (capped by department scope)
+function getEffectiveAllowedCompanies() {
+    if (!state.currentUser) return 'ALL';
+    if (isSuperAdmin()) return 'ALL';
+    const userList = state.currentUser.allowedCompanies && state.currentUser.allowedCompanies !== 'ALL'
+        ? parseCsvList(state.currentUser.allowedCompanies) : null;
+    const deptList = state.currentUser.deptAllowedCompanies && state.currentUser.deptAllowedCompanies !== 'ALL'
+        ? parseCsvList(state.currentUser.deptAllowedCompanies) : null;
+    if (!userList) return deptList ? deptList : 'ALL';
+    if (!deptList) return userList;
+    return userList.filter(c => deptList.map(d => d.toLowerCase()).includes(c.toLowerCase()));
+}
+
+// Effective modules the current user may open (Admin = everything)
+function getEffectiveAllowedModules() {
+    if (!state.currentUser) return BUDGET_MODULES.map(m => m.key);
+    if (isSuperAdmin()) return BUDGET_MODULES.map(m => m.key);
+    if (state.currentUser.allowedModules && state.currentUser.allowedModules !== 'ALL') {
+        return parseCsvList(state.currentUser.allowedModules);
+    }
+    return BUDGET_MODULES.map(m => m.key);
+}
+
+function isModuleAllowed(moduleKey) {
+    return getEffectiveAllowedModules().includes(moduleKey);
+}
+
+// The department whose entries the current user reads/writes:
+// Admin picks from the header selector; everyone else is locked to their own department
+function getActiveDepartment() {
+    if (!state.currentUser) return '';
+    if (isSuperAdmin()) return state.selectedDepartment;
+    return state.currentUser.department || '';
+}
+
+// Warn before discarding an unsaved draft when switching project/company/division
+function confirmDiscardDraft() {
+    if (!state.isDirty) return true;
+    return confirm('You have unsaved changes in the current budget. Discard them and switch?');
+}
+
+// Whether a tab may be opened by the current user
+function isTabAllowed(tabId) {
+    if (!state.currentUser) return tabId === 'dashboard';
+    if (isSuperAdmin()) return true;
+    // FAT manager: consolidated all-departments summary is their only view
+    if (isFAT()) return tabId === 'fat-summary';
+    if (tabId === 'departments') return false;
+    if (tabId === 'nik-management') return isDeptHead();
+    if (tabId === 'dept-summary') return isDeptHead();
+    if (tabId === 'fat-summary') return false;
+    if (tabId === 'dashboard' || tabId === 'summary-budget') return true;
+    const mod = BUDGET_MODULES.find(m => m.key === tabId);
+    if (mod) return isModuleAllowed(tabId);
+    return true;
+}
+
+// Landing tab when the active tab isn't allowed for the current role
+function getDefaultTab() {
+    if (isFAT()) return 'fat-summary';
+    return 'dashboard';
+}
+
+// Show/hide sidebar items based on role + department module access
+function applyModuleVisibility() {
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+        const tabId = item.getAttribute('data-tab');
+        item.style.display = isTabAllowed(tabId) ? 'flex' : 'none';
+    });
+    // Keep active tab valid
+    const activeTab = getActiveTabId();
+    if (!isTabAllowed(activeTab)) {
+        switchTab(getDefaultTab());
+    }
+}
 
 // Months names and formatting helpers
 const months = [
@@ -37,6 +185,26 @@ const formatPercent = (val) => {
     if (val === undefined || val === null || isNaN(val)) return '0.0%';
     return (val * 100).toFixed(1) + '%';
 };
+
+// HTML-escape user-controlled strings before they touch innerHTML / attribute values
+// (prevents stored XSS via category names, descriptions, employee names, NIKs, etc.)
+function esc(str) {
+    return String(str === undefined || str === null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Count fields (units, sqm, qty, duration): non-negative integers only
+function parseCount(v) {
+    const n = Math.floor(parseFloat(v));
+    return isNaN(n) || n < 0 ? 0 : n;
+}
+
+// Money fields (rupiah): whole numbers; negatives allowed (income lines in Others/Finance)
+function parseMoney(v) {
+    const n = Math.floor(parseFloat(v));
+    return isNaN(n) ? 0 : n;
+}
 
 // Initial Data Structure generator (matches Excel templates)
 function getInitialDataStructure() {
@@ -92,13 +260,13 @@ function getInitialDataStructure() {
         payroll_expenses: {},
         dev_land: {},
         ga_expenses: {},
+        ga_children: {}, // G&A hierarchy: code -> [{ id, name, monthly[12] }]; parent ga_expenses[code] = sum of children
         others_expenses: {},
         finance_expenses: {},
         tax_expenses: {},
         corp_events: {},
         fixed_assets: [],
         business_trip: [],
-        hc_program: [],
         summary_2026: {}
     };
 }
@@ -110,10 +278,48 @@ function refreshIcons() {
 }
 
 // Sidebar collapse / expand
+let navTooltipEl = null;
+function getNavTooltip() {
+    if (!navTooltipEl) {
+        navTooltipEl = document.createElement('div');
+        navTooltipEl.className = 'nav-tooltip';
+        document.body.appendChild(navTooltipEl);
+    }
+    return navTooltipEl;
+}
+function hideNavTooltip() {
+    if (navTooltipEl) navTooltipEl.style.display = 'none';
+}
+
+// Floating tooltip for nav items, shown only while the sidebar is collapsed
+function initNavTooltips() {
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+        const span = item.querySelector('span');
+        if (span && !item.getAttribute('data-tooltip')) {
+            item.setAttribute('data-tooltip', span.textContent.trim());
+        }
+        item.addEventListener('mouseenter', () => {
+            const sidebar = document.querySelector('.sidebar');
+            if (!sidebar.classList.contains('collapsed')) return;
+            const tip = getNavTooltip();
+            tip.textContent = item.getAttribute('data-tooltip') || '';
+            const rect = item.getBoundingClientRect();
+            tip.style.top = Math.round(rect.top + rect.height / 2) + 'px';
+            tip.style.left = Math.round(rect.right + 10) + 'px';
+            tip.style.display = 'block';
+        });
+        item.addEventListener('mouseleave', hideNavTooltip);
+    });
+    // Keep tooltip in sync with sidebar scroll / window resize
+    document.querySelector('.sidebar-nav').addEventListener('scroll', hideNavTooltip);
+    window.addEventListener('resize', hideNavTooltip);
+}
+
 function toggleSidebar(e) {
     e.stopPropagation();
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('collapsed');
+    hideNavTooltip();
     refreshIcons();
 }
 
@@ -122,6 +328,7 @@ function expandSidebar(e) {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar.classList.contains('collapsed')) {
         sidebar.classList.remove('collapsed');
+        hideNavTooltip();
         refreshIcons();
     }
 }
@@ -130,6 +337,7 @@ function collapseSidebar() {
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar.classList.contains('collapsed')) {
         sidebar.classList.add('collapsed');
+        hideNavTooltip();
         refreshIcons();
     }
 }
@@ -174,8 +382,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         setupEventListeners();
         refreshIcons();
         
-        // Load initial mock or live data
-        triggerDataLoad();
+        // Restore existing session (v2) - re-applies module visibility, dept selector, etc.
+        if (state.currentUser) {
+            setAuthenticatedUser(state.currentUser);
+        } else {
+            // Load initial mock or live data
+            triggerDataLoad();
+        }
     } catch (err) {
         console.error("Initialization error:", err);
         showToast('Failed to load local templates or metadata configuration', 'error');
@@ -192,14 +405,23 @@ function initDropdowns() {
         return;
     }
     
-    // Filter projects based on user permissions
+    // Filter projects based on user permissions (capped by department scope)
     let allowedProjs = state.metadata.projects;
-    if (state.currentUser.allowedProjects && state.currentUser.allowedProjects !== 'ALL') {
-        const userProjList = state.currentUser.allowedProjects.split(',').map(s => s.trim().toLowerCase());
+    const effProjects = getEffectiveAllowedProjects();
+    if (effProjects !== 'ALL') {
+        const userProjList = effProjects.map(s => s.toLowerCase());
         allowedProjs = state.metadata.projects.filter(p => userProjList.includes(p.toLowerCase()));
     }
     
-    if (allowedProjs.length === 0) allowedProjs = state.metadata.projects; // fallback
+    if (allowedProjs.length === 0) {
+        // Never fall back to ALL projects on an empty scope — show an empty state instead
+        projSel.innerHTML = `<option value="">No accessible projects</option>`;
+        state.selectedProject = '';
+        compSel.innerHTML = `<option value="">Select Entity...</option>`;
+        state.selectedCompany = '';
+        showToast('Your account has no accessible projects for this selection.', 'amber');
+        return;
+    }
     
     projSel.innerHTML = allowedProjs.map(p => `<option value="${p}">${p}</option>`).join('');
     state.selectedProject = projSel.value;
@@ -214,9 +436,10 @@ function updateCompanyDropdownForProject(projectName) {
     
     let entities = mapping[projectName] || state.metadata.companies;
     
-    // Filter by NIK allowed companies if restricted
-    if (state.currentUser && state.currentUser.allowedCompanies && state.currentUser.allowedCompanies !== 'ALL') {
-        const userCompList = state.currentUser.allowedCompanies.split(',').map(s => s.trim().toLowerCase());
+    // Filter by effective allowed companies (user + department scope)
+    const effCompanies = getEffectiveAllowedCompanies();
+    if (effCompanies !== 'ALL') {
+        const userCompList = effCompanies.map(s => s.toLowerCase());
         const filtered = entities.filter(c => userCompList.includes(c.toLowerCase()));
         if (filtered.length > 0) entities = filtered;
     }
@@ -289,6 +512,8 @@ function initDefaultDynamicData() {
 function setupEventListeners() {
     // Project selector change updates company entities
     document.getElementById('project-select').addEventListener('change', (e) => {
+        const prev = state.selectedProject;
+        if (!confirmDiscardDraft()) { e.target.value = prev; return; }
         state.selectedProject = e.target.value;
         updateCompanyDropdownForProject(state.selectedProject);
         triggerDataLoad();
@@ -296,7 +521,17 @@ function setupEventListeners() {
     
     // Company selector change
     document.getElementById('company-select').addEventListener('change', (e) => {
+        const prev = state.selectedCompany;
+        if (!confirmDiscardDraft()) { e.target.value = prev; return; }
         state.selectedCompany = e.target.value;
+        triggerDataLoad();
+    });
+    
+    // Department selector change (super admin only - switches which dept's entries are shown)
+    document.getElementById('dept-select').addEventListener('change', (e) => {
+        const prev = state.selectedDepartment;
+        if (!confirmDiscardDraft()) { e.target.value = prev; return; }
+        state.selectedDepartment = e.target.value;
         triggerDataLoad();
     });
     
@@ -308,6 +543,9 @@ function setupEventListeners() {
             switchTab(tabId);
         });
     });
+    
+    // Tooltips for collapsed sidebar
+    initNavTooltips();
 
     // Card Subtabs
     document.querySelectorAll('.card-tab').forEach(tab => {
@@ -327,9 +565,17 @@ function setupEventListeners() {
     // Sync triggers
     document.getElementById('save-btn').addEventListener('click', triggerDataSave);
     
+    // Mock data & role preview (super admin only)
+    document.getElementById('mock-btn').addEventListener('click', toggleMockMode);
+    document.getElementById('viewas-select').addEventListener('change', (e) => applyPreviewRole(e.target.value));
+    document.getElementById('exit-preview-btn').addEventListener('click', exitPreview);
+    
+    // YTD filter dropdown
+    const ytdSel = document.getElementById('summary-ytd-select');
+    if (ytdSel) ytdSel.addEventListener('change', renderSummaryBudgetTable);
+    
     // Dynamic lists additions
     document.getElementById('add-revenue-cat').addEventListener('click', addTargetRevenueRow);
-    document.getElementById('add-hc-row').addEventListener('click', addHCProgramRow);
     document.getElementById('add-fa-row').addEventListener('click', addFixedAssetRow);
     document.getElementById('add-trip-row').addEventListener('click', addBusinessTripRow);
     
@@ -359,14 +605,32 @@ function setupEventListeners() {
     document.getElementById('logout-btn').addEventListener('click', handleNikLogout);
     
     // NIK Management UI
-    document.getElementById('add-nik-btn').addEventListener('click', showNikEditModal);
+    document.getElementById('add-nik-btn').addEventListener('click', () => showNikEditModal(null));
     document.getElementById('close-nik-edit-modal').addEventListener('click', hideNikEditModal);
     document.getElementById('cancel-nik-edit-btn').addEventListener('click', hideNikEditModal);
     document.getElementById('save-nik-edit-btn').addEventListener('click', saveNikPermissions);
+    
+    // Department Management UI (super admin)
+    document.getElementById('add-dept-btn').addEventListener('click', () => showDeptEditModal(null));
+    document.getElementById('close-dept-edit-modal').addEventListener('click', hideDeptEditModal);
+    document.getElementById('cancel-dept-edit-btn').addEventListener('click', hideDeptEditModal);
+    document.getElementById('save-dept-edit-btn').addEventListener('click', saveDepartmentPermissions);
+    
+    // Consolidated summary export buttons
+    document.getElementById('export-dept-summary-btn').addEventListener('click', () => exportConsolidatedSummary('dept-summary'));
+    document.getElementById('export-fat-summary-btn').addEventListener('click', () => exportConsolidatedSummary('fat-summary'));
 }
 
 // Navigation controller
 function switchTab(tabId) {
+    // Permission guard: users can only open tabs allowed by their role + department modules
+    if (!isTabAllowed(tabId)) {
+        tabId = getDefaultTab();
+    }
+    
+    // Remember the active tab so a page refresh returns to the same view
+    sessionStorage.setItem('budget_active_tab', tabId);
+    
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     
@@ -401,9 +665,6 @@ function renderTabContent(tabId) {
         case 'employee-hc':
             renderPayrollTable();
             break;
-        case 'hc-program-planner':
-            renderHCProgramList();
-            break;
         case 'ga-others':
             renderGAOthersTables();
             break;
@@ -419,8 +680,17 @@ function renderTabContent(tabId) {
         case 'summary-budget':
             renderSummaryBudgetTable();
             break;
+        case 'dept-summary':
+            renderConsolidatedSummary('dept-summary');
+            break;
+        case 'fat-summary':
+            renderConsolidatedSummary('fat-summary');
+            break;
         case 'nik-management':
             renderNikManagementTable();
+            break;
+        case 'departments':
+            renderDepartmentsTable();
             break;
     }
     refreshIcons();
@@ -509,7 +779,7 @@ function renderTargetRevenueTable() {
         html += `
             <tr class="row-group-header">
                 <td colspan="16">
-                    <span class="cat-name">${row.category}</span>
+                    <span class="cat-name">${esc(row.category)}</span>
                     <span class="cat-actions">
                         <button class="btn-icon-xs" onclick="editTargetRevenueCategory(${rIdx})" title="Edit Category Name"><i data-lucide="pencil" class="icon-xs"></i></button>
                         <button class="btn-icon-xs btn-icon-danger" onclick="deleteTargetRevenueCategory(${rIdx})" title="Delete Category"><i data-lucide="trash-2" class="icon-xs"></i></button>
@@ -625,7 +895,8 @@ function renderTargetRevenueTable() {
 }
 
 function updateTargetRevenue(rIdx, field, mIdx, val) {
-    val = parseFloat(val) || 0;
+    const isCount = field === 'stock_units' || field === 'stock_sqm' || field === 'units' || field === 'sqm';
+    val = isCount ? parseCount(val) : parseMoney(val);
     if (mIdx === null) {
         state.data.target_revenue[rIdx][field] = val;
     } else {
@@ -636,21 +907,31 @@ function updateTargetRevenue(rIdx, field, mIdx, val) {
     renderTargetRevenueTable();
 }
 
+// Rapid double-click protection for the prompt/dynamic-row adders
+const addRowLocks = {};
+function withAddLock(key, fn) {
+    if (addRowLocks[key]) return;
+    addRowLocks[key] = true;
+    try { fn(); } finally { setTimeout(() => { addRowLocks[key] = false; }, 350); }
+}
+
 function addTargetRevenueRow() {
-    const name = prompt("Enter new category name (e.g. Townhouse Type 120):");
-    if (!name) return;
-    
-    state.data.target_revenue.push({
-        category: name,
-        stock_units: 0,
-        stock_sqm: 0,
-        price_sqm: 0,
-        units: Array(12).fill(0),
-        sqm: Array(12).fill(0)
+    withAddLock('revenue', () => {
+        const name = prompt("Enter new category name (e.g. Townhouse Type 120):");
+        if (!name) return;
+        
+        state.data.target_revenue.push({
+            category: name,
+            stock_units: 0,
+            stock_sqm: 0,
+            price_sqm: 0,
+            units: Array(12).fill(0),
+            sqm: Array(12).fill(0)
+        });
+        state.isDirty = true;
+        updateSyncIndicator(false);
+        renderTargetRevenueTable();
     });
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderTargetRevenueTable();
 }
 
 function editTargetRevenueCategory(rIdx) {
@@ -716,7 +997,7 @@ function renderGenericRatiosTable(tableId, sourceData, targetSales, typeKey) {
         
         html += `
             <tr>
-                <td>${label}</td>
+                <td>${esc(label)}</td>
                 <td><input type="text" class="table-input readonly" readonly value="${rowSum.toLocaleString('id-ID')}"></td>
                 ${rowData.map((val, mIdx) => {
                     monthlyTotals[mIdx] += val;
@@ -790,7 +1071,7 @@ function deleteSalesCostRow(typeKey, key) {
 }
 
 function updateSalesCost(typeKey, rowKey, mIdx, val) {
-    val = parseFloat(val) || 0;
+    val = parseMoney(val);
     state.data.sales_cost[typeKey][rowKey][mIdx] = val;
     state.isDirty = true;
     updateSyncIndicator(false);
@@ -829,7 +1110,7 @@ function renderProgramSalesTable(targetSales) {
         
         html += `
             <tr>
-                <td>${label}</td>
+                <td>${esc(label)}</td>
                 <td><input type="text" class="table-input readonly" readonly value="${rowSum.toLocaleString('id-ID')}"></td>
                 ${rowData.map((val, mIdx) => {
                     monthlyTotals[mIdx] += val;
@@ -903,7 +1184,7 @@ function deleteProgramSalesRow(key) {
 }
 
 function updateProgramSales(rowKey, mIdx, val) {
-    val = parseFloat(val) || 0;
+    val = parseMoney(val);
     state.data.program_sales[rowKey][mIdx] = val;
     state.isDirty = true;
     updateSyncIndicator(false);
@@ -943,18 +1224,18 @@ function renderMarketingSubTable(tableId, typeText) {
     
     filterRows.forEach(item => {
         if (item.type === 'main_header') {
-            html += `<tr class="row-group-header" style="background-color:rgba(139, 92, 246, 0.15)"><td colspan="15">${item.name}</td></tr>`;
+            html += `<tr class="row-group-header" style="background-color:rgba(139, 92, 246, 0.15)"><td colspan="15">${esc(item.name)}</td></tr>`;
         } else if (item.type === 'sub_header') {
-            html += `<tr class="row-group-header"><td colspan="15">${item.name}</td></tr>`;
+            html += `<tr class="row-group-header"><td colspan="15">${esc(item.name)}</td></tr>`;
         } else if (item.type === 'category_header') {
-            html += `<tr style="font-weight:600; color:#d1d5db"><td colspan="15">${item.name}</td></tr>`;
+            html += `<tr style="font-weight:600; color:#d1d5db"><td colspan="15">${esc(item.name)}</td></tr>`;
         } else if (item.type === 'input') {
             const mValues = state.data.marketing_activity[item.row] || Array(12).fill(0);
             const rowSum = mValues.reduce((a, b) => a + b, 0);
             
             html += `
                 <tr>
-                    <td style="padding-left:30px;">${item.name}</td>
+                    <td style="padding-left:30px;">${esc(item.name)}</td>
                     <td><span style="font-size:0.75rem; color:var(--text-secondary)">${item.classification}</span></td>
                     <td><input type="text" class="table-input readonly" readonly value="${rowSum.toLocaleString('id-ID')}"></td>
                     ${mValues.map((val, mIdx) => {
@@ -981,7 +1262,7 @@ function renderMarketingSubTable(tableId, typeText) {
 }
 
 function updateMarketingActivity(rowId, mIdx, val) {
-    val = parseFloat(val) || 0;
+    val = parseMoney(val);
     if (!state.data.marketing_activity[rowId]) {
         state.data.marketing_activity[rowId] = Array(12).fill(0);
     }
@@ -1233,7 +1514,7 @@ function renderDevLandTable() {
                 <tr>
                     <td style="font-weight:600; color:var(--text-secondary); text-align:center;">${numDisp}</td>
                     <td>
-                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${descValue}" placeholder="Description / Item Name" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
+                        <input type="text" class="table-input" style="width:100%; text-align:left; font-weight:500;" value="${esc(descValue)}" placeholder="Description / Item Name" onchange="updateDevLandName('${key}', ${itemIdx}, this.value)">
                     </td>
                     <td><input type="number" class="table-input" style="width:75px" value="${dataRow.sqm}" onchange="updateDevLand('${key}', 'sqm', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:90px" value="${dataRow.cost_sqm}" onchange="updateDevLand('${key}', 'cost_sqm', this.value)"></td>
@@ -1357,7 +1638,7 @@ function addDevLandCategory() {
 }
 
 function updateDevLand(key, field, val, mIdx = null) {
-    val = parseFloat(val) || 0;
+    val = (field === 'sqm') ? parseCount(val) : parseMoney(val);
     if (!state.data.dev_land[key]) {
         state.data.dev_land[key] = { sqm: 0, cost_sqm: 0, rab_spk: 0, realisasi: 0, best_est: 0, monthly: Array(12).fill(0) };
     }
@@ -1375,7 +1656,11 @@ function updateDevLand(key, field, val, mIdx = null) {
 function toggleDevLandHeader(headerKey) {
     if (!state.collapsedHeaders) state.collapsedHeaders = {};
     state.collapsedHeaders[headerKey] = !state.collapsedHeaders[headerKey];
-    renderDevLandTable();
+    // Re-render the table that owns this header (dev-land, marketing, corp-event or G&A)
+    if (headerKey.indexOf('ga_') === 0) renderGAOthersTables();
+    else if (headerKey.indexOf('mkt_') === 0) renderMarketingActivityTables();
+    else if (headerKey.indexOf('ce_') === 0) renderCorpEventTable();
+    else renderDevLandTable();
 }
 
 // 5. MODULE RENDER: BUDGET PAYROLL (COA-based)
@@ -1384,7 +1669,7 @@ function renderPayrollTable() {
 }
 
 function updatePayroll(code, mIdx, val) {
-    val = parseFloat(val) || 0;
+    val = parseMoney(val);
     if (!state.data.payroll_expenses[code]) {
         state.data.payroll_expenses[code] = Array(12).fill(0);
     }
@@ -1394,82 +1679,181 @@ function updatePayroll(code, mIdx, val) {
     renderPayrollTable();
 }
 
-function renderHCProgramList() {
-    const body = document.getElementById('hc-program-body');
-    
-    if (state.data.hc_program.length === 0) {
-        body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-secondary); padding:24px;">No human capital activities planned. Click 'Add Program Activity' above.</td></tr>`;
-        return;
-    }
-    
-    // Select option templates for COA
-    const coaOpts = state.metadata.anp.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-    
-    body.innerHTML = state.data.hc_program.map((row, idx) => {
-        const total = row.qty * row.price;
-        return `
+// 6. MODULE RENDER: G&A (hierarchical COA headers + user child rows), OTHERS, FINANCE, TAX
+// ------------------------------------------------------------------------------------
+// G&A model: each COA account is a HEADER row. Users add child rows under it (name + 12
+// months). The parent COA monthly totals = sum of its children, and ga_expenses[code]
+// (the parent array) stays the source of truth for summaries, consolidation and export.
+// Legacy flat values auto-materialize as an "Existing Budget" child so no data is lost.
+
+function ensureGaChildren() {
+    if (!state.data.ga_children) state.data.ga_children = {};
+    Object.keys(state.data.ga_expenses || {}).forEach(code => {
+        const existing = state.data.ga_children[code] || [];
+        // Normalize any malformed child rows (short/non-numeric monthly arrays) so the
+        // renderer always sees 12 numeric months
+        existing.forEach(c => {
+            if (!Array.isArray(c.monthly)) c.monthly = Array(12).fill(0);
+            for (let m = 0; m < 12; m++) c.monthly[m] = (parseFloat(c.monthly[m]) || 0);
+        });
+        if (existing.length > 0) return;
+        const parent = state.data.ga_expenses[code];
+        if (Array.isArray(parent) && parent.some(v => v && v !== 0)) {
+            state.data.ga_children[code] = [{ id: 'ga_child_' + code + '_0', name: 'Existing Budget', monthly: parent.map(v => (parseFloat(v) || 0)) }];
+        }
+    });
+}
+
+function recomputeGaParent(code) {
+    const children = state.data.ga_children && state.data.ga_children[code];
+    if (!children || children.length === 0) return;
+    const sums = Array(12).fill(0);
+    children.forEach(c => {
+        (c.monthly || Array(12).fill(0)).forEach((v, m) => { sums[m] += (parseFloat(v) || 0); });
+    });
+    state.data.ga_expenses[code] = sums;
+}
+
+function addGaChild(code) {
+    withAddLock('ga_child_' + code, () => {
+        ensureGaChildren();
+        const children = state.data.ga_children[code] || [];
+        children.push({
+            id: 'ga_child_' + code + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            name: 'Detail ' + (children.length + 1),
+            monthly: Array(12).fill(0)
+        });
+        state.data.ga_children[code] = children;
+        recomputeGaParent(code);
+        state.isDirty = true;
+        updateSyncIndicator(false);
+        renderGAOthersTables();
+    });
+}
+
+function updateGaChild(code, childIdx, mIdx, val) {
+    const child = (state.data.ga_children[code] || [])[childIdx];
+    if (!child) return;
+    if (!child.monthly) child.monthly = Array(12).fill(0);
+    child.monthly[mIdx] = parseMoney(val);
+    recomputeGaParent(code);
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderGAOthersTables();
+}
+
+function updateGaChildName(code, childIdx, val) {
+    const child = (state.data.ga_children[code] || [])[childIdx];
+    if (!child) return;
+    child.name = val;
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    // No re-render here: keeps focus in the input while typing
+}
+
+function removeGaChild(code, childIdx) {
+    if (!confirm('Delete this row?')) return;
+    const children = state.data.ga_children[code] || [];
+    children.splice(childIdx, 1);
+    state.data.ga_children[code] = children;
+    recomputeGaParent(code);
+    state.isDirty = true;
+    updateSyncIndicator(false);
+    renderGAOthersTables();
+}
+
+function renderGaHierarchyTable() {
+    ensureGaChildren();
+    recomputeGaParents();
+    const table = document.getElementById('ga-table');
+    if (!state.collapsedHeaders) state.collapsedHeaders = {};
+
+    let html = `
+        <thead>
             <tr>
-                <td><input type="text" value="${row.topic}" placeholder="e.g. Leadership Training" onchange="updateHCProgram(${idx}, 'topic', this.value)"></td>
-                <td><input type="text" value="${row.institution}" placeholder="e.g. PPM Manajemen" onchange="updateHCProgram(${idx}, 'institution', this.value)"></td>
-                <td>
-                    <select onchange="updateHCProgram(${idx}, 'category', this.value)">
-                        <option value="${row.category}">${row.category}</option>
-                        ${coaOpts}
-                    </select>
-                </td>
-                <td><input type="number" style="width:70px" value="${row.qty}" onchange="updateHCProgram(${idx}, 'qty', this.value)"></td>
-                <td><input type="number" style="width:120px" value="${row.price}" onchange="updateHCProgram(${idx}, 'price', this.value)"></td>
-                <td><span style="font-weight:600">${total.toLocaleString('id-ID')}</span></td>
-                <td>
-                    <select style="width:90px" onchange="updateHCProgram(${idx}, 'month', this.value)">
-                        ${months.map((m, mIdx) => `<option value="${mIdx}" ${row.month == mIdx ? 'selected' : ''}>${m}</option>`).join('')}
-                    </select>
-                </td>
-                <td class="action-cell">
-                    <button class="btn-delete" onclick="removeHCProgramRow(${idx})"><i data-lucide="trash-2"></i></button>
-                </td>
+                <th>Account ID</th>
+                <th>Account Description</th>
+                <th>Total Budget</th>
+                ${months.map(m => `<th>${m}</th>`).join('')}
             </tr>
-        `;
-    }).join('');
+        </thead>
+        <tbody>
+    `;
+
+    let monthlyTotals = Array(12).fill(0);
+
+    state.templates.ga.forEach(acc => {
+        const code = acc.code;
+        const children = state.data.ga_children[code] || [];
+        const parent = state.data.ga_expenses[code] || Array(12).fill(0);
+        const parentSum = parent.reduce((a, b) => a + b, 0);
+        parent.forEach((v, m) => { monthlyTotals[m] += v; });
+
+        const safeKey = ('ga_' + code).replace(/[^a-zA-Z0-9_]/g, '_');
+        const isCollapsed = !!state.collapsedHeaders[safeKey];
+
+        html += `
+            <tr class="row-group-header" style="background:rgba(139,92,246,0.15);">
+                <td style="font-weight:700; font-family:monospace;">
+                    <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:4px;" title="${isCollapsed ? 'Expand' : 'Collapse'}">
+                        <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
+                    </button>
+                    ${esc(code)}
+                </td>
+                <td style="font-weight:700;">
+                    ${esc(acc.name)}
+                    <button class="btn btn-secondary btn-sm" onclick="addGaChild('${esc(code)}')" title="Add child row under this COA" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Row</button>
+                </td>
+                <td style="font-weight:700;">${parentSum.toLocaleString('id-ID')}</td>
+                ${parent.map(v => `<td style="font-weight:700;">${v ? v.toLocaleString('id-ID') : '-'}</td>`).join('')}
+            </tr>`;
+
+        if (!isCollapsed) {
+            children.forEach((child, childIdx) => {
+                const cMonthly = child.monthly || Array(12).fill(0);
+                const cSum = cMonthly.reduce((a, b) => a + b, 0);
+                html += `
+                    <tr>
+                        <td></td>
+                        <td style="padding-left:24px;">
+                            <input type="text" class="table-input" style="width:88%; text-align:left;" value="${esc(child.name)}" placeholder="Detail description" onchange="updateGaChildName('${esc(code)}', ${childIdx}, this.value)">
+                            <button class="btn-delete" onclick="removeGaChild('${esc(code)}', ${childIdx})" title="Delete row"><i data-lucide="trash-2"></i></button>
+                        </td>
+                        <td><span style="font-weight:600;">${cSum.toLocaleString('id-ID')}</span></td>
+                        ${cMonthly.map((val, mIdx) => `<td><input type="number" class="table-input" value="${val}" onchange="updateGaChild('${esc(code)}', ${childIdx}, ${mIdx}, this.value)"></td>`).join('')}
+                    </tr>`;
+            });
+        }
+    });
+
+    const grandSum = monthlyTotals.reduce((a, b) => a + b, 0);
+    const expYTD = [];
+    for (let m = 0; m < 12; m++) expYTD[m] = (expYTD[m-1] || 0) + monthlyTotals[m];
+
+    html += `
+        <tr class="row-grand-total">
+            <td colspan="2">TOTAL GA EXPENSES</td>
+            <td>${grandSum.toLocaleString('id-ID')}</td>
+            ${monthlyTotals.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+        </tr>
+        <tr class="row-ytd">
+            <td colspan="2">GA YTD</td>
+            <td>${grandSum.toLocaleString('id-ID')}</td>
+            ${expYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
+        </tr>
+        </tbody>
+    `;
+
+    table.innerHTML = html;
     refreshIcons();
 }
 
-function addHCProgramRow() {
-    state.data.hc_program.push({
-        id: 'hc_' + Date.now(),
-        topic: '',
-        institution: '',
-        category: 'Training & Development',
-        qty: 1,
-        price: 0,
-        currency: 'IDR',
-        month: 0
-    });
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderHCProgramList();
+function recomputeGaParents() {
+    Object.keys(state.data.ga_children || {}).forEach(recomputeGaParent);
 }
 
-function updateHCProgram(idx, field, val) {
-    if (field === 'qty' || field === 'price' || field === 'month') {
-        val = parseFloat(val) || 0;
-    }
-    state.data.hc_program[idx][field] = val;
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderHCProgramList();
-}
-
-function removeHCProgramRow(idx) {
-    state.data.hc_program.splice(idx, 1);
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderHCProgramList();
-}
-
-// 6. MODULE RENDER: G&A, OTHERS, FINANCE, TAX
 function renderGAOthersTables() {
-    renderExpensesSubTable('ga-table', state.templates.ga, state.data.ga_expenses, 'ga');
+    renderGaHierarchyTable();
     renderExpensesSubTable('others-table', state.templates.others, state.data.others_expenses, 'others');
     renderExpensesSubTable('finance-table', state.templates.finance, state.data.finance_expenses, 'finance');
     renderExpensesSubTable('tax-table', state.templates.tax, state.data.tax_expenses, 'tax');
@@ -1533,7 +1917,7 @@ function renderExpensesSubTable(tableId, accountsMeta, sourceData, keyPrefix) {
 }
 
 function updateExpensesData(keyPrefix, accCode, mIdx, val) {
-    val = parseFloat(val) || 0;
+    val = parseMoney(val);
     const targetStore = keyPrefix === 'ga' ? state.data.ga_expenses :
                        keyPrefix === 'others' ? state.data.others_expenses :
                        keyPrefix === 'finance' ? state.data.finance_expenses :
@@ -1600,7 +1984,7 @@ function renderMarketingSubTable(tableId, typeText) {
                         <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:6px;">
                             <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
                         </button>
-                        ${item.name}
+                        ${esc(item.name)}
                     </td>
                 </tr>`;
         } else if (item.type === 'input') {
@@ -1611,7 +1995,7 @@ function renderMarketingSubTable(tableId, typeText) {
             
             html += `
                 <tr>
-                    <td style="padding-left:30px;">${item.name}</td>
+                    <td style="padding-left:30px;">${esc(item.name)}</td>
                     <td><span style="font-size:0.75rem; color:var(--text-secondary)">${item.classification}</span></td>
                     <td><input type="text" class="table-input readonly" readonly value="${rowSum.toLocaleString('id-ID')}"></td>
                     ${mValues.map((val, mIdx) => {
@@ -1639,7 +2023,7 @@ function renderMarketingSubTable(tableId, typeText) {
 }
 
 function updateMarketingActivity(rowId, mIdx, val) {
-    val = parseFloat(val) || 0;
+    val = parseMoney(val);
     if (!state.data.marketing_activity[rowId]) {
         state.data.marketing_activity[rowId] = Array(12).fill(0);
     }
@@ -1691,7 +2075,7 @@ function renderCorpEventTable() {
                         <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:6px;">
                             <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
                         </button>
-                        ${item.activity}
+                        ${esc(item.activity)}
                     </td>
                     <td style="background:none;">
                         <button class="btn btn-secondary btn-sm" onclick="addCorpEventDetail(${itemIdx})" title="Add detail row under this category" style="font-size:0.7rem; padding:3px 8px;"><i data-lucide="plus"></i> Detail</button>
@@ -1709,8 +2093,8 @@ function renderCorpEventTable() {
             
             html += `
                 <tr>
-                    <td style="padding-left:30px;">${item.activity}</td>
-                    <td><span style="font-size:0.75rem; color:var(--text-secondary)">${item.classification || ''}</span></td>
+                    <td style="padding-left:30px;">${esc(item.activity)}</td>
+                    <td><span style="font-size:0.75rem; color:var(--text-secondary)">${esc(item.classification || '')}</span></td>
                     <td><input type="number" class="table-input" style="width:75px" value="${dataRow.qty}" onchange="updateCorpEvent('${key}', 'qty', this.value)"></td>
                     <td><input type="number" class="table-input" style="width:110px" value="${dataRow.price_unit}" onchange="updateCorpEvent('${key}', 'price_unit', this.value)"></td>
                     <td><span style="font-weight:600">${subtotal.toLocaleString('id-ID')}</span></td>
@@ -1752,12 +2136,14 @@ function renderCorpEventTable() {
 }
 
 function addCorpEventCategory() {
-    const catName = prompt('Enter category title (e.g. "Town Hall Meeting"):');
-    if (!catName || catName.trim() === '') return;
-    state.templates.corp_event.push({ type: 'header', activity: catName.trim(), row: null });
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderCorpEventTable();
+    withAddLock('ce', () => {
+        const catName = prompt('Enter category title (e.g. "Town Hall Meeting"):');
+        if (!catName || catName.trim() === '') return;
+        state.templates.corp_event.push({ type: 'header', activity: catName.trim(), row: null });
+        state.isDirty = true;
+        updateSyncIndicator(false);
+        renderCorpEventTable();
+    });
 }
 
 function addCorpEventDetail(categoryIdx) {
@@ -1805,7 +2191,7 @@ function removeCorpEventDetail(itemIdx) {
 }
 
 function updateCorpEvent(key, field, val, mIdx = null) {
-    val = parseFloat(val) || 0;
+    val = (field === 'qty') ? parseCount(val) : parseMoney(val);
     if (!state.data.corp_events[key]) {
         state.data.corp_events[key] = { qty: 0, price_unit: 0, monthly: Array(12).fill(0) };
     }
@@ -1836,13 +2222,13 @@ function renderFixedAssetsTable() {
         const total = row.qty * row.price;
         return `
             <tr>
-                <td><input type="text" value="${row.division}" placeholder="e.g. Sales" onchange="updateFixedAsset(${idx}, 'division', this.value)"></td>
+                <td><input type="text" value="${esc(row.division)}" placeholder="e.g. Sales" onchange="updateFixedAsset(${idx}, 'division', this.value)"></td>
                 <td>
                     <select onchange="updateFixedAsset(${idx}, 'category', this.value)">
                         ${categories.map(c => `<option value="${c}" ${row.category === c ? 'selected' : ''}>${c}</option>`).join('')}
                     </select>
                 </td>
-                <td><input type="text" value="${row.desc}" placeholder="e.g. Laptop Core i7" onchange="updateFixedAsset(${idx}, 'desc', this.value)"></td>
+                <td><input type="text" value="${esc(row.desc)}" placeholder="e.g. Laptop Core i7" onchange="updateFixedAsset(${idx}, 'desc', this.value)"></td>
                 <td>
                     <select style="width:85px" onchange="updateFixedAsset(${idx}, 'new_replace', this.value)">
                         <option value="New" ${row.new_replace === 'New' ? 'selected' : ''}>New</option>
@@ -1872,27 +2258,29 @@ function renderFixedAssetsTable() {
 }
 
 function addFixedAssetRow() {
-    state.data.fixed_assets.push({
-        id: 'fa_' + Date.now(),
-        division: '',
-        category: 'IT Hardware & Software',
-        desc: '',
-        new_replace: 'New',
-        qty: 1,
-        price: 0,
-        currency: 'IDR',
-        month: 0,
-        justification: 'Must To Have'
+    withAddLock('fa', () => {
+        state.data.fixed_assets.push({
+            id: 'fa_' + Date.now(),
+            division: '',
+            category: 'IT Hardware & Software',
+            desc: '',
+            new_replace: 'New',
+            qty: 1,
+            price: 0,
+            currency: 'IDR',
+            month: 0,
+            justification: 'Must To Have'
+        });
+        state.isDirty = true;
+        updateSyncIndicator(false);
+        renderFixedAssetsTable();
     });
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderFixedAssetsTable();
 }
 
 function updateFixedAsset(idx, field, val) {
-    if (field === 'qty' || field === 'price' || field === 'month') {
-        val = parseFloat(val) || 0;
-    }
+    if (field === 'qty') val = parseCount(val);
+    else if (field === 'price') val = parseMoney(val);
+    else if (field === 'month') val = parseFloat(val) || 0;
     state.data.fixed_assets[idx][field] = val;
     state.isDirty = true;
     updateSyncIndicator(false);
@@ -1942,8 +2330,8 @@ function renderBusinessTripTable() {
         
         return `
             <tr>
-                <td><input type="text" value="${row.employee}" placeholder="e.g. Rudi" onchange="updateTrip(${idx}, 'employee', this.value)"></td>
-                <td><input type="text" value="${row.division}" placeholder="e.g. Sales" onchange="updateTrip(${idx}, 'division', this.value)"></td>
+                <td><input type="text" value="${esc(row.employee)}" placeholder="e.g. Rudi" onchange="updateTrip(${idx}, 'employee', this.value)"></td>
+                <td><input type="text" value="${esc(row.division)}" placeholder="e.g. Sales" onchange="updateTrip(${idx}, 'division', this.value)"></td>
                 <td>
                     <select style="width:100px" onchange="updateTrip(${idx}, 'grade', this.value)">
                         ${levels.map(l => `<option value="${l}" ${row.grade === l ? 'selected' : ''}>${l}</option>`).join('')}
@@ -1954,7 +2342,7 @@ function renderBusinessTripTable() {
                         ${destinations.map(d => `<option value="${d}" ${row.destination === d ? 'selected' : ''}>${d}</option>`).join('')}
                     </select>
                 </td>
-                <td><input type="text" value="${row.city}" placeholder="e.g. Jakarta" onchange="updateTrip(${idx}, 'city', this.value)"></td>
+                <td><input type="text" value="${esc(row.city)}" placeholder="e.g. Jakarta" onchange="updateTrip(${idx}, 'city', this.value)"></td>
                 <td>
                     <select style="width:90px" onchange="updateTrip(${idx}, 'month', this.value)">
                         ${months.map((m, mIdx) => `<option value="${mIdx}" ${row.month == mIdx ? 'selected' : ''}>${m}</option>`).join('')}
@@ -1975,26 +2363,27 @@ function renderBusinessTripTable() {
 }
 
 function addBusinessTripRow() {
-    state.data.business_trip.push({
-        id: 'trip_' + Date.now(),
-        employee: '',
-        division: '',
-        grade: 'Staff',
-        destination: 'Local',
-        city: '',
-        month: 0,
-        duration: 3,
-        ticket_price: 4000000
+    withAddLock('trip', () => {
+        state.data.business_trip.push({
+            id: 'trip_' + Date.now(),
+            employee: '',
+            division: '',
+            grade: 'Staff',
+            destination: 'Local',
+            city: '',
+            month: 0,
+            duration: 3,
+            ticket_price: 4000000
+        });
+        state.isDirty = true;
+        updateSyncIndicator(false);
+        renderBusinessTripTable();
     });
-    state.isDirty = true;
-    updateSyncIndicator(false);
-    renderBusinessTripTable();
 }
 
 function updateTrip(idx, field, val) {
-    if (field === 'duration' || field === 'month') {
-        val = parseFloat(val) || 0;
-    }
+    if (field === 'duration') val = parseCount(val);
+    else if (field === 'month') val = parseFloat(val) || 0;
     state.data.business_trip[idx][field] = val;
     state.isDirty = true;
     updateSyncIndicator(false);
@@ -2011,6 +2400,10 @@ function removeTripRow(idx) {
 // 10. CONSOLIDATED SUMMARY BUDGET TABLE RENDERER
 function renderSummaryBudgetTable() {
     const table = document.getElementById('summary-budget-table');
+
+    // ── Get YTD month filter selection (1 = Jan, ..., 12 = Full Year) ────
+    const ytdSel = document.getElementById('summary-ytd-select');
+    const maxMonth = ytdSel ? (parseInt(ytdSel.value, 10) || 12) : 12;
 
     // ── Initialize 2026 manual input storage if missing ──────────────────
     if (!state.data.summary_2026) {
@@ -2063,7 +2456,7 @@ function renderSummaryBudgetTable() {
         Object.keys(state.data.ga_expenses).forEach(c=>{ mGA[m] += state.data.ga_expenses[c][m]; });
         // Business trip costs go into G&A
         const amap = {'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'SPV':{'Local':750000,'Overseas':1000000},'Staff':{'Local':600000,'Overseas':800000}};
-        const hmap = {'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'SPV':{'Local':600000,'Overseas':1000000},'Staff':{'Local':500000,'Overseas':800000}};
+        const hmap = {'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'SPV':{'Local':600000,'Overseas':1000000},'Staff':{'Local':600000,'Overseas':800000}};
         state.data.business_trip.forEach(r => {
             if (r.month == m) {
                 const g=r.grade||'Staff', d=r.destination||'Local';
@@ -2078,8 +2471,8 @@ function renderSummaryBudgetTable() {
         state.data.fixed_assets.forEach(r=>{ if(r.month==m) mCapex[m]+=r.qty*r.price; });
     }
 
-    // ── Annual sums ───────────────────────────────────────────────────────
-    const sum = arr => arr.reduce((a,b)=>a+b,0);
+    // ── Sum up to selected YTD maxMonth (default 12 for Full Year) ────────
+    const sum = arr => arr.slice(0, maxMonth).reduce((a,b)=>a+b,0);
     const bgt27 = {
         units:   sum(mUnits),
         sqm:     sum(mSqm),
@@ -2232,10 +2625,205 @@ function renderSummaryBudgetTable() {
 
 function update2026(key, val) {
     if (!state.data.summary_2026) state.data.summary_2026 = {};
-    state.data.summary_2026[key] = parseFloat(val) || 0;
+    state.data.summary_2026[key] = parseMoney(val);
     state.isDirty = true;
     updateSyncIndicator(false);
     renderSummaryBudgetTable();
+}
+
+// ----------------------------------------------------
+// CONSOLIDATED SUMMARY (dept head: all projects / FAT: all departments)
+// ----------------------------------------------------
+// Compute 12-month totals per module from any budget data object.
+// Mirrors the Consolidated Budget tab math; defensive against missing keys.
+function computeMonthlyTotals(d) {
+    const mRevenue = Array(12).fill(0), mUnits = Array(12).fill(0), mSqm = Array(12).fill(0);
+    (d.target_revenue || []).forEach(row => {
+        (row.sqm || []).forEach((s, m) => { mRevenue[m] += (s || 0) * (row.price_sqm || 0); mSqm[m] += (s || 0); });
+        (row.units || []).forEach((u, m) => { mUnits[m] += (u || 0); });
+    });
+    const mSalesInhouse = Array(12).fill(0), mSalesAgent = Array(12).fill(0);
+    const mSalesProgram = Array(12).fill(0);
+    const mMarketingATL = Array(12).fill(0), mMarketingBTL = Array(12).fill(0);
+    const mDevLand = Array(12).fill(0), mEmployee = Array(12).fill(0);
+    const mGA = Array(12).fill(0), mOthers = Array(12).fill(0);
+    const mFinance = Array(12).fill(0), mTax = Array(12).fill(0);
+    const mCorpEvent = Array(12).fill(0), mCapex = Array(12).fill(0);
+    const sc = (d.sales_cost || {}), pg = (d.program_sales || {});
+    const amap = {'Director':{'Local':1500000,'Overseas':2000000},'Manager':{'Local':900000,'Overseas':1200000},'SPV':{'Local':750000,'Overseas':1000000},'Staff':{'Local':600000,'Overseas':800000}};
+    const hmap = {'Director':{'Local':1650000,'Overseas':2500000},'Manager':{'Local':750000,'Overseas':1200000},'SPV':{'Local':600000,'Overseas':1000000},'Staff':{'Local':500000,'Overseas':800000}};
+    for (let m = 0; m < 12; m++) {
+        Object.keys(sc.inhouse || {}).filter(k => !k.startsWith('_')).forEach(k => { mSalesInhouse[m] += (sc.inhouse[k] || [])[m] || 0; });
+        Object.keys(sc.agent || {}).filter(k => !k.startsWith('_')).forEach(k => { mSalesAgent[m] += (sc.agent[k] || [])[m] || 0; });
+        Object.keys(pg).filter(k => !k.startsWith('_')).forEach(k => { mSalesProgram[m] += (pg[k] || [])[m] || 0; });
+        (state.templates.marketing || []).forEach(item => {
+            if (item.type === 'input') {
+                const v = (d.marketing_activity || {})[item.row] ? ((d.marketing_activity[item.row] || [])[m] || 0) : 0;
+                if (item.row < 46) mMarketingATL[m] += v; else mMarketingBTL[m] += v;
+            }
+        });
+        Object.keys(d.dev_land || {}).forEach(r => { mDevLand[m] += ((d.dev_land[r] || {}).monthly || [])[m] || 0; });
+        Object.keys(d.payroll_expenses || {}).forEach(c => { mEmployee[m] += (d.payroll_expenses[c] || [])[m] || 0; });
+        Object.keys(d.ga_expenses || {}).forEach(c => { mGA[m] += (d.ga_expenses[c] || [])[m] || 0; });
+        (d.business_trip || []).forEach(r => {
+            if (r.month == m) {
+                const g = r.grade || 'Staff', dd = r.destination || 'Local';
+                const flt = r.ticket_price != null ? r.ticket_price : (dd === 'Overseas' ? 8000000 : 4000000);
+                mGA[m] += flt + ((hmap[g] || hmap.Staff)[dd]) * Math.max(0, (r.duration || 0) - 1) + ((amap[g] || amap.Staff)[dd]) * (r.duration || 0);
+            }
+        });
+        Object.keys(d.others_expenses || {}).forEach(c => { mOthers[m] += (d.others_expenses[c] || [])[m] || 0; });
+        Object.keys(d.finance_expenses || {}).forEach(c => { mFinance[m] += (d.finance_expenses[c] || [])[m] || 0; });
+        Object.keys(d.tax_expenses || {}).forEach(c => { mTax[m] += (d.tax_expenses[c] || [])[m] || 0; });
+        Object.keys(d.corp_events || {}).forEach(r => { mCorpEvent[m] += ((d.corp_events[r] || {}).monthly || [])[m] || 0; });
+        (d.fixed_assets || []).forEach(r => { if (r.month == m) mCapex[m] += (r.qty || 0) * (r.price || 0); });
+    }
+    return { mRevenue, mUnits, mSqm, mSalesInhouse, mSalesAgent, mSalesProgram, mMarketingATL, mMarketingBTL, mDevLand, mEmployee, mGA, mOthers, mFinance, mTax, mCorpEvent, mCapex };
+}
+
+// Render the aggregated summary table.
+// dept-summary: one department across ALL projects. fat-summary: ALL departments of the selected project.
+async function renderConsolidatedSummary(tabId) {
+    const isDeptView = tabId === 'dept-summary';
+    const table = document.getElementById(isDeptView ? 'dept-summary-table' : 'fat-summary-table');
+    const scopeEl = document.getElementById(isDeptView ? 'dept-summary-scope' : 'fat-summary-scope');
+    if (!table) return;
+    state.consolidatedExport = null;
+
+    let scope, params = '', scopeLabel;
+    if (isDeptView) {
+        scope = 'dept';
+        const dept = isSuperAdmin() ? state.selectedDepartment : (state.currentUser.department || '');
+        if (!dept) {
+            scopeEl.textContent = 'No division assigned. Ask a super admin to assign your division.';
+            table.innerHTML = '';
+            return;
+        }
+        scopeLabel = dept + ' — all projects';
+        params = `&department=${encodeURIComponent(dept)}`;
+    } else {
+        scope = 'project';
+        if (!state.selectedProject) {
+            scopeEl.textContent = 'Select a project first.';
+            table.innerHTML = '';
+            return;
+        }
+        scopeLabel = state.selectedProject + ' — all divisions';
+        params = `&project=${encodeURIComponent(state.selectedProject)}`;
+    }
+    scopeEl.textContent = 'Aggregating ' + scopeLabel + '...';
+    table.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading summary...</td></tr>`;
+
+    let merged = null, rowCount = 0;
+    if (state.mockMode) {
+        // Mock mode is browser-only: summarize the CURRENT in-memory data, never the backend
+        merged = state.data;
+        rowCount = 1;
+        scopeLabel += ' · mock data (browser only)';
+    } else if (state.gasUrl) {
+        try {
+            const res = await fetchGasGet(`${state.gasUrl}?action=summary&scope=${scope}${params}`);
+            const json = await res.json();
+            if (json.status === 'success' && json.data) { merged = json.data; rowCount = (json.meta && json.meta.rows) || 0; }
+        } catch (err) {
+            if (!isAbortError(err)) console.error(err);
+        }
+    }
+    if (!merged || Object.keys(merged).length === 0) {
+        scopeEl.textContent = 'No saved budget entries found for ' + scopeLabel + '.';
+        table.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-secondary);">No saved budget data to summarize. Save budgets first (or check the backend connection).</td></tr>`;
+        return;
+    }
+    scopeEl.textContent = 'Scope: ' + scopeLabel + ' · ' + rowCount + ' saved entr' + (rowCount === 1 ? 'y' : 'ies') + ' aggregated';
+
+    const T = computeMonthlyTotals(merged);
+    const sum = arr => arr.reduce((a, b) => a + b, 0);
+
+    // Subtotals
+    const salesMktg = T.mSalesInhouse.map((v, m) => v + T.mSalesAgent[m] + T.mSalesProgram[m] + T.mMarketingATL[m] + T.mMarketingBTL[m]);
+    const empOps = T.mEmployee.map((v, m) => v + T.mGA[m] + T.mOthers[m] + T.mFinance[m] + T.mTax[m] + T.mCorpEvent[m]);
+    const totalCost = T.mDevLand.map((v, m) => v + salesMktg[m] + empOps[m] + T.mCapex[m]);
+
+    const cells = arr => arr.map(v => `<td class="cell-computed">${formatShortCurrency(v)}</td>`).join('');
+    const cellsNum = arr => arr.map(v => `<td class="cell-computed">${Math.round(v).toLocaleString('id-ID')}</td>`).join('');
+    const secHdr = label => `<tr class="row-group-header"><td colspan="14" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
+
+    let html = `
+        <thead>
+            <tr>
+                <th style="min-width:200px">Category</th>
+                ${months.map(m => `<th>${m}</th>`).join('')}
+                <th>Total 2027</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    // Revenue block
+    html += `<tr class="row-grand-total"><td style="font-weight:800">Target Revenue</td>${cells(T.mRevenue)}<td style="font-weight:800">${formatShortCurrency(sum(T.mRevenue))}</td></tr>`;
+    html += `<tr><td style="padding-left:28px">Units Sold</td>${cellsNum(T.mUnits)}<td class="cell-computed">${Math.round(sum(T.mUnits)).toLocaleString('id-ID')}</td></tr>`;
+    html += `<tr><td style="padding-left:28px">Sqm Sold</td>${cellsNum(T.mSqm)}<td class="cell-computed">${Math.round(sum(T.mSqm)).toLocaleString('id-ID')}</td></tr>`;
+
+    // Cost blocks
+    html += secHdr('Project Cost');
+    html += `<tr><td>Dev & Land Cost</td>${cells(T.mDevLand)}<td class="cell-computed">${formatShortCurrency(sum(T.mDevLand))}</td></tr>`;
+    html += secHdr('Sales & Marketing');
+    [['Sales Inhouse', T.mSalesInhouse], ['Sales Agent', T.mSalesAgent], ['Program Sales', T.mSalesProgram], ['Marketing ATL', T.mMarketingATL], ['Marketing BTL', T.mMarketingBTL]].forEach(r => {
+        html += `<tr><td style="padding-left:28px">${r[0]}</td>${cells(r[1])}<td class="cell-computed">${formatShortCurrency(sum(r[1]))}</td></tr>`;
+    });
+    html += `<tr class="row-group-total"><td style="font-weight:700">Sales & Marketing Total</td>${cells(salesMktg)}<td style="font-weight:800">${formatShortCurrency(sum(salesMktg))}</td></tr>`;
+    html += secHdr('Employee & Operations');
+    [['Payroll', T.mEmployee], ['G&A (incl. Business Trip)', T.mGA], ['Others', T.mOthers], ['Finance', T.mFinance], ['Tax', T.mTax], ['Corporate Event', T.mCorpEvent]].forEach(r => {
+        html += `<tr><td style="padding-left:28px">${r[0]}</td>${cells(r[1])}<td class="cell-computed">${formatShortCurrency(sum(r[1]))}</td></tr>`;
+    });
+    html += `<tr class="row-group-total"><td style="font-weight:700">Employee & Operations Total</td>${cells(empOps)}<td style="font-weight:800">${formatShortCurrency(sum(empOps))}</td></tr>`;
+    html += secHdr('Capital');
+    html += `<tr><td>Capex (Fixed Assets)</td>${cells(T.mCapex)}<td class="cell-computed">${formatShortCurrency(sum(T.mCapex))}</td></tr>`;
+
+    // Grand total + ratio
+    html += `<tr class="row-grand-total"><td style="font-weight:800">TOTAL BUDGET 2027</td>${cells(totalCost)}<td style="font-weight:800;color:var(--accent-purple)">${formatShortCurrency(sum(totalCost))}</td></tr>`;
+    const ratio = sum(T.mRevenue) > 0 ? (sum(totalCost) / sum(T.mRevenue) * 100).toFixed(1) : '0.0';
+    html += `<tr><td colspan="13" style="text-align:right;padding-right:12px;color:var(--text-secondary);">Cost / Revenue Ratio</td><td class="cell-computed" style="font-weight:700">${ratio}%</td></tr>`;
+    html += '</tbody>';
+
+    table.innerHTML = html;
+
+    // Cache 2D rows for export
+    const rows2d = [['Category', ...months, 'Total 2027']];
+    const pushRow = (label, arr, isNum) => rows2d.push([label, ...arr.map(v => isNum ? Math.round(v) : Math.round(v)), isNum ? Math.round(sum(arr)) : Math.round(sum(arr))]);
+    pushRow('Target Revenue (Sales Value)', T.mRevenue, false);
+    pushRow('Units Sold', T.mUnits, true);
+    pushRow('Sqm Sold', T.mSqm, true);
+    [['Sales Inhouse', T.mSalesInhouse], ['Sales Agent', T.mSalesAgent], ['Program Sales', T.mSalesProgram], ['Marketing ATL', T.mMarketingATL], ['Marketing BTL', T.mMarketingBTL]].forEach(r => pushRow(r[0], r[1], false));
+    pushRow('Sales & Marketing Total', salesMktg, false);
+    [['Dev & Land Cost', T.mDevLand], ['Payroll', T.mEmployee], ['G&A (incl. Business Trip)', T.mGA], ['Others', T.mOthers], ['Finance', T.mFinance], ['Tax', T.mTax], ['Corporate Event', T.mCorpEvent]].forEach(r => pushRow(r[0], r[1], false));
+    pushRow('Employee & Operations Total', empOps, false);
+    pushRow('Capex (Fixed Assets)', T.mCapex, false);
+    pushRow('TOTAL BUDGET 2027', totalCost, false);
+    rows2d.push(['Cost / Revenue Ratio (%)', ...Array(12).fill(''), parseFloat(ratio)]);
+    const namePart = isDeptView
+        ? 'Dept_' + (scopeLabel.split('—')[0].trim().replace(/\s+/g, '_'))
+        : 'Consolidated_' + (state.selectedProject || '').replace(/\s+/g, '_');
+    state.consolidatedExport = { filename: namePart + '_FY2027.xlsx', rows: rows2d };
+}
+
+async function exportConsolidatedSummary() {
+    if (exportInFlight) return;
+    exportInFlight = true;
+    try {
+        const data = state.consolidatedExport;
+        if (!data) {
+            showToast('Summary data not loaded yet. Open the summary tab first.', 'amber');
+            return;
+        }
+        const infoLine = 'ENTITAS: ' + (state.selectedCompany || '') + '   |   PROJECT: ' + (state.selectedProject || '');
+        await writeStyledWorkbook([{ name: 'Summary', title: 'CONSOLIDATED SUMMARY', infoLine, rows: data.rows, opts: { cols: [{ wch: 30 }, ...Array(12).fill({ wch: 12 }), { wch: 14 }] } }], data.filename);
+        showToast('Summary exported to Excel.', 'emerald');
+    } catch (err) {
+        console.error(err);
+        showToast('Export error: ' + err.message, 'error');
+    } finally {
+        exportInFlight = false;
+    }
 }
 
 // ----------------------------------------------------
@@ -2288,9 +2876,6 @@ function getCalculatedSummary() {
     let employeeCostVal = 0;
     Object.keys(state.data.payroll_expenses).forEach(code => {
         employeeCostVal += state.data.payroll_expenses[code].reduce((a,b)=>a+b,0);
-    });
-    state.data.hc_program.forEach(row => {
-        employeeCostVal += row.qty * row.price;
     });
     
     let operatingCostVal = 0;
@@ -2362,6 +2947,23 @@ function getCalculatedSummary() {
 async function triggerDataLoad() {
     if (!state.selectedCompany || !state.selectedProject) return;
     
+    // Mock mode: browser-only data, never touch the backend
+    if (state.mockMode) {
+        const key = localDraftKey();
+        const stored = localStorage.getItem(key);
+        if (stored) {
+            try { state.data = JSON.parse(stored); }
+            catch (e) { state.data = generateMockBudget(); saveLocalMockData(); }
+        } else {
+            state.data = generateMockBudget();
+            saveLocalMockData();
+        }
+        state.isDirty = false;
+        updateSyncIndicator(true);
+        switchTab(getActiveTabId());
+        return;
+    }
+    
     showToast('Loading budget data from server...', 'info');
     
     if (!state.gasUrl) {
@@ -2375,8 +2977,9 @@ async function triggerDataLoad() {
     }
     
     try {
-        const url = `${state.gasUrl}?action=get&company=${encodeURIComponent(state.selectedCompany)}&project=${encodeURIComponent(state.selectedProject)}`;
-        const response = await fetch(url);
+        const department = getActiveDepartment();
+        const url = `${state.gasUrl}?action=get&company=${encodeURIComponent(state.selectedCompany)}&project=${encodeURIComponent(state.selectedProject)}&department=${encodeURIComponent(department || '')}`;
+        const response = await fetchGasGet(url);
         if (!response.ok) throw new Error('Network error loading data');
         
         const resJson = await response.json();
@@ -2402,17 +3005,58 @@ async function triggerDataLoad() {
     }
 }
 
+function isReadOnlyUser() {
+    return state.currentUser && (state.currentUser.role === 'Viewer' || state.currentUser.role === 'FAT');
+}
+
+// Enable/disable the Save button according to the CURRENT effective user (incl. previews)
+function syncSaveButton() {
+    const saveBtn = document.getElementById('save-btn');
+    if (!saveBtn) return;
+    if (isReadOnlyUser()) {
+        saveBtn.disabled = true;
+        saveBtn.title = 'This role is read-only';
+    } else {
+        saveBtn.disabled = false;
+        saveBtn.title = '';
+    }
+}
+
+// Flip the Save button into a "Saving..." state while the POST is in flight,
+// then restore it - keeps the user on their current tab the whole time.
+function setSaveButtonState(saving) {
+    const btn = document.getElementById('save-btn');
+    if (!btn) return;
+    if (saving) {
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-circle" class="spin"></i> Saving...`;
+    } else {
+        btn.disabled = isReadOnlyUser();
+        if (btn.dataset.originalHtml) {
+            btn.innerHTML = btn.dataset.originalHtml;
+            delete btn.dataset.originalHtml;
+        }
+        btn.title = isReadOnlyUser() ? 'This role is read-only' : '';
+    }
+    refreshIcons();
+}
+
 async function triggerDataSave() {
     if (!state.selectedCompany || !state.selectedProject) return;
     
     showToast('Saving budget planning to database...', 'info');
+    setSaveButtonState(true);
     
-    if (!state.gasUrl) {
-        // Save to local storage for local testing
+    if (!state.gasUrl || state.mockMode) {
+        // Save to local storage (mock mode = browser-only draft)
         saveLocalMockData();
-        showToast('Saved local draft successfully (Link GAS backend for server database).', 'emerald');
+        showToast(state.mockMode
+            ? 'Saved mock draft locally (browser only).'
+            : 'Saved local draft successfully (Link GAS backend for server database).', 'emerald');
         state.isDirty = false;
         updateSyncIndicator(true);
+        setSaveButtonState(false);
         return;
     }
     
@@ -2421,10 +3065,14 @@ async function triggerDataSave() {
             action: 'save',
             company: state.selectedCompany,
             project: state.selectedProject,
+            department: getActiveDepartment() || '',
+            // Real caller identity (survives "View as" previews) so the backend can
+            // authorize: Admin may save any division; others only their own; Viewer/FAT rejected.
+            callerNik: (state.realUser && state.realUser.employeeId) || (state.currentUser ? state.currentUser.employeeId : ''),
             data: state.data
         };
         
-        const response = await fetch(state.gasUrl, {
+        const response = await fetchWithTimeout(state.gasUrl, {
             method: 'POST',
             // Content-Type must be text/plain to avoid CORS preflight (GAS does not support OPTIONS)
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -2444,24 +3092,90 @@ async function triggerDataSave() {
         showToast('Failed to save to Google Sheets. Saved local draft.', 'error');
         saveLocalMockData();
         updateSyncIndicator(false);
+    } finally {
+        setSaveButtonState(false);
     }
 }
 
 // ---------------------------------------------------
 // EXPORT TO XLSX
-// ---------------------------------------------------
-function exportBudget() {
+// Styled workbook writer (exceljs — SheetJS community build cannot write fills/fonts).
+// Mirrors "Template Budget 2027_ OSYT.xlsx": dark-navy title band, gray info line,
+// blue bold header row, #,##0 on numeric cells, bold light-filled totals rows.
+async function writeStyledWorkbook(sheets, filename) {
+    const wb = new ExcelJS.Workbook();
+    wb.created = new Date();
+    wb.creator = 'Triniti Budget';
+    sheets.forEach(s => {
+        const ws = wb.addWorksheet(s.name, { views: [{ state: 'frozen', ySplit: 3 }] });
+        const colCount = Math.max((s.opts && s.opts.cols ? s.opts.cols.length : 14), 1);
+        // Title band
+        ws.mergeCells(1, 1, 1, colCount);
+        const title = ws.getCell(1, 1);
+        title.value = s.title;
+        title.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 14 };
+        title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF44546A' } };
+        title.alignment = { vertical: 'middle', horizontal: 'left' };
+        ws.getRow(1).height = 24;
+        // Info line
+        ws.mergeCells(2, 1, 2, colCount);
+        const info = ws.getCell(2, 1);
+        info.value = s.infoLine;
+        info.font = { bold: true, size: 10, color: { argb: 'FF1F2937' } };
+        info.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7E6E6' } };
+        info.alignment = { vertical: 'middle', horizontal: 'left' };
+        // Data rows (start at row 3)
+        s.rows.forEach((row, ri) => {
+            const xlRow = ws.getRow(ri + 3);
+            row.forEach((val, ci) => {
+                const cell = xlRow.getCell(ci + 1);
+                cell.value = (val === '' || val === undefined || val === null) ? null : val;
+                if (typeof val === 'number') cell.numFmt = '#,##0';
+                if (ri === 0) {
+                    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                }
+                if (ri > 0 && typeof row[0] === 'string' && /total|grand|ytd|ratio/i.test(row[0])) {
+                    cell.font = { bold: true };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFECECEC' } };
+                }
+            });
+        });
+        // Column widths
+        ((s.opts && s.opts.cols) || []).forEach((w, ci) => { ws.getColumn(ci + 1).width = (w && w.wch) || 12; });
+    });
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: 'application/octet-stream' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+}
+
+// One export at a time (double-click / repeated clicks on async exports)
+let exportInFlight = false;
+
+async function exportBudget() {
+    if (exportInFlight) return;
+    exportInFlight = true;
     if (!state.selectedCompany || !state.selectedProject) {
         showToast('Select a company and project before exporting.', 'amber');
+        exportInFlight = false;
         return;
     }
     showToast('Building Excel file...', 'info');
     try {
-        const wb = XLSX.utils.book_new();
+        const sheets = [];
+        const addSheet = (name, title, rows, opts) => sheets.push({ name, title, infoLine, rows, opts });
         const d = state.data;
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const fs = (n) => Math.round(n).toLocaleString('id-ID');
         const fshort = (n) => 'Rp ' + (n/1000000000).toFixed(2) + ' Bio';
+        const infoLine = 'ENTITAS: ' + state.selectedCompany + '   |   PROJECT: ' + state.selectedProject;
 
         // --- 1. Target Revenue ---
         (() => {
@@ -2491,9 +3205,7 @@ function exportBudget() {
             rows.push(['UNITS YTD','','','','Units',gU,...yU]);
             rows.push(['SQM YTD','','','','Sqm',gS,...yS]);
             rows.push(['VALUE YTD','','','','Rupiah',gV,...yV]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:20},{wch:10},{wch:10},{wch:10},{wch:8},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Target Revenue');
+            addSheet('Target Revenue', 'TARGET MARKETING REVENUE', rows, { cols: [{wch:20},{wch:10},{wch:10},{wch:10},{wch:8},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
         // --- 2. Sales Cost ---
@@ -2518,9 +3230,7 @@ function exportBudget() {
             rows.push(['TOTAL SALES COST',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['SALES COST YTD',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:22},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Sales Cost');
+            addSheet('Sales Cost', 'BUDGET SALES COST', rows, { cols: [{wch:22},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
         // --- 3. Program Sales ---
@@ -2542,9 +3252,7 @@ function exportBudget() {
             rows.push(['TOTAL PROGRAM SALES',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['PROGRAM SALES YTD',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:24},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Program Sales');
+            addSheet('Program Sales', 'BUDGET PROGRAM SALES', rows, { cols: [{wch:24},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
         // --- 4. Marketing ---
@@ -2566,9 +3274,7 @@ function exportBudget() {
             rows.push(['TOTAL MARKETING',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['MARKETING YTD',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:40},{wch:18},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Marketing');
+            addSheet('Marketing', 'BUDGET MARKETING ACTIVITY', rows, { cols: [{wch:40},{wch:18},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
         // --- 5. Dev & Land ---
@@ -2591,9 +3297,7 @@ function exportBudget() {
             rows.push(['TOTAL DEV & LAND','','','','','','','',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['DEV & LAND YTD','','','','','','','',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:6},{wch:24},{wch:8},{wch:10},{wch:14},{wch:14},{wch:14},{wch:8},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Dev & Land');
+            addSheet('Dev & Land', 'DEV & LAND BUDGET PLAN COST', rows, { cols: [{wch:6},{wch:24},{wch:8},{wch:10},{wch:14},{wch:14},{wch:14},{wch:8},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
         // --- 6. Payroll ---
@@ -2613,23 +3317,10 @@ function exportBudget() {
             rows.push(['','TOTAL PAYROLL',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['','PAYROLL YTD',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:12},{wch:42},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Payroll');
+            addSheet('Payroll', 'BUDGET PAYROLL', rows, { cols: [{wch:12},{wch:42},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
-        // --- 7. HC Program ---
-        (() => {
-            const rows = [['Activity','Institution','Category','Qty','Price/Unit','Total','Month']];
-            (d.hc_program||[]).forEach(r => {
-                rows.push([r.topic,r.institution,r.category,r.qty,r.price,r.qty*r.price,months[r.month]]);
-            });
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:30},{wch:22},{wch:22},{wch:6},{wch:12},{wch:16},{wch:8}];
-            XLSX.utils.book_append_sheet(wb, ws, 'HC Program');
-        })();
-
-        // --- 8. Expenses (GA, Others, Finance, Tax) ---
+        // --- 7. Expenses (GA, Others, Finance, Tax) ---
         const expTypes = [
             {key:'ga', label:'G&A Expenses', templates: state.templates.ga, data: d.ga_expenses},
             {key:'others', label:'Others Expenses', templates: state.templates.others, data: d.others_expenses},
@@ -2649,9 +3340,7 @@ function exportBudget() {
             rows.push(['TOTAL',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['YTD',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:14},{wch:42},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, label);
+            addSheet(label, 'BUDGET ' + label.toUpperCase(), rows, { cols: [{wch:14},{wch:42},{wch:14},...Array(12).fill({wch:12})] });
         });
 
         // --- 9. Corporate Event ---
@@ -2673,9 +3362,7 @@ function exportBudget() {
             rows.push(['TOTAL CORPORATE EVENT','','','','',gSum,...mT]);
             const ytd=[]; for(let m=0;m<12;m++) ytd[m]=(ytd[m-1]||0)+mT[m];
             rows.push(['CORPORATE EVENT YTD','','','','',gSum,...ytd]);
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:36},{wch:16},{wch:6},{wch:12},{wch:14},{wch:14},...Array(12).fill({wch:12})];
-            XLSX.utils.book_append_sheet(wb, ws, 'Corporate Event');
+            addSheet('Corporate Event', 'BUDGET CORPORATE EVENT & EXHIBITION', rows, { cols: [{wch:36},{wch:16},{wch:6},{wch:12},{wch:14},{wch:14},...Array(12).fill({wch:12})] });
         })();
 
         // --- 10. Fixed Assets ---
@@ -2684,9 +3371,7 @@ function exportBudget() {
             (d.fixed_assets||[]).forEach(r => {
                 rows.push([r.division,r.category,r.desc,r.new_replace,r.qty,r.price,r.qty*r.price,months[r.month],r.justification]);
             });
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:14},{wch:26},{wch:30},{wch:10},{wch:6},{wch:14},{wch:18},{wch:8},{wch:14}];
-            XLSX.utils.book_append_sheet(wb, ws, 'Fixed Assets');
+            addSheet('Fixed Assets', 'FIXED ASSET', rows, { cols: [{wch:14},{wch:26},{wch:30},{wch:10},{wch:6},{wch:14},{wch:18},{wch:8},{wch:14}] });
         })();
 
         // --- 11. Business Trip ---
@@ -2702,9 +3387,7 @@ function exportBudget() {
                 const total = ticket + (hotel * Math.max(0,r.duration-1)) + (allow * r.duration);
                 rows.push([r.employee,r.division,r.grade,r.destination,r.city,months[r.month],r.duration,ticket,hotel,allow,total]);
             });
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:18},{wch:14},{wch:10},{wch:10},{wch:14},{wch:8},{wch:8},{wch:14},{wch:14},{wch:14},{wch:18}];
-            XLSX.utils.book_append_sheet(wb, ws, 'Business Trip');
+            addSheet('Business Trip', 'BUSINESS TRIP', rows, { cols: [{wch:18},{wch:14},{wch:10},{wch:10},{wch:14},{wch:8},{wch:8},{wch:14},{wch:14},{wch:14},{wch:18}] });
         })();
 
         // --- 12. Summary Budget (Original Template Format) ---
@@ -2729,7 +3412,6 @@ function exportBudget() {
                 });
                 Object.keys(d.dev_land).forEach(row=>mdev[m]+=d.dev_land[row].monthly[m]);
                 memp[m]=Object.keys(d.payroll_expenses).reduce((sum,code)=>sum+d.payroll_expenses[code][m],0);
-                (d.hc_program||[]).forEach(r=>{if(r.month==m)memp[m]+=r.qty*r.price;});
                 Object.keys(d.ga_expenses).forEach(code=>mga[m]+=d.ga_expenses[code][m]);
                 (d.business_trip||[]).forEach(r=>{
                     if(r.month==m){
@@ -2801,32 +3483,252 @@ function exportBudget() {
             rows.push(['Total Purchase Fixed Assets (Capex)', g26('total_capex_b26'), g26('total_capex_a26'), g26('total_capex_r26'), b27.capex, calcPct(g26('total_capex_b26'), b27.capex), calcPct(g26('total_capex_a26'), b27.capex)]);
             rows.push(['TOTAL ALL COST (Rp)', g26('total_b26'), g26('total_a26'), g26('total_r26'), b27.totalAllCost, calcPct(g26('total_b26'), b27.totalAllCost), calcPct(g26('total_a26'), b27.totalAllCost)]);
 
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:38},{wch:18},{wch:18},{wch:22},{wch:18},{wch:16},{wch:16}];
-            XLSX.utils.book_append_sheet(wb, ws, 'SUMMARY BUDGET');
+            addSheet('SUMMARY BUDGET', 'SUMMARY BUDGET', rows, { cols: [{wch:38},{wch:18},{wch:18},{wch:22},{wch:18},{wch:16},{wch:16}] });
         })();
 
-        // Write file
-        const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-        const blob = new Blob([wbout], {type:'application/octet-stream'});
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        const fname = `Budget_${state.selectedCompany}_${state.selectedProject}_FY2027.xlsx`;
-        link.download = fname.replace(/[^a-zA-Z0-9_\-\.]/g,'_');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
+        // Write styled workbook (template colors: navy title, blue header, #,##0 numbers)
+        const fname = `Budget_${state.selectedCompany}_${state.selectedProject}_FY2027.xlsx`.replace(/[^a-zA-Z0-9_\-\.]/g,'_');
+        await writeStyledWorkbook(sheets, fname);
         showToast('Excel file exported successfully!', 'emerald');
     } catch (err) {
         console.error(err);
         showToast('Export error: ' + err.message, 'error');
+    } finally {
+        exportInFlight = false;
     }
 }
 
-// Local mock data handlers
+// ----------------------------------------------------
+// MOCK DATA MODE (browser-only, no backend) + ROLE PREVIEW (super admin)
+// ----------------------------------------------------
+// Deterministic pseudo-random generator (seeded by string) so mock data is stable
+function seededRand(seedStr) {
+    let h = 2166136261;
+    for (let i = 0; i < seedStr.length; i++) {
+        h ^= seedStr.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return function () {
+        h = Math.imul(h ^ (h >>> 15), 2246822507);
+        h = Math.imul(h ^ (h >>> 13), 3266489909);
+        h ^= h >>> 16;
+        return (h >>> 0) / 4294967296;
+    };
+}
+
+// Build a realistic full budget for the current project/division
+function generateMockBudget() {
+    const seed = (state.selectedProject || 'Demo') + '|' + (getActiveDepartment() || '');
+    const rnd = seededRand(seed);
+    const d = getInitialDataStructure();
+    const monthRamp = (base, jitter) => Array.from({ length: 12 }, (_, m) =>
+        Math.round((base * (0.6 + m * 0.08) * (1 + (rnd() - 0.5) * jitter)) / 1000) * 1000);
+
+    // Target revenue: monthly units ramp + sqm
+    d.target_revenue.forEach(row => {
+        const baseUnits = Math.max(1, Math.round(row.stock_units / 8));
+        row.units = Array.from({ length: 12 }, (_, m) => Math.max(0, Math.round(baseUnits * (0.5 + m * 0.09) * (0.7 + rnd() * 0.6))));
+        row.sqm = row.units.map(u => u * Math.round(row.stock_sqm / row.stock_units));
+    });
+
+    // Sales cost as % of monthly revenue
+    const monthlyRev = d.target_revenue.reduce((acc, r) => {
+        r.sqm.forEach((s, m) => { acc[m] += s * r.price_sqm; });
+        return acc;
+    }, Array(12).fill(0));
+    const pct = (p) => monthlyRev.map(v => Math.round(v * p / 1000) * 1000);
+    d.sales_cost.inhouse.komisi = pct(0.025);
+    d.sales_cost.inhouse.closing_fee = pct(0.005);
+    d.sales_cost.inhouse.or = pct(0.004);
+    d.sales_cost.inhouse.reward = pct(0.002);
+    d.sales_cost.agent.komisi = pct(0.03);
+    d.sales_cost.agent.closing_fee = pct(0.006);
+    d.sales_cost.agent.or = pct(0.005);
+    d.sales_cost.agent.reward = pct(0.002);
+    Object.keys(d.program_sales).filter(k => !k.startsWith('_')).forEach(k => {
+        d.program_sales[k] = pct(0.004 + rnd() * 0.006);
+    });
+
+    // Marketing activity from templates (ATL rows < 46, BTL >= 46)
+    (state.templates.marketing || []).forEach(item => {
+        if (item.type === 'input') {
+            const base = item.row < 46 ? 30000000 : 15000000;
+            d.marketing_activity[item.row] = monthRamp(base, 0.5);
+        }
+    });
+
+    // Dev & Land from templates
+    (state.templates.dev_land || []).forEach(item => {
+        if (item.num && item.num.includes('.')) {
+            d.dev_land[item.row] = {
+                sqm: item.sqm || 0,
+                cost_sqm: item.cost_sqm || 0,
+                rab_spk: item.rab_spk || 5000000000,
+                realisasi: item.realisasi || 0,
+                best_est: item.best_est || 0,
+                monthly: monthRamp((item.rab_spk || 5000000000) / 12 / 4, 0.6)
+            };
+        }
+    });
+
+    // Payroll / GA / Others / Finance / Tax
+    const fillExpense = (target, template, base) => {
+        (template || []).forEach(acc => {
+            target[acc.code] = monthRamp(base * (0.6 + rnd() * 0.9), 0.4);
+        });
+    };
+    fillExpense(d.payroll_expenses, state.templates.payroll, 60000000);
+    fillExpense(d.ga_expenses, state.templates.ga, 25000000);
+    fillExpense(d.others_expenses, state.templates.others, 20000000);
+    fillExpense(d.finance_expenses, state.templates.finance, 15000000);
+    fillExpense(d.tax_expenses, state.templates.tax, 40000000);
+
+    // Corporate events (one-off in a random month)
+    (state.templates.corp_event || []).forEach(item => {
+        if (item.type === 'input') {
+            const qty = Math.max(1, Math.round(rnd() * 3));
+            const price = 25000000 + Math.round(rnd() * 4) * 25000000;
+            d.corp_events[item.row] = { qty, price_unit: price, monthly: Array(12).fill(0) };
+            d.corp_events[item.row].monthly[Math.floor(rnd() * 12)] = qty * price;
+        }
+    });
+
+    // Fixed assets
+    d.fixed_assets = [
+        { id: 'mock_fa1', category: 'IT Equipment', desc: 'Laptop & Workstation', division: getActiveDepartment() || 'IT', justification: 'Replace aging fleet', new_replace: 'New', qty: 10, price: 18000000, month: 1 },
+        { id: 'mock_fa2', category: 'IT Equipment', desc: 'Server & Network', division: getActiveDepartment() || 'IT', justification: 'HQ upgrade', new_replace: 'Replace', qty: 2, price: 120000000, month: 3 },
+        { id: 'mock_fa3', category: 'Furniture & Fittings', desc: 'Office Furniture', division: getActiveDepartment() || 'GA', justification: 'New office fit-out', new_replace: 'New', qty: 25, price: 4500000, month: 2 }
+    ];
+
+    // Business trips
+    d.business_trip = [
+        { id: 'mock_t1', employee: 'Sales Executive', grade: 'Staff', destination: 'Local', city: 'Bandung', division: getActiveDepartment() || 'SALES', duration: 3, month: 2 },
+        { id: 'mock_t2', employee: 'Project Manager', grade: 'Manager', destination: 'Local', city: 'Surabaya', division: getActiveDepartment() || 'PROJECT', duration: 4, month: 4 },
+        { id: 'mock_t3', employee: 'Finance Director', grade: 'Director', destination: 'Overseas', city: 'Singapore', division: getActiveDepartment() || 'CORFIN', duration: 6, month: 6 },
+        { id: 'mock_t4', employee: 'Marketing SPV', grade: 'SPV', destination: 'Local', city: 'Bali', division: getActiveDepartment() || 'MARKETING', duration: 2, month: 8 }
+    ];
+
+    d.summary_2026 = {};
+    return d;
+}
+
+function loadMockData() {
+    state.mockMode = true;
+    state.data = generateMockBudget();
+    saveLocalMockData();
+    state.isDirty = false;
+    updateSyncIndicator(true);
+    updateMockButton();
+    switchTab(getActiveTabId());
+    showToast('Mock data loaded — browser only, no backend touched.', 'emerald');
+}
+
+function exitMockMode() {
+    state.mockMode = false;
+    state.isDirty = false;
+    updateSyncIndicator(true);
+    updateMockButton();
+    showToast('Back to live backend data.', 'info');
+    triggerDataLoad();
+}
+
+function toggleMockMode() {
+    if (state.mockMode) exitMockMode();
+    else loadMockData();
+}
+
+function updateMockButton() {
+    const btn = document.getElementById('mock-btn');
+    if (!btn) return;
+    if (state.mockMode) {
+        btn.innerHTML = `<i data-lucide="plug-zap"></i> Live`;
+        btn.title = 'Exit mock data and return to the live backend';
+    } else {
+        btn.innerHTML = `<i data-lucide="flask-conical"></i> Mock`;
+        btn.title = 'Load browser-only sample data (no backend)';
+    }
+    refreshIcons();
+}
+
+// ---- Super admin "View as" role preview ----
+function getDivisionRecord(name) {
+    return state.departments.find(d => d.department === name) || null;
+}
+
+function applyPreviewRole(role) {
+    if (!role) { exitPreview(); return; }
+    if (!state.realUser) {
+        state.realUser = JSON.parse(sessionStorage.getItem('current_user_v2') || 'null') || state.currentUser;
+    }
+    const base = state.realUser;
+    const divName = state.selectedDepartment || (state.departments[0] && state.departments[0].department) || '';
+    const div = getDivisionRecord(divName);
+    const mods = div ? div.allowedModules : 'ALL';
+    const projs = div ? div.allowedProjects : 'ALL';
+    const comps = div ? div.allowedCompanies : 'ALL';
+
+    let preview;
+    if (role === 'Admin') {
+        preview = { ...base, role: 'Admin', department: '', allowedProjects: 'ALL', allowedCompanies: 'ALL', allowedModules: 'ALL', deptAllowedProjects: 'ALL', deptAllowedCompanies: 'ALL' };
+    } else if (role === 'DeptHead') {
+        preview = { ...base, role: 'DeptHead', department: divName, allowedProjects: projs, allowedCompanies: comps, allowedModules: mods, deptAllowedProjects: projs, deptAllowedCompanies: comps };
+    } else if (role === 'User') {
+        preview = { ...base, role: 'User', department: divName, allowedProjects: projs, allowedCompanies: comps, allowedModules: mods, deptAllowedProjects: projs, deptAllowedCompanies: comps };
+    } else if (role === 'FAT') {
+        preview = { ...base, role: 'FAT', department: '', allowedProjects: 'ALL', allowedCompanies: 'ALL', allowedModules: 'ALL', deptAllowedProjects: 'ALL', deptAllowedCompanies: 'ALL' };
+    } else if (role === 'Viewer') {
+        preview = { ...base, role: 'Viewer', department: divName, allowedProjects: projs, allowedCompanies: comps, allowedModules: mods, deptAllowedProjects: projs, deptAllowedCompanies: comps };
+    } else {
+        return;
+    }
+
+    state.currentUser = preview;
+    // Non-admin previews don't see the division switcher
+    const deptSelGroup = document.getElementById('dept-selector-group');
+    if (deptSelGroup) deptSelGroup.style.display = (role === 'Admin') ? 'flex' : 'none';
+    applyModuleVisibility();
+    syncSaveButton();
+    initDropdowns();
+    triggerDataLoad();
+
+    const roleLabel = { Admin: 'Super Admin', DeptHead: 'Dept Head', FAT: 'FAT Manager' }[role] || role;
+    const banner = document.getElementById('preview-banner');
+    if (banner) {
+        document.getElementById('preview-banner-text').innerText = roleLabel + ((role !== 'FAT' && role !== 'Admin' && divName) ? ' — ' + divName : '');
+        banner.style.display = 'flex';
+    }
+    showToast('Previewing as ' + roleLabel + ((role !== 'FAT' && role !== 'Admin' && divName) ? ' (' + divName + ')' : '') + '.', 'info');
+}
+
+function exitPreview() {
+    if (!state.realUser) {
+        const sel = document.getElementById('viewas-select');
+        if (sel) sel.value = '';
+        return;
+    }
+    state.currentUser = state.realUser;
+    state.realUser = null;
+    const deptSelGroup = document.getElementById('dept-selector-group');
+    if (deptSelGroup) deptSelGroup.style.display = 'flex';
+    applyModuleVisibility();
+    syncSaveButton();
+    initDropdowns();
+    triggerDataLoad();
+    const banner = document.getElementById('preview-banner');
+    if (banner) banner.style.display = 'none';
+    const sel = document.getElementById('viewas-select');
+    if (sel) sel.value = '';
+    showToast('Preview ended. Back to your account.', 'info');
+}
+
+// Local mock data handlers — draft key is scoped by division so two departments
+// sharing a project never see each other's browser drafts
+function localDraftKey() {
+    return `draft_${state.selectedCompany}_${state.selectedProject}_${getActiveDepartment() || ''}`;
+}
+
 function loadLocalMockData() {
-    const key = `draft_${state.selectedCompany}_${state.selectedProject}`;
+    const key = localDraftKey();
     const stored = localStorage.getItem(key);
     if (stored) {
         state.data = JSON.parse(stored);
@@ -2837,7 +3739,7 @@ function loadLocalMockData() {
 }
 
 function saveLocalMockData() {
-    const key = `draft_${state.selectedCompany}_${state.selectedProject}`;
+    const key = localDraftKey();
     localStorage.setItem(key, JSON.stringify(state.data));
 }
 
@@ -2850,6 +3752,12 @@ function getActiveTabId() {
 function updateSyncIndicator(synced) {
     const dot = document.querySelector('.indicator-dot');
     const text = document.getElementById('sync-status');
+    
+    if (state.mockMode) {
+        dot.className = 'indicator-dot unsynced';
+        text.innerText = 'Mock Mode';
+        return;
+    }
     
     if (synced) {
         dot.className = 'indicator-dot synced';
@@ -2886,13 +3794,13 @@ function showToast(message, type = 'emerald') {
 
 // Modal Actions
 function showGasConfigModal() {
-    const modal = document.getElementById('gas-modal');
+    const modal = document.getElementById('gas-config-modal');
     modal.style.display = 'flex';
     document.getElementById('gas-url-input').value = state.gasUrl;
 }
 
 function hideGasConfigModal() {
-    document.getElementById('gas-modal').style.display = 'none';
+    document.getElementById('gas-config-modal').style.display = 'none';
 }
 
 function saveGasConfigLink() {
@@ -2925,7 +3833,7 @@ async function handleNikLoginSubmit(e) {
     if (state.gasUrl) {
         try {
             const url = `${state.gasUrl}?action=loginNik&nik=${encodeURIComponent(nikInput)}`;
-            const res = await fetch(url);
+            const res = await fetchGasGet(url);
             const json = await res.json();
             
             if (json.status === 'success' && json.user) {
@@ -2934,8 +3842,8 @@ async function handleNikLoginSubmit(e) {
                 showToast('Invalid NIK or not authorized for 2027 budget planner.', 'error');
             }
         } catch (err) {
-            console.error(err);
-            // Fallback for offline/local testing
+            // Timeout/offline: fall back to local login (still lets the app run standalone)
+            if (!isAbortError(err)) console.error(err);
             fallbackNikLogin(nikInput);
         }
     } else {
@@ -2950,26 +3858,88 @@ function fallbackNikLogin(nikInput) {
         name: nikInput.toLowerCase() === '1001' ? 'Administrator' : `Employee (${nikInput})`,
         allowedProjects: 'ALL',
         allowedCompanies: 'ALL',
-        role: nikInput.toLowerCase() === '1001' ? 'Admin' : 'User'
+        role: nikInput.toLowerCase() === '1001' ? 'Admin' : 'User',
+        department: '',
+        allowedModules: 'ALL',
+        deptAllowedProjects: 'ALL',
+        deptAllowedCompanies: 'ALL'
     };
     setAuthenticatedUser(user);
 }
 
-function setAuthenticatedUser(user) {
+async function fetchDepartmentsList() {
+    if (!state.gasUrl) return;
+    try {
+        const res = await fetchGasGet(`${state.gasUrl}?action=listDepartments`);
+        const json = await res.json();
+        if (json.status === 'success' && Array.isArray(json.data)) {
+            state.departments = json.data;
+        }
+    } catch (err) {
+        if (!isAbortError(err)) console.error(err);
+    }
+}
+
+function populateDeptSelector() {
+    const deptSel = document.getElementById('dept-select');
+    if (!deptSel) return;
+    const depts = state.departments.map(d => d.department);
+    if (depts.length === 0) {
+        deptSel.innerHTML = `<option value="">No divisions yet</option>`;
+        return;
+    }
+    deptSel.innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+    // Keep previous selection if still valid, else first dept
+    if (depts.includes(state.selectedDepartment)) {
+        deptSel.value = state.selectedDepartment;
+    } else {
+        state.selectedDepartment = depts[0];
+        deptSel.value = state.selectedDepartment;
+    }
+}
+
+async function setAuthenticatedUser(user) {
     state.currentUser = user;
-    sessionStorage.setItem('current_user', JSON.stringify(user));
+    sessionStorage.setItem('current_user_v2', JSON.stringify(user));
     
     document.getElementById('user-display-name').innerText = user.name || user.employeeId;
-    document.getElementById('user-display-nik').innerText = `NIK: ${user.employeeId} (${user.role})`;
+    const deptTag = user.department ? ` • ${user.department}` : '';
+    document.getElementById('user-display-nik').innerText = `NIK: ${user.employeeId} (${user.role})${deptTag}`;
     
     hideNikLoginModal();
     showToast(`Welcome ${user.name}! NIK verified.`, 'emerald');
     
-    // Show/hide admin tab based on role
-    const adminNav = document.getElementById('nav-nik-mgmt');
-    if (adminNav) {
-        adminNav.style.display = (user.role === 'Admin' || user.allowedProjects === 'ALL') ? 'flex' : 'none';
+    // Super admin: load departments & show dept switcher to review each department's entries
+    const deptSelectorGroup = document.getElementById('dept-selector-group');
+    if (deptSelectorGroup) {
+        if (isSuperAdmin()) {
+            deptSelectorGroup.style.display = 'flex';
+            await fetchDepartmentsList();
+            populateDeptSelector();
+        } else {
+            deptSelectorGroup.style.display = 'none';
+            state.selectedDepartment = user.department || '';
+        }
     }
+    
+    // Role-based sidebar visibility (admin tabs + department module access)
+    applyModuleVisibility();
+    
+    // Restore the tab the user was on before (e.g. after a page refresh/reload)
+    const savedTab = sessionStorage.getItem('budget_active_tab');
+    if (savedTab && isTabAllowed(savedTab)) {
+        switchTab(savedTab);
+    }
+    
+    // Viewer & FAT roles = read-only
+    syncSaveButton();
+    
+    // Mock & View-as controls: super admin only
+    const mockBtn = document.getElementById('mock-btn');
+    if (mockBtn) mockBtn.style.display = isSuperAdmin() ? 'inline-flex' : 'none';
+    const viewasSel = document.getElementById('viewas-select');
+    if (viewasSel) viewasSel.style.display = isSuperAdmin() ? 'inline-block' : 'none';
+    updateMockButton();
     
     initDropdowns();
     triggerDataLoad();
@@ -2977,66 +3947,227 @@ function setAuthenticatedUser(user) {
 
 function handleNikLogout() {
     state.currentUser = null;
-    sessionStorage.removeItem('current_user');
+    state.departments = [];
+    state.selectedDepartment = '';
+    state.mockMode = false;
+    state.realUser = null;
+    sessionStorage.removeItem('current_user_v2');
     document.getElementById('user-display-name').innerText = 'Not Signed In';
     document.getElementById('user-display-nik').innerText = 'NIK: -';
+    
+    // Reset admin-only UI
+    const deptSelectorGroup = document.getElementById('dept-selector-group');
+    if (deptSelectorGroup) deptSelectorGroup.style.display = 'none';
+    const mockBtn = document.getElementById('mock-btn');
+    if (mockBtn) { mockBtn.style.display = 'none'; updateMockButton(); }
+    const viewasSel = document.getElementById('viewas-select');
+    if (viewasSel) { viewasSel.style.display = 'none'; viewasSel.value = ''; }
+    const banner = document.getElementById('preview-banner');
+    if (banner) banner.style.display = 'none';
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) saveBtn.disabled = false;
+    
     showToast('Signed out successfully.', 'info');
     showNikLoginModal();
 }
 
 // ----------------------------------------------------
-// NIK MANAGEMENT UI (ADMIN)
+// NIK MANAGEMENT UI (SUPER ADMIN + DEPT HEAD)
 // ----------------------------------------------------
+function roleBadgeClass(role) {
+    switch (role) {
+        case 'Admin': return 'badge-amber';
+        case 'DeptHead': return 'badge-purple';
+        case 'FAT': return 'badge-cherry';
+        case 'Viewer': return 'badge-emerald';
+        default: return 'badge-indigo';
+    }
+}
+
 async function renderNikManagementTable() {
-    const tbody = document.getElementById('nik-list-body');
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading employee access list...</td></tr>`;
+    const tbody = document.getElementById('nik-management-body');
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading employee access list...</td></tr>`;
+    
+    const subtitle = document.getElementById('nik-mgmt-subtitle');
+    if (subtitle) {
+        if (isDeptHead()) {
+            subtitle.innerText = `You manage the ${state.currentUser.department} team. Your team members can only be assigned to projects within this division's scope, and they can only see entries from ${state.currentUser.department}.`;
+        } else {
+            subtitle.innerText = 'Manage employee NIKs, divisions, and roles. Employees can only access budget entries for their division and authorized projects.';
+        }
+    }
     
     if (state.gasUrl) {
         try {
-            const res = await fetch(`${state.gasUrl}?action=listEmployees`);
+            // Dept heads only see their own team
+            const deptParam = isDeptHead() ? `&department=${encodeURIComponent(state.currentUser.department || '')}` : '';
+            const res = await fetchGasGet(`${state.gasUrl}?action=listEmployees${deptParam}`);
             const json = await res.json();
             if (json.status === 'success' && Array.isArray(json.data)) {
                 state.nikList = json.data;
             }
         } catch (err) {
-            console.error(err);
+            if (!isAbortError(err)) console.error(err);
         }
+    }
+    
+    // A dept head without a department has no team scope - show empty state instead of all users
+    if (isDeptHead() && !state.currentUser.department) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-secondary);">Your account has no division assigned. Ask a super admin to assign you to a division.</td></tr>`;
+        return;
     }
     
     if (!state.nikList || state.nikList.length === 0) {
         state.nikList = [
-            { employeeId: '1001', name: 'Administrator', allowedProjects: 'ALL', allowedCompanies: 'ALL', role: 'Admin' }
+            { employeeId: '1001', name: 'Administrator', allowedProjects: 'ALL', allowedCompanies: 'ALL', role: 'Admin', department: '' }
         ];
     }
     
-    tbody.innerHTML = state.nikList.map((emp, idx) => `
+    tbody.innerHTML = state.nikList.map((emp, idx) => {
+        const isSelf = state.currentUser && emp.employeeId === state.currentUser.employeeId;
+        // Dept heads may only manage plain User/Viewer rows — editing a DeptHead/FAT/Admin
+        // row would silently demote it (role select only offers User/Viewer).
+        const isProtected = (emp.role === 'Admin' && !isSuperAdmin()) || (isDeptHead() && emp.role !== 'User' && emp.role !== 'Viewer');
+        return `
         <tr>
-            <td><strong style="font-family:monospace;">${emp.employeeId}</strong></td>
-            <td>${emp.name || '-'}</td>
-            <td><span class="badge ${emp.allowedProjects === 'ALL' ? 'badge-emerald' : 'badge-purple'}">${emp.allowedProjects}</span></td>
-            <td><span class="badge ${emp.allowedCompanies === 'ALL' ? 'badge-emerald' : 'badge-indigo'}">${emp.allowedCompanies}</span></td>
-            <td><span class="badge ${emp.role === 'Admin' ? 'badge-amber' : ''}">${emp.role}</span></td>
+            <td><strong style="font-family:monospace;">${esc(emp.employeeId)}</strong></td>
+            <td>${esc(emp.name || '-')}</td>
+            <td>${emp.department ? `<span class="badge badge-indigo">${esc(emp.department)}</span>` : '<span class="badge">Unassigned</span>'}</td>
+            <td><span class="badge ${emp.allowedProjects === 'ALL' ? 'badge-emerald' : 'badge-purple'}">${esc(emp.allowedProjects)}</span></td>
+            <td><span class="badge ${emp.allowedCompanies === 'ALL' ? 'badge-emerald' : 'badge-indigo'}">${esc(emp.allowedCompanies)}</span></td>
+            <td><span class="badge ${roleBadgeClass(emp.role)}">${esc(emp.role)}</span></td>
+            <td>${emp.createdAt ? String(emp.createdAt).substring(0, 10) : '-'}</td>
             <td class="action-cell">
-                <button class="btn-delete" onclick="deleteNikPermission('${emp.employeeId}')" title="Revoke NIK Access"><i data-lucide="trash-2"></i></button>
+                ${isProtected ? '' : `<button class="btn-icon-sm" onclick="showNikEditModal('${esc(emp.employeeId)}')" title="Edit Employee"><i data-lucide="pencil"></i></button>`}
+                ${(isProtected || isSelf) ? '' : `<button class="btn-delete" onclick="deleteNikPermission('${esc(emp.employeeId)}')" title="Revoke Access"><i data-lucide="trash-2"></i></button>`}
             </td>
         </tr>
-    `).join('');
+    `}).join('');
     
     refreshIcons();
 }
 
-function showNikEditModal() {
+function showNikEditModal(empId) {
+    const emp = empId ? state.nikList.find(e => e.employeeId === empId) : null;
+    
+    // Department options: super admin sees all; dept head locked to their own
+    const deptSel = document.getElementById('nik-edit-dept');
+    const isDeptHeadUser = isDeptHead();
+    if (isDeptHeadUser) {
+        deptSel.innerHTML = `<option value="${state.currentUser.department || ''}">${state.currentUser.department || 'No Division'}</option>`;
+        deptSel.disabled = true;
+    } else {
+        deptSel.disabled = false;
+        const deptOptions = state.departments.map(d => d.department);
+        deptSel.innerHTML = `<option value="">-- No Division --</option>` +
+            deptOptions.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+    
+    // Role options: dept head can only create User/Viewer
+    const roleSel = document.getElementById('nik-edit-role');
+    if (isDeptHeadUser) {
+        roleSel.innerHTML = `
+            <option value="User">User</option>
+            <option value="Viewer">Viewer</option>`;
+    } else {
+        roleSel.innerHTML = `
+            <option value="User">User</option>
+            <option value="DeptHead">Dept Head</option>
+            <option value="FAT">FAT Manager</option>
+            <option value="Viewer">Viewer</option>
+            <option value="Admin">Super Admin</option>`;
+    }
+    
+    document.getElementById('nik-edit-id').value = emp ? emp.employeeId : '';
+    document.getElementById('nik-edit-name').value = emp ? (emp.name || '') : '';
+    deptSel.value = emp ? (emp.department || '') : (isDeptHeadUser ? state.currentUser.department || '' : '');
+    roleSel.value = emp ? (emp.role || 'User') : 'User';
+    
+    // Project & company checkbox grids
+    state.nikEditEmp = emp || null;
+    state.nikCompanyOverrides = {};
+    buildNikProjectCheckboxes(emp);
+    
+    // ID locked when editing
+    document.getElementById('nik-edit-id').readOnly = !!emp;
+    
+    document.getElementById('nik-edit-modal').style.display = 'flex';
+}
+
+// Populate project checkboxes (admin: all projects; dept head: department scope only)
+function buildNikProjectCheckboxes(emp) {
     const container = document.getElementById('nik-project-checkboxes');
-    container.innerHTML = state.metadata.projects.map(p => `
+    if (!container) return;
+    
+    let availableProjs = state.metadata.projects;
+    let deptScope = null;
+    if (isDeptHead()) {
+        deptScope = parseCsvList(state.currentUser.deptAllowedProjects || 'ALL');
+        if (deptScope.length > 0 && deptScope[0] !== 'ALL') {
+            availableProjs = state.metadata.projects.filter(p => deptScope.some(d => d.toLowerCase() === p.toLowerCase()));
+        }
+    }
+    
+    // Pre-check: emp's projects, or default to all available projects in division scope
+    let checked = [];
+    if (emp) {
+        checked = emp.allowedProjects === 'ALL' ? availableProjs : parseCsvList(emp.allowedProjects);
+    } else {
+        checked = availableProjs;
+    }
+    
+    container.innerHTML = availableProjs.map(p => `
         <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
-            <input type="checkbox" name="nik-project" value="${p}" checked>
+            <input type="checkbox" name="nik-project" value="${p}" ${checked.some(c => c.toLowerCase() === p.toLowerCase()) ? 'checked' : ''} onchange="syncNikCompanyCheckboxes()">
             <span>${p}</span>
         </label>
     `).join('');
     
-    document.getElementById('edit-nik-id').value = '';
-    document.getElementById('edit-nik-name').value = '';
-    document.getElementById('nik-edit-modal').style.display = 'flex';
+    // Seed company overrides when editing someone with a specific company list
+    state.nikCompanyOverrides = {};
+    if (emp && emp.allowedCompanies && emp.allowedCompanies !== 'ALL') {
+        const empComps = parseCsvList(emp.allowedCompanies).map(c => c.toLowerCase());
+        const checkedProjects = Array.from(document.querySelectorAll('input[name="nik-project"]:checked')).map(cb => cb.value);
+        const derived = [];
+        checkedProjects.forEach(proj => {
+            ((state.metadata.projectCompanyMapping || {})[proj] || []).forEach(c => { if (!derived.includes(c)) derived.push(c); });
+        });
+        derived.forEach(c => {
+            if (!empComps.includes(c.toLowerCase())) state.nikCompanyOverrides[c] = false;
+        });
+    }
+    
+    syncNikCompanyCheckboxes();
+}
+
+// Company checkboxes: auto-derived from the currently checked projects
+function syncNikCompanyCheckboxes() {
+    const container = document.getElementById('nik-company-checkboxes');
+    if (!container) return;
+    
+    const checkedProjects = Array.from(document.querySelectorAll('input[name="nik-project"]:checked')).map(cb => cb.value);
+    let availableComps = [];
+    checkedProjects.forEach(proj => {
+        ((state.metadata.projectCompanyMapping || {})[proj] || []).forEach(c => { if (!availableComps.includes(c)) availableComps.push(c); });
+    });
+    if (availableComps.length === 0) availableComps = state.metadata.companies; // fallback when nothing selected
+    
+    const overrides = state.nikCompanyOverrides || {};
+    container.innerHTML = availableComps.map(c => {
+        const isChecked = overrides[c] !== undefined ? overrides[c] : true;
+        return `
+        <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
+            <input type="checkbox" name="nik-company" value="${c}" ${isChecked ? 'checked' : ''} onchange="recordNikCompanyOverride(this)">
+            <span>${c}</span>
+        </label>
+    `;
+    }).join('');
+}
+
+// Remember manual company toggles so they survive project re-syncs within the modal session
+function recordNikCompanyOverride(cb) {
+    state.nikCompanyOverrides = state.nikCompanyOverrides || {};
+    state.nikCompanyOverrides[cb.value] = cb.checked;
 }
 
 function hideNikEditModal() {
@@ -3044,53 +4175,83 @@ function hideNikEditModal() {
 }
 
 async function saveNikPermissions() {
-    const empId = document.getElementById('edit-nik-id').value.trim();
-    const name = document.getElementById('edit-nik-name').value.trim();
-    const role = document.getElementById('edit-nik-role').value;
+    const empId = document.getElementById('nik-edit-id').value.trim();
+    const name = document.getElementById('nik-edit-name').value.trim();
+    const role = document.getElementById('nik-edit-role').value;
+    let department = document.getElementById('nik-edit-dept').value;
     
     if (!empId) {
         showToast('Employee NIK ID is required.', 'amber');
         return;
     }
     
-    const checkboxes = document.querySelectorAll('input[name="nik-project"]:checked');
-    const selectedProjects = Array.from(checkboxes).map(cb => cb.value);
-    const allowedProjsStr = (selectedProjects.length === state.metadata.projects.length || selectedProjects.length === 0) ? 'ALL' : selectedProjects.join(',');
+    // Dept head: force their own department & never escalate roles
+    if (isDeptHead()) {
+        department = state.currentUser.department || '';
+        if (role === 'Admin' || role === 'DeptHead' || role === 'FAT' || role === '') {
+            showToast('Dept heads can only create/manage User/Viewer accounts.', 'amber');
+            return;
+        }
+    }
     
-    // Auto-map companies for selected projects
-    let allowedComps = [];
-    selectedProjects.forEach(proj => {
-        const comps = (state.metadata.projectCompanyMapping || {})[proj] || [];
-        comps.forEach(c => { if (!allowedComps.includes(c)) allowedComps.push(c); });
-    });
-    const allowedCompsStr = (allowedComps.length === 0 || allowedProjsStr === 'ALL') ? 'ALL' : allowedComps.join(',');
+    // Read selected projects from checkboxes
+    const projBoxes = document.querySelectorAll('input[name="nik-project"]');
+    const projChecked = document.querySelectorAll('input[name="nik-project"]:checked');
+    const selectedProjects = Array.from(projChecked).map(cb => cb.value);
+    
+    let finalProjsStr = 'ALL';
+    if (isDeptHead()) {
+        const deptScope = parseCsvList(state.currentUser.deptAllowedProjects || 'ALL');
+        if (selectedProjects.length === 0) {
+            showToast('Select at least one project within your division scope.', 'amber');
+            return;
+        }
+        // If Dept Head checked all boxes or 'ALL', explicitly list out their division's projects
+        if (projBoxes.length === 0 || selectedProjects.length === projBoxes.length) {
+            finalProjsStr = deptScope.length > 0 && deptScope[0] !== 'ALL' ? deptScope.join(',') : selectedProjects.join(',');
+        } else {
+            finalProjsStr = selectedProjects.join(',');
+        }
+    } else {
+        finalProjsStr = (projBoxes.length === 0 || selectedProjects.length === 0 || selectedProjects.length === projBoxes.length)
+            ? 'ALL' : selectedProjects.join(',');
+    }
+    
+    // Read selected companies from checkboxes
+    const compBoxes = document.querySelectorAll('input[name="nik-company"]');
+    const compChecked = document.querySelectorAll('input[name="nik-company"]:checked');
+    const selectedComps = Array.from(compChecked).map(cb => cb.value);
+    const allowedCompsStr = (compBoxes.length === 0 || selectedComps.length === 0 || selectedComps.length === compBoxes.length)
+        ? 'ALL' : selectedComps.join(',');
     
     const payload = {
         action: 'addEmployee',
         employeeId: empId,
         name: name || 'Employee',
-        allowedProjects: allowedProjsStr,
+        allowedProjects: finalProjsStr,
         allowedCompanies: allowedCompsStr,
-        role: role
+        role: role,
+        department: department || '',
+        callerNik: state.currentUser ? state.currentUser.employeeId : ''
     };
     
-    showToast('Saving NIK permissions...', 'info');
+    showToast('Saving employee permissions...', 'info');
     
     if (state.gasUrl) {
         try {
-            await fetch(state.gasUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-            showToast('NIK permissions saved successfully to Google Sheets.', 'emerald');
+            await fetchWithTimeout(state.gasUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+            showToast('Employee permissions saved successfully to Google Sheets.', 'emerald');
         } catch (err) {
-            console.error(err);
-            showToast('Saved NIK locally.', 'amber');
+            if (!isAbortError(err)) console.error(err);
+            showToast('Saved employee locally.', 'amber');
         }
     } else {
-        showToast('Saved NIK access rules.', 'emerald');
+        showToast('Saved employee access rules.', 'emerald');
     }
     
     // Update local state
     const existingIdx = state.nikList.findIndex(e => e.employeeId === empId);
-    const newRecord = { employeeId: empId, name: name || 'Employee', allowedProjects: allowedProjsStr, allowedCompanies: allowedCompsStr, role: role };
+    const newRecord = { employeeId: empId, name: name || 'Employee', allowedProjects: finalProjsStr, allowedCompanies: allowedCompsStr, role: role, department: department || '' };
     if (existingIdx >= 0) state.nikList[existingIdx] = newRecord;
     else state.nikList.push(newRecord);
     
@@ -3099,18 +4260,191 @@ async function saveNikPermissions() {
 }
 
 async function deleteNikPermission(empId) {
-    if (!confirm(`Revoke NIK access for ${empId}?`)) return;
+    if (!confirm(`Revoke access for ${empId}?`)) return;
+    if (isDeptHead() && state.currentUser && empId === state.currentUser.employeeId) {
+        showToast('You cannot delete your own account.', 'amber');
+        return;
+    }
     
-    showToast('Revoking NIK access...', 'info');
+    showToast('Revoking employee access...', 'info');
+    
     if (state.gasUrl) {
         try {
-            await fetch(state.gasUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'deleteEmployee', employeeId: empId }) });
+            const payload = {
+                action: 'deleteEmployee',
+                employeeId: empId,
+                callerNik: state.currentUser ? state.currentUser.employeeId : ''
+            };
+            await fetchWithTimeout(state.gasUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+            showToast('Employee access revoked from Google Sheets.', 'emerald');
         } catch (err) {
-            console.error(err);
+            if (!isAbortError(err)) console.error(err);
+            showToast('Employee removed locally.', 'amber');
         }
     }
     
     state.nikList = state.nikList.filter(e => e.employeeId !== empId);
-    showToast(`NIK access revoked for ${empId}.`, 'emerald');
     renderNikManagementTable();
+}
+
+// ----------------------------------------------------
+// DEPARTMENT MANAGEMENT UI (SUPER ADMIN)
+// ----------------------------------------------------
+function moduleLabel(key) {
+    const m = BUDGET_MODULES.find(x => x.key === key);
+    return m ? m.label : key;
+}
+
+async function renderDepartmentsTable() {
+    const tbody = document.getElementById('dept-management-body');
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-secondary);">Loading divisions...</td></tr>`;
+    
+    await fetchDepartmentsList();
+    
+    if (state.departments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-secondary);">No divisions yet. Add one to start scoping module & project access.</td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = state.departments.map(dept => {
+        const validKeys = BUDGET_MODULES.map(m => m.key);
+        const modules = parseCsvList(dept.allowedModules).filter(m => validKeys.includes(m));
+        const projects = parseCsvList(dept.allowedProjects);
+        const companies = parseCsvList(dept.allowedCompanies);
+        const moduleHtml = modules.length === 0 || dept.allowedModules === 'ALL'
+            ? '<span class="badge badge-emerald">ALL</span>'
+            : modules.map(m => `<span class="badge badge-purple" style="margin:2px;">${moduleLabel(m)}</span>`).join('');
+        const projectHtml = dept.allowedProjects === 'ALL'
+            ? '<span class="badge badge-emerald">ALL</span>'
+            : projects.map(p => `<span class="badge badge-indigo" style="margin:2px;">${p}</span>`).join('');
+        const companyHtml = dept.allowedCompanies === 'ALL'
+            ? '<span class="badge badge-emerald">ALL</span>'
+            : companies.map(c => `<span class="badge" style="margin:2px;">${c}</span>`).join('');
+        return `
+        <tr>
+            <td><strong>${esc(dept.department)}</strong></td>
+            <td style="max-width:320px;">${moduleHtml}</td>
+            <td style="max-width:260px;">${projectHtml}</td>
+            <td style="max-width:260px;">${companyHtml}</td>
+            <td>${dept.createdAt ? String(dept.createdAt).substring(0, 10) : '-'}</td>
+            <td class="action-cell">
+                <button class="btn-icon-sm" onclick="showDeptEditModal('${encodeURIComponent(dept.department)}')" title="Edit Division"><i data-lucide="pencil"></i></button>
+                <button class="btn-delete" onclick="deleteDepartment('${encodeURIComponent(dept.department)}')" title="Delete Division"><i data-lucide="trash-2"></i></button>
+            </td>
+        </tr>
+    `}).join('');
+    
+    refreshIcons();
+}
+
+function showDeptEditModal(encodedName) {
+    const deptName = encodedName ? decodeURIComponent(encodedName) : null;
+    const dept = deptName ? state.departments.find(d => d.department === deptName) : null;
+    
+    // Module checkboxes
+    const modContainer = document.getElementById('dept-module-checkboxes');
+    const allowedMods = dept ? parseCsvList(dept.allowedModules) : BUDGET_MODULES.map(m => m.key);
+    modContainer.innerHTML = BUDGET_MODULES.map(m => `
+        <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
+            <input type="checkbox" name="dept-module" value="${m.key}" ${allowedMods.includes(m.key) ? 'checked' : ''}>
+            <span>${m.label}</span>
+        </label>
+    `).join('');
+    
+    // Project checkboxes
+    const projContainer = document.getElementById('dept-project-checkboxes');
+    const allowedProjs = dept ? parseCsvList(dept.allowedProjects) : state.metadata.projects;
+    projContainer.innerHTML = state.metadata.projects.map(p => `
+        <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
+            <input type="checkbox" name="dept-project" value="${p}" ${allowedProjs.includes(p) ? 'checked' : ''}>
+            <span>${p}</span>
+        </label>
+    `).join('');
+    
+    document.getElementById('dept-edit-name').value = dept ? dept.department : '';
+    document.getElementById('dept-edit-name').readOnly = !!dept;
+    
+    document.getElementById('dept-edit-modal').style.display = 'flex';
+}
+
+function hideDeptEditModal() {
+    document.getElementById('dept-edit-modal').style.display = 'none';
+}
+
+async function saveDepartmentPermissions() {
+    const deptName = document.getElementById('dept-edit-name').value.trim();
+    if (!deptName) {
+        showToast('Division name is required.', 'amber');
+        return;
+    }
+    
+    const modCheckboxes = document.querySelectorAll('input[name="dept-module"]:checked');
+    const selectedMods = Array.from(modCheckboxes).map(cb => cb.value);
+    const allowedModsStr = (selectedMods.length === BUDGET_MODULES.length || selectedMods.length === 0) ? 'ALL' : selectedMods.join(',');
+    
+    const projCheckboxes = document.querySelectorAll('input[name="dept-project"]:checked');
+    const selectedProjs = Array.from(projCheckboxes).map(cb => cb.value);
+    const allowedProjsStr = (selectedProjs.length === state.metadata.projects.length || selectedProjs.length === 0) ? 'ALL' : selectedProjs.join(',');
+    
+    // Auto-map companies for selected projects
+    let allowedComps = [];
+    selectedProjs.forEach(proj => {
+        const comps = (state.metadata.projectCompanyMapping || {})[proj] || [];
+        comps.forEach(c => { if (!allowedComps.includes(c)) allowedComps.push(c); });
+    });
+    const allowedCompsStr = (allowedComps.length === 0 || allowedProjsStr === 'ALL') ? 'ALL' : allowedComps.join(',');
+    
+    const payload = {
+        action: 'saveDepartment',
+        department: deptName,
+        allowedModules: allowedModsStr,
+        allowedProjects: allowedProjsStr,
+        allowedCompanies: allowedCompsStr,
+        callerNik: state.currentUser ? state.currentUser.employeeId : ''
+    };
+    
+    showToast('Saving division access...', 'info');
+    
+    if (state.gasUrl) {
+        try {
+            await fetchWithTimeout(state.gasUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+            showToast('Division access saved to Google Sheets.', 'emerald');
+        } catch (err) {
+            if (!isAbortError(err)) console.error(err);
+            showToast('Saved division locally.', 'amber');
+        }
+    } else {
+        showToast('Saved division access rules.', 'emerald');
+    }
+    
+    // Update local state
+    const existingIdx = state.departments.findIndex(d => d.department === deptName);
+    const newRecord = { department: deptName, allowedModules: allowedModsStr, allowedProjects: allowedProjsStr, allowedCompanies: allowedCompsStr };
+    if (existingIdx >= 0) state.departments[existingIdx] = newRecord;
+    else state.departments.push(newRecord);
+    
+    hideDeptEditModal();
+    renderDepartmentsTable();
+    // Refresh dept selector so admin can switch to the new dept
+    if (isSuperAdmin()) populateDeptSelector();
+}
+
+async function deleteDepartment(encodedName) {
+    const deptName = decodeURIComponent(encodedName);
+    if (!confirm(`Delete division "${deptName}"? Its employees will become unassigned.`)) return;
+    
+    showToast('Deleting division...', 'info');
+    if (state.gasUrl) {
+        try {
+            await fetchWithTimeout(state.gasUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'deleteDepartment', department: deptName, callerNik: state.currentUser ? state.currentUser.employeeId : '' }) });
+        } catch (err) {
+            if (!isAbortError(err)) console.error(err);
+        }
+    }
+    
+    state.departments = state.departments.filter(d => d.department !== deptName);
+    if (state.selectedDepartment === deptName) state.selectedDepartment = '';
+    showToast(`Division "${deptName}" deleted.`, 'emerald');
+    renderDepartmentsTable();
+    populateDeptSelector();
 }

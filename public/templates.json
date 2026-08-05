@@ -141,10 +141,6 @@
       "name": "BEBAN LANGGANAN MEDIA ONLINE"
     },
     {
-      "code": "62270000",
-      "name": "BEBAN PERLENGKAPAN & PERALATAN KANTOR"
-    },
-    {
       "code": "62270001",
       "name": "BEBAN STATIONARY (ALAT TULIS, KERTAS, TINTA PRINTER) & PERLENGKAPAN KANTOR"
     },
@@ -1042,12 +1038,6 @@
       "type": "main_header"
     },
     {
-      "row": 13,
-      "name": "Production:",
-      "classification": "Sub Chart",
-      "type": "sub_header"
-    },
-    {
       "row": 21,
       "name": "Placement:",
       "classification": "Sub Chart",
@@ -1136,120 +1126,6 @@
       "name": "Adv & Promotion - Below-The-Line",
       "classification": "Main Chart",
       "type": "main_header"
-    },
-    {
-      "row": 48,
-      "name": "Production:",
-      "classification": "Sub Chart",
-      "type": "sub_header"
-    },
-    {
-      "row": 49,
-      "name": "Out-of-Home",
-      "classification": "",
-      "type": "category_header"
-    },
-    {
-      "row": 50,
-      "name": "- Billboard, neonbox, signboard, baliho, banner (outdoor), project signage & directory",
-      "classification": "Billboard",
-      "type": "input"
-    },
-    {
-      "row": 51,
-      "name": "- Mobile ad, bus ad, taxi ad",
-      "classification": "Billboard",
-      "type": "input"
-    },
-    {
-      "row": 56,
-      "name": "Point-of-Sale & Merchandising",
-      "classification": "",
-      "type": "category_header"
-    },
-    {
-      "row": 57,
-      "name": "- Poster, flyer, brochure, catalogue, city directory, map",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "input"
-    },
-    {
-      "row": 58,
-      "name": "- In-door banner, roll-up banner, Floor display unit, trade marketing, etc",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "input"
-    },
-    {
-      "row": 59,
-      "name": "- Corporate merchandise, giveaways, corporate attributes",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "input"
-    },
-    {
-      "row": 62,
-      "name": "Corporate Presentation",
-      "classification": "",
-      "type": "category_header"
-    },
-    {
-      "row": 63,
-      "name": "- Video presentation, multimedia presentation",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "input"
-    },
-    {
-      "row": 64,
-      "name": "- Company profile (printed)",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "input"
-    },
-    {
-      "row": 65,
-      "name": "- Special communication (corp magazine, intranet, newsletter, portal, etc)",
-      "classification": "Media Cetak, Brosur, Spanduk, Katalog",
-      "type": "input"
-    },
-    {
-      "row": 68,
-      "name": "Event & exhibition",
-      "classification": "",
-      "type": "category_header"
-    },
-    {
-      "row": 69,
-      "name": "- Launching, special events, internal/corporate events",
-      "classification": "Events & Exibition",
-      "type": "input"
-    },
-    {
-      "row": 70,
-      "name": "- Exhibition & expo",
-      "classification": "Events & Exibition",
-      "type": "input"
-    },
-    {
-      "row": 71,
-      "name": "- Sponsorship, co-branding, joint event, etc",
-      "classification": "Events & Exibition",
-      "type": "input"
-    },
-    {
-      "row": 74,
-      "name": "Other (Direct mail,telemkt,sms,viral,etc)",
-      "classification": "",
-      "type": "category_header"
-    },
-    {
-      "row": 75,
-      "name": "- Direct Mail, telemarketing",
-      "classification": "Beban Marketing Promosi Lainnya",
-      "type": "input"
-    },
-    {
-      "row": 76,
-      "name": "- SMS, Viral, social media",
-      "classification": "Beban Marketing Promosi Lainnya",
-      "type": "input"
     },
     {
       "row": 80,
