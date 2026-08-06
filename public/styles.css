@@ -784,6 +784,17 @@ body.light .theme-toggle-btn:hover {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.kpi-hint {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    cursor: help;
+    flex-shrink: 0;
 }
 
 .kpi-value {
