@@ -2545,17 +2545,22 @@ function renderSummaryBudgetTable() {
             <td colspan="10" style="font-weight:800;letter-spacing:0.04em;">${label}</td>
         </tr>`;
 
-    // ── Row builder: Description | bgt2026 | act2026 | real2026 | bgt2027 | diff1 | diff2
+    // Helper: computed Budget Realization = Actual 2026 / Budget 2026 (auto, not manual)
+    const real26 = (b26, a26) => {
+        if (!b26) return '<td class="cell-computed">-</td>';
+        return `<td class="cell-computed">${((a26 / b26) * 100).toFixed(1)}%</td>`;
+    };
+
+    // ── Row builder: Description | bgt2026 | act2026 | real2026(auto) | bgt2027 | diff1 | diff2
     const row = (label, key, b27val, indent=false) => {
         const b26 = g26(key+'_b26');
         const a26 = g26(key+'_a26');
-        const r26 = g26(key+'_r26');
         const labelCell = `<td style="padding-left:${indent?'28px':'10px'}">${label}</td>`;
         return `<tr>
             ${labelCell}
             ${inp26(key+'_b26')}
             ${inp26(key+'_a26')}
-            ${inp26(key+'_r26')}
+            ${real26(b26, a26)}
             ${ro(b27val)}
             ${diff(b26, b27val)}
             ${diff(a26, b27val)}
@@ -2566,12 +2571,11 @@ function renderSummaryBudgetTable() {
     const subtotal = (label, key, b27val) => {
         const b26 = g26(key+'_b26');
         const a26 = g26(key+'_a26');
-        const r26 = g26(key+'_r26');
         return `<tr class="row-group-total">
             <td style="font-weight:700">${label}</td>
             <td class="cell-computed">${b26 ? Math.round(b26).toLocaleString('id-ID') : '-'}</td>
             <td class="cell-computed">${a26 ? Math.round(a26).toLocaleString('id-ID') : '-'}</td>
-            <td class="cell-computed">${r26 ? Math.round(r26).toLocaleString('id-ID') : '-'}</td>
+            ${real26(b26, a26)}
             <td class="cell-computed" style="font-weight:800;color:var(--accent-indigo)">${Math.round(b27val).toLocaleString('id-ID')}</td>
             ${diff(b26, b27val)}
             ${diff(a26, b27val)}
@@ -2592,7 +2596,7 @@ function renderSummaryBudgetTable() {
             <tr>
                 <th style="font-size:0.7rem;font-weight:400;background:rgba(59,130,246,0.1)">Manual Input</th>
                 <th style="font-size:0.7rem;font-weight:400;background:rgba(16,185,129,0.1)">Manual Input</th>
-                <th style="font-size:0.7rem;font-weight:400;background:rgba(245,158,11,0.1)">Manual Input</th>
+                <th style="font-size:0.7rem;font-weight:400;background:rgba(245,158,11,0.1)">Auto (A26/B26)</th>
                 <th style="font-size:0.7rem;font-weight:400;background:rgba(139,92,246,0.2)">Auto from Modules</th>
                 <th style="font-size:0.7rem;font-weight:400">∆ %</th>
                 <th style="font-size:0.7rem;font-weight:400">∆ %</th>
@@ -2648,13 +2652,13 @@ function renderSummaryBudgetTable() {
     html += subtotal('Total Purchase Fixed Assets (Rp Bio)', 'total_capex', bgt27.capex);
 
     // ── GRAND TOTAL ───────────────────────────────────────────────────────
-    const tot26b = g26('total_b26'), tot26a = g26('total_a26'), tot26r = g26('total_r26');
+    const tot26b = g26('total_b26'), tot26a = g26('total_a26');
     html += `
         <tr class="row-grand-total" style="background:rgba(139,92,246,0.3)!important;font-size:1rem;">
             <td style="font-weight:900">TOTAL ALL COST (Rp Bio)</td>
             <td class="cell-computed" style="font-weight:800">${tot26b ? Math.round(tot26b).toLocaleString('id-ID') : '-'}</td>
             <td class="cell-computed" style="font-weight:800">${tot26a ? Math.round(tot26a).toLocaleString('id-ID') : '-'}</td>
-            <td class="cell-computed" style="font-weight:800">${tot26r ? Math.round(tot26r).toLocaleString('id-ID') : '-'}</td>
+            ${real26(tot26b, tot26a)}
             <td class="cell-computed" style="font-weight:900;color:#a78bfa;font-size:1.05rem">${Math.round(bgt27.totalAllCost).toLocaleString('id-ID')}</td>
             ${diff(tot26b, bgt27.totalAllCost)}
             ${diff(tot26a, bgt27.totalAllCost)}
@@ -3685,6 +3689,7 @@ async function exportBudget() {
             b27.totalAllCost = b27.totalProj + b27.totalSalesMkt + b27.totalEmpOps + b27.capex;
 
             const calcPct = (b26, b27val) => b26 ? ((b27val - b26) / Math.abs(b26) * 100).toFixed(1) + '%' : '-';
+            const realPct = (b26, a26) => b26 ? ((a26 / b26) * 100).toFixed(1) + '%' : '-';
 
             const rows = [
                 ['Description', 'BUDGET 2026', 'ACTUAL 2026', 'Budget Realization 2026', 'BUDGET 2027', 'B2026 vs B2027', 'B2027 vs A2026'],
@@ -3695,45 +3700,45 @@ async function exportBudget() {
             d.target_revenue.forEach((r, i) => {
                 const sqmSum = r.sqm.reduce((a,b)=>a+b,0);
                 const k = `sqm_cat${i}`;
-                rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), g26(k+'_r26'), sqmSum, calcPct(g26(k+'_b26'), sqmSum), calcPct(g26(k+'_a26'), sqmSum)]);
+                rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), realPct(g26(k+'_b26'), g26(k+'_a26')), sqmSum, calcPct(g26(k+'_b26'), sqmSum), calcPct(g26(k+'_a26'), sqmSum)]);
             });
-            rows.push(['TOTAL SALES in SQM', g26('total_sqm_b26'), g26('total_sqm_a26'), g26('total_sqm_r26'), b27.sqm, calcPct(g26('total_sqm_b26'), b27.sqm), calcPct(g26('total_sqm_a26'), b27.sqm)]);
+            rows.push(['TOTAL SALES in SQM', g26('total_sqm_b26'), g26('total_sqm_a26'), realPct(g26('total_sqm_b26'), g26('total_sqm_a26')), b27.sqm, calcPct(g26('total_sqm_b26'), b27.sqm), calcPct(g26('total_sqm_a26'), b27.sqm)]);
 
             rows.push(['Marketing Revenue (Rp Bio)', '', '', '', '', '', '']);
             d.target_revenue.forEach((r, i) => {
                 const revSum = r.sqm.reduce((a,b,mi)=>a+b*r.price_sqm,0);
                 const k = `rev_cat${i}`;
-                rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), g26(k+'_r26'), revSum, calcPct(g26(k+'_b26'), revSum), calcPct(g26(k+'_a26'), revSum)]);
+                rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), realPct(g26(k+'_b26'), g26(k+'_a26')), revSum, calcPct(g26(k+'_b26'), revSum), calcPct(g26(k+'_a26'), revSum)]);
             });
-            rows.push(['TOTAL MARKETING REVENUE (Rp Bio)', g26('total_rev_b26'), g26('total_rev_a26'), g26('total_rev_r26'), b27.revenue, calcPct(g26('total_rev_b26'), b27.revenue), calcPct(g26('total_rev_a26'), b27.revenue)]);
+            rows.push(['TOTAL MARKETING REVENUE (Rp Bio)', g26('total_rev_b26'), g26('total_rev_a26'), realPct(g26('total_rev_b26'), g26('total_rev_a26')), b27.revenue, calcPct(g26('total_rev_b26'), b27.revenue), calcPct(g26('total_rev_a26'), b27.revenue)]);
 
             rows.push(['B. DEVELOPMENT & OPERATIONAL COST', '', '', '', '', '', '']);
             rows.push(['Project Cost', '', '', '', '', '', '']);
-            rows.push(['  Land Cost', g26('land_cost_b26'), g26('land_cost_a26'), g26('land_cost_r26'), b27.devland, calcPct(g26('land_cost_b26'), b27.devland), calcPct(g26('land_cost_a26'), b27.devland)]);
-            rows.push(['  Hard Cost (Dev Construction)', g26('hard_cost_b26'), g26('hard_cost_a26'), g26('hard_cost_r26'), 0, '-', '-']);
-            rows.push(['  Soft Cost (Legal, Permits, Fees)', g26('soft_cost_b26'), g26('soft_cost_a26'), g26('soft_cost_r26'), 0, '-', '-']);
-            rows.push(['Total Project Cost (Rp Bio)', g26('total_proj_b26'), g26('total_proj_a26'), g26('total_proj_r26'), b27.devland, calcPct(g26('total_proj_b26'), b27.devland), calcPct(g26('total_proj_a26'), b27.devland)]);
+            rows.push(['  Land Cost', g26('land_cost_b26'), g26('land_cost_a26'), realPct(g26('land_cost_b26'), g26('land_cost_a26')), b27.devland, calcPct(g26('land_cost_b26'), b27.devland), calcPct(g26('land_cost_a26'), b27.devland)]);
+            rows.push(['  Hard Cost (Dev Construction)', g26('hard_cost_b26'), g26('hard_cost_a26'), realPct(g26('hard_cost_b26'), g26('hard_cost_a26')), 0, '-', '-']);
+            rows.push(['  Soft Cost (Legal, Permits, Fees)', g26('soft_cost_b26'), g26('soft_cost_a26'), realPct(g26('soft_cost_b26'), g26('soft_cost_a26')), 0, '-', '-']);
+            rows.push(['Total Project Cost (Rp Bio)', g26('total_proj_b26'), g26('total_proj_a26'), realPct(g26('total_proj_b26'), g26('total_proj_a26')), b27.devland, calcPct(g26('total_proj_b26'), b27.devland), calcPct(g26('total_proj_a26'), b27.devland)]);
 
             rows.push(['Sales & Marketing Costs (Rp Bio)', '', '', '', '', '', '']);
-            rows.push(['  Sales Commission (Inhouse + Agent)', g26('sales_comm_b26'), g26('sales_comm_a26'), g26('sales_comm_r26'), b27.salesComm, calcPct(g26('sales_comm_b26'), b27.salesComm), calcPct(g26('sales_comm_a26'), b27.salesComm)]);
-            rows.push(['  Program Sales Subsidies', g26('prog_sales_b26'), g26('prog_sales_a26'), g26('prog_sales_r26'), b27.progSales, calcPct(g26('prog_sales_b26'), b27.progSales), calcPct(g26('prog_sales_a26'), b27.progSales)]);
-            rows.push(['  Advertising & Promotions (ATL+BTL)', g26('marketing_b26'), g26('marketing_a26'), g26('marketing_r26'), b27.marketing, calcPct(g26('marketing_b26'), b27.marketing), calcPct(g26('marketing_a26'), b27.marketing)]);
-            rows.push(['Total Sales & Marketing Costs (Rp Bio)', g26('total_sales_mkt_b26'), g26('total_sales_mkt_a26'), g26('total_sales_mkt_r26'), b27.totalSalesMkt, calcPct(g26('total_sales_mkt_b26'), b27.totalSalesMkt), calcPct(g26('total_sales_mkt_a26'), b27.totalSalesMkt)]);
+            rows.push(['  Sales Commission (Inhouse + Agent)', g26('sales_comm_b26'), g26('sales_comm_a26'), realPct(g26('sales_comm_b26'), g26('sales_comm_a26')), b27.salesComm, calcPct(g26('sales_comm_b26'), b27.salesComm), calcPct(g26('sales_comm_a26'), b27.salesComm)]);
+            rows.push(['  Program Sales Subsidies', g26('prog_sales_b26'), g26('prog_sales_a26'), realPct(g26('prog_sales_b26'), g26('prog_sales_a26')), b27.progSales, calcPct(g26('prog_sales_b26'), b27.progSales), calcPct(g26('prog_sales_a26'), b27.progSales)]);
+            rows.push(['  Advertising & Promotions (ATL+BTL)', g26('marketing_b26'), g26('marketing_a26'), realPct(g26('marketing_b26'), g26('marketing_a26')), b27.marketing, calcPct(g26('marketing_b26'), b27.marketing), calcPct(g26('marketing_a26'), b27.marketing)]);
+            rows.push(['Total Sales & Marketing Costs (Rp Bio)', g26('total_sales_mkt_b26'), g26('total_sales_mkt_a26'), realPct(g26('total_sales_mkt_b26'), g26('total_sales_mkt_a26')), b27.totalSalesMkt, calcPct(g26('total_sales_mkt_b26'), b27.totalSalesMkt), calcPct(g26('total_sales_mkt_a26'), b27.totalSalesMkt)]);
 
             rows.push(['Employee & Operational Expenses (Rp Bio)', '', '', '', '', '', '']);
-            rows.push(['  Employee Expenses (Payroll)', g26('employee_b26'), g26('employee_a26'), g26('employee_r26'), b27.employee, calcPct(g26('employee_b26'), b27.employee), calcPct(g26('employee_a26'), b27.employee)]);
-            rows.push(['  General & Administration (incl. Bistrip)', g26('ga_b26'), g26('ga_a26'), g26('ga_r26'), b27.ga, calcPct(g26('ga_b26'), b27.ga), calcPct(g26('ga_a26'), b27.ga)]);
-            rows.push(['  Others Expenses', g26('others_b26'), g26('others_a26'), g26('others_r26'), b27.others, calcPct(g26('others_b26'), b27.others), calcPct(g26('others_a26'), b27.others)]);
-            rows.push(['  Finance Expense (Interest Loan)', g26('finance_b26'), g26('finance_a26'), g26('finance_r26'), b27.finance, calcPct(g26('finance_b26'), b27.finance), calcPct(g26('finance_a26'), b27.finance)]);
-            rows.push(['  Taxes', g26('tax_b26'), g26('tax_a26'), g26('tax_r26'), b27.tax, calcPct(g26('tax_b26'), b27.tax), calcPct(g26('tax_a26'), b27.tax)]);
-            rows.push(['  Corporate Event & Exhibitions', g26('corp_event_b26'), g26('corp_event_a26'), g26('corp_event_r26'), b27.corpEvent, calcPct(g26('corp_event_b26'), b27.corpEvent), calcPct(g26('corp_event_a26'), b27.corpEvent)]);
-            rows.push(['Total Employee & Operational (Rp Bio)', g26('total_emp_ops_b26'), g26('total_emp_ops_a26'), g26('total_emp_ops_r26'), b27.totalEmpOps, calcPct(g26('total_emp_ops_b26'), b27.totalEmpOps), calcPct(g26('total_emp_ops_a26'), b27.totalEmpOps)]);
+            rows.push(['  Employee Expenses (Payroll)', g26('employee_b26'), g26('employee_a26'), realPct(g26('employee_b26'), g26('employee_a26')), b27.employee, calcPct(g26('employee_b26'), b27.employee), calcPct(g26('employee_a26'), b27.employee)]);
+            rows.push(['  General & Administration (incl. Bistrip)', g26('ga_b26'), g26('ga_a26'), realPct(g26('ga_b26'), g26('ga_a26')), b27.ga, calcPct(g26('ga_b26'), b27.ga), calcPct(g26('ga_a26'), b27.ga)]);
+            rows.push(['  Others Expenses', g26('others_b26'), g26('others_a26'), realPct(g26('others_b26'), g26('others_a26')), b27.others, calcPct(g26('others_b26'), b27.others), calcPct(g26('others_a26'), b27.others)]);
+            rows.push(['  Finance Expense (Interest Loan)', g26('finance_b26'), g26('finance_a26'), realPct(g26('finance_b26'), g26('finance_a26')), b27.finance, calcPct(g26('finance_b26'), b27.finance), calcPct(g26('finance_a26'), b27.finance)]);
+            rows.push(['  Taxes', g26('tax_b26'), g26('tax_a26'), realPct(g26('tax_b26'), g26('tax_a26')), b27.tax, calcPct(g26('tax_b26'), b27.tax), calcPct(g26('tax_a26'), b27.tax)]);
+            rows.push(['  Corporate Event & Exhibitions', g26('corp_event_b26'), g26('corp_event_a26'), realPct(g26('corp_event_b26'), g26('corp_event_a26')), b27.corpEvent, calcPct(g26('corp_event_b26'), b27.corpEvent), calcPct(g26('corp_event_a26'), b27.corpEvent)]);
+            rows.push(['Total Employee & Operational (Rp Bio)', g26('total_emp_ops_b26'), g26('total_emp_ops_a26'), realPct(g26('total_emp_ops_b26'), g26('total_emp_ops_a26')), b27.totalEmpOps, calcPct(g26('total_emp_ops_b26'), b27.totalEmpOps), calcPct(g26('total_emp_ops_a26'), b27.totalEmpOps)]);
 
             rows.push(['Capital Expenditure (Capex)', '', '', '', '', '', '']);
-            rows.push(['  Purchases of Fixed Assets (Capex)', g26('capex_b26'), g26('capex_a26'), g26('capex_r26'), b27.capex, calcPct(g26('capex_b26'), b27.capex), calcPct(g26('capex_a26'), b27.capex)]);
-            rows.push(['Total Purchase Fixed Assets (Rp Bio)', g26('total_capex_b26'), g26('total_capex_a26'), g26('total_capex_r26'), b27.capex, calcPct(g26('total_capex_b26'), b27.capex), calcPct(g26('total_capex_a26'), b27.capex)]);
+            rows.push(['  Purchases of Fixed Assets (Capex)', g26('capex_b26'), g26('capex_a26'), realPct(g26('capex_b26'), g26('capex_a26')), b27.capex, calcPct(g26('capex_b26'), b27.capex), calcPct(g26('capex_a26'), b27.capex)]);
+            rows.push(['Total Purchase Fixed Assets (Rp Bio)', g26('total_capex_b26'), g26('total_capex_a26'), realPct(g26('total_capex_b26'), g26('total_capex_a26')), b27.capex, calcPct(g26('total_capex_b26'), b27.capex), calcPct(g26('total_capex_a26'), b27.capex)]);
 
-            rows.push(['TOTAL ALL COST (Rp Bio)', g26('total_b26'), g26('total_a26'), g26('total_r26'), b27.totalAllCost, calcPct(g26('total_b26'), b27.totalAllCost), calcPct(g26('total_a26'), b27.totalAllCost)]);
+            rows.push(['TOTAL ALL COST (Rp Bio)', g26('total_b26'), g26('total_a26'), realPct(g26('total_b26'), g26('total_a26')), b27.totalAllCost, calcPct(g26('total_b26'), b27.totalAllCost), calcPct(g26('total_a26'), b27.totalAllCost)]);
 
             addSheet('SUMMARY BUDGET', 'SUMMARY BUDGET', rows, { cols: [{wch:38},{wch:18},{wch:18},{wch:22},{wch:18},{wch:16},{wch:16}] });
         })();
