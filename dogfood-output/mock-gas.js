@@ -65,8 +65,9 @@ function initData() {
       akad_subsidy: Array(12).fill(0), rentback: Array(12).fill(0), cashback_patungan: Array(12).fill(0),
       _rowLabels: { booking_fee_subsidy: 'SUBSIDI BOOKING FEE', dp_subsidy: 'SUBSIDI DOWN PAYMENT', angsuran_subsidy: 'SUBSIDI ANGSURAN', akad_subsidy: 'SUBSIDI AKAD', rentback: 'RENTBACK (Investment fees)', cashback_patungan: 'CASHBACK PATUNGAN RUMAH' }
     },
-    marketing_activity: {}, payroll_expenses: {}, dev_land: {}, ga_expenses: {},
-    others_expenses: {}, finance_expenses: {}, tax_expenses: {}, corp_events: {},
+    marketing_activity: {}, payroll_expenses: {}, dev_land: {}, ga_expenses: {}, ga_children: {},
+    others_expenses: {}, others_children: {}, finance_expenses: {}, finance_children: {},
+    tax_expenses: {}, tax_children: {}, corp_events: {},
     fixed_assets: [], business_trip: [], summary_2026: {}
   };
 }
@@ -166,8 +167,8 @@ pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', '
 pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'FAT', 1.0);
 pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PAYROLL', 0.5);
 pushOp('PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PROJECT', 0.7);
-// SW & TS (4P): BOD
-pushOp('4P', 'SW & TS', 'BOD', 2.0);
+// SW & TS (PT Triniti Dinamik): BOD
+pushOp('PT Triniti Dinamik', 'SW & TS', 'BOD', 2.0);
 
 // ---------------- faithful ports of Code.js logic ----------------
 function verifyNikLogin(nik) {

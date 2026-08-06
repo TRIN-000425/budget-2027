@@ -262,8 +262,11 @@ function getInitialDataStructure() {
         ga_expenses: {},
         ga_children: {}, // G&A hierarchy: code -> [{ id, name, monthly[12] }]; parent ga_expenses[code] = sum of children
         others_expenses: {},
+        others_children: {}, // Others hierarchy (same parent/child model as G&A)
         finance_expenses: {},
+        finance_children: {}, // Finance hierarchy (same parent/child model as G&A)
         tax_expenses: {},
+        tax_children: {}, // Tax hierarchy (same parent/child model as G&A)
         corp_events: {},
         fixed_assets: [],
         business_trip: [],
@@ -1598,11 +1601,6 @@ function renderDevLandTable() {
             ${devYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
             <td></td>
         </tr>
-        <tr>
-            <td colspan="22" style="padding:10px 0; background:none; border:none;">
-                <button class="btn btn-primary btn-sm" onclick="addDevLandCategory()"><i data-lucide="plus"></i> Add Category Header</button>
-            </td>
-        </tr>
         </tbody>
     `;
     
@@ -1700,8 +1698,8 @@ function updateDevLand(key, field, val, mIdx = null) {
 function toggleDevLandHeader(headerKey) {
     if (!state.collapsedHeaders) state.collapsedHeaders = {};
     state.collapsedHeaders[headerKey] = !state.collapsedHeaders[headerKey];
-    // Re-render the table that owns this header (dev-land, marketing, corp-event or G&A)
-    if (headerKey.indexOf('ga_') === 0) renderGAOthersTables();
+    // Re-render the table that owns this header (dev-land, marketing, corp-event, G&A or expense hierarchies)
+    if (headerKey.indexOf('ga_') === 0 || headerKey.indexOf('others_') === 0 || headerKey.indexOf('finance_') === 0 || headerKey.indexOf('tax_') === 0) renderGAOthersTables();
     else if (headerKey.indexOf('mkt_') === 0) renderMarketingActivityTables();
     else if (headerKey.indexOf('ce_') === 0) renderCorpEventTable();
     else renderDevLandTable();
@@ -1723,17 +1721,19 @@ function updatePayroll(code, mIdx, val) {
     renderPayrollTable();
 }
 
-// 6. MODULE RENDER: G&A (hierarchical COA headers + user child rows), OTHERS, FINANCE, TAX
+// 6. MODULE RENDER: G&A, OTHERS, FINANCE, TAX (hierarchical COA headers + user child rows)
 // ------------------------------------------------------------------------------------
-// G&A model: each COA account is a HEADER row. Users add child rows under it (name + 12
-// months). The parent COA monthly totals = sum of its children, and ga_expenses[code]
+// Expense model: each COA account is a HEADER row. Users add child rows under it (name + 12
+// months). The parent COA monthly totals = sum of its children, and <prefix>_expenses[code]
 // (the parent array) stays the source of truth for summaries, consolidation and export.
 // Legacy flat values auto-materialize as an "Existing Budget" child so no data is lost.
 
-function ensureGaChildren() {
-    if (!state.data.ga_children) state.data.ga_children = {};
-    Object.keys(state.data.ga_expenses || {}).forEach(code => {
-        const existing = state.data.ga_children[code] || [];
+function ensureExpenseChildren(prefix) {
+    const childrenKey = prefix + '_children';
+    const expensesKey = prefix + '_expenses';
+    if (!state.data[childrenKey]) state.data[childrenKey] = {};
+    Object.keys(state.data[expensesKey] || {}).forEach(code => {
+        const existing = state.data[childrenKey][code] || [];
         // Normalize any malformed child rows (short/non-numeric monthly arrays) so the
         // renderer always sees 12 numeric months
         existing.forEach(c => {
@@ -1741,53 +1741,53 @@ function ensureGaChildren() {
             for (let m = 0; m < 12; m++) c.monthly[m] = (parseFloat(c.monthly[m]) || 0);
         });
         if (existing.length > 0) return;
-        const parent = state.data.ga_expenses[code];
+        const parent = state.data[expensesKey][code];
         if (Array.isArray(parent) && parent.some(v => v && v !== 0)) {
-            state.data.ga_children[code] = [{ id: 'ga_child_' + code + '_0', name: 'Existing Budget', monthly: parent.map(v => (parseFloat(v) || 0)) }];
+            state.data[childrenKey][code] = [{ id: prefix + '_child_' + code + '_0', name: 'Existing Budget', monthly: parent.map(v => (parseFloat(v) || 0)) }];
         }
     });
 }
 
-function recomputeGaParent(code) {
-    const children = state.data.ga_children && state.data.ga_children[code];
+function recomputeExpenseParent(prefix, code) {
+    const children = state.data[prefix + '_children'] && state.data[prefix + '_children'][code];
     if (!children || children.length === 0) return;
     const sums = Array(12).fill(0);
     children.forEach(c => {
         (c.monthly || Array(12).fill(0)).forEach((v, m) => { sums[m] += (parseFloat(v) || 0); });
     });
-    state.data.ga_expenses[code] = sums;
+    state.data[prefix + '_expenses'][code] = sums;
 }
 
-function addGaChild(code) {
-    withAddLock('ga_child_' + code, () => {
-        ensureGaChildren();
-        const children = state.data.ga_children[code] || [];
+function addExpenseChild(prefix, code) {
+    withAddLock(prefix + '_child_' + code, () => {
+        ensureExpenseChildren(prefix);
+        const children = state.data[prefix + '_children'][code] || [];
         children.push({
-            id: 'ga_child_' + code + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            id: prefix + '_child_' + code + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
             name: 'Detail ' + (children.length + 1),
             monthly: Array(12).fill(0)
         });
-        state.data.ga_children[code] = children;
-        recomputeGaParent(code);
+        state.data[prefix + '_children'][code] = children;
+        recomputeExpenseParent(prefix, code);
         state.isDirty = true;
         updateSyncIndicator(false);
         renderGAOthersTables();
     });
 }
 
-function updateGaChild(code, childIdx, mIdx, val) {
-    const child = (state.data.ga_children[code] || [])[childIdx];
+function updateExpenseChild(prefix, code, childIdx, mIdx, val) {
+    const child = (state.data[prefix + '_children'][code] || [])[childIdx];
     if (!child) return;
     if (!child.monthly) child.monthly = Array(12).fill(0);
     child.monthly[mIdx] = parseMoney(val);
-    recomputeGaParent(code);
+    recomputeExpenseParent(prefix, code);
     state.isDirty = true;
     updateSyncIndicator(false);
     renderGAOthersTables();
 }
 
-function updateGaChildName(code, childIdx, val) {
-    const child = (state.data.ga_children[code] || [])[childIdx];
+function updateExpenseChildName(prefix, code, childIdx, val) {
+    const child = (state.data[prefix + '_children'][code] || [])[childIdx];
     if (!child) return;
     child.name = val;
     state.isDirty = true;
@@ -1795,21 +1795,25 @@ function updateGaChildName(code, childIdx, val) {
     // No re-render here: keeps focus in the input while typing
 }
 
-function removeGaChild(code, childIdx) {
+function removeExpenseChild(prefix, code, childIdx) {
     if (!confirm('Delete this row?')) return;
-    const children = state.data.ga_children[code] || [];
+    const children = state.data[prefix + '_children'][code] || [];
     children.splice(childIdx, 1);
-    state.data.ga_children[code] = children;
-    recomputeGaParent(code);
+    state.data[prefix + '_children'][code] = children;
+    recomputeExpenseParent(prefix, code);
     state.isDirty = true;
     updateSyncIndicator(false);
     renderGAOthersTables();
 }
 
-function renderGaHierarchyTable() {
-    ensureGaChildren();
-    recomputeGaParents();
-    const table = document.getElementById('ga-table');
+function recomputeExpenseParents(prefix) {
+    Object.keys(state.data[prefix + '_children'] || {}).forEach(code => recomputeExpenseParent(prefix, code));
+}
+
+function renderExpenseHierarchyTable(tableId, accountsMeta, prefix, sectionLabel) {
+    ensureExpenseChildren(prefix);
+    recomputeExpenseParents(prefix);
+    const table = document.getElementById(tableId);
     if (!state.collapsedHeaders) state.collapsedHeaders = {};
 
     let html = `
@@ -1826,14 +1830,14 @@ function renderGaHierarchyTable() {
 
     let monthlyTotals = Array(12).fill(0);
 
-    state.templates.ga.forEach(acc => {
+    accountsMeta.forEach(acc => {
         const code = acc.code;
-        const children = state.data.ga_children[code] || [];
-        const parent = state.data.ga_expenses[code] || Array(12).fill(0);
+        const children = state.data[prefix + '_children'][code] || [];
+        const parent = state.data[prefix + '_expenses'][code] || Array(12).fill(0);
         const parentSum = parent.reduce((a, b) => a + b, 0);
         parent.forEach((v, m) => { monthlyTotals[m] += v; });
 
-        const safeKey = ('ga_' + code).replace(/[^a-zA-Z0-9_]/g, '_');
+        const safeKey = (prefix + '_' + code).replace(/[^a-zA-Z0-9_]/g, '_');
         const isCollapsed = !!state.collapsedHeaders[safeKey];
 
         html += `
@@ -1846,7 +1850,7 @@ function renderGaHierarchyTable() {
                 </td>
                 <td style="font-weight:700;">
                     ${esc(acc.name)}
-                    <button class="btn btn-secondary btn-sm" onclick="addGaChild('${esc(code)}')" title="Add child row under this COA" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Row</button>
+                    <button class="btn btn-secondary btn-sm" onclick="addExpenseChild('${prefix}', '${esc(code)}')" title="Add child row under this COA" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Row</button>
                 </td>
                 <td style="font-weight:700;">${parentSum.toLocaleString('id-ID')}</td>
                 ${parent.map(v => `<td style="font-weight:700;">${v ? v.toLocaleString('id-ID') : '-'}</td>`).join('')}
@@ -1860,11 +1864,11 @@ function renderGaHierarchyTable() {
                     <tr>
                         <td></td>
                         <td style="padding-left:24px;">
-                            <input type="text" class="table-input" style="width:88%; text-align:left;" value="${esc(child.name)}" placeholder="Detail description" onchange="updateGaChildName('${esc(code)}', ${childIdx}, this.value)">
-                            <button class="btn-delete" onclick="removeGaChild('${esc(code)}', ${childIdx})" title="Delete row"><i data-lucide="trash-2"></i></button>
+                            <input type="text" class="table-input" style="width:88%; text-align:left;" value="${esc(child.name)}" placeholder="Detail description" onchange="updateExpenseChildName('${prefix}', '${esc(code)}', ${childIdx}, this.value)">
+                            <button class="btn-delete" onclick="removeExpenseChild('${prefix}', '${esc(code)}', ${childIdx})" title="Delete row"><i data-lucide="trash-2"></i></button>
                         </td>
                         <td><span style="font-weight:600;">${cSum.toLocaleString('id-ID')}</span></td>
-                        ${cMonthly.map((val, mIdx) => `<td><input type="number" class="table-input" value="${val}" onchange="updateGaChild('${esc(code)}', ${childIdx}, ${mIdx}, this.value)"></td>`).join('')}
+                        ${cMonthly.map((val, mIdx) => `<td><input type="number" class="table-input" value="${val}" onchange="updateExpenseChild('${prefix}', '${esc(code)}', ${childIdx}, ${mIdx}, this.value)"></td>`).join('')}
                     </tr>`;
             });
         }
@@ -1876,12 +1880,12 @@ function renderGaHierarchyTable() {
 
     html += `
         <tr class="row-grand-total">
-            <td colspan="2">TOTAL GA EXPENSES</td>
+            <td colspan="2">TOTAL ${sectionLabel} EXPENSES</td>
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${monthlyTotals.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
         </tr>
         <tr class="row-ytd">
-            <td colspan="2">GA YTD</td>
+            <td colspan="2">${sectionLabel} YTD</td>
             <td>${grandSum.toLocaleString('id-ID')}</td>
             ${expYTD.map(val => `<td>${val.toLocaleString('id-ID')}</td>`).join('')}
         </tr>
@@ -1892,15 +1896,11 @@ function renderGaHierarchyTable() {
     refreshIcons();
 }
 
-function recomputeGaParents() {
-    Object.keys(state.data.ga_children || {}).forEach(recomputeGaParent);
-}
-
 function renderGAOthersTables() {
-    renderGaHierarchyTable();
-    renderExpensesSubTable('others-table', state.templates.others, state.data.others_expenses, 'others');
-    renderExpensesSubTable('finance-table', state.templates.finance, state.data.finance_expenses, 'finance');
-    renderExpensesSubTable('tax-table', state.templates.tax, state.data.tax_expenses, 'tax');
+    renderExpenseHierarchyTable('ga-table', state.templates.ga, 'ga', 'GA');
+    renderExpenseHierarchyTable('others-table', state.templates.others, 'others', 'OTHERS');
+    renderExpenseHierarchyTable('finance-table', state.templates.finance, 'finance', 'FINANCE');
+    renderExpenseHierarchyTable('tax-table', state.templates.tax, 'tax', 'TAX');
 }
 
 function renderExpensesSubTable(tableId, accountsMeta, sourceData, keyPrefix) {
@@ -2115,15 +2115,13 @@ function renderCorpEventTable() {
 
             html += `
                 <tr class="row-group-header">
-                    <td colspan="17" style="font-weight:700; font-size:0.95rem;">
+                    <td colspan="18" style="font-weight:700; font-size:0.95rem;">
                         <button class="btn-icon-xs" onclick="toggleDevLandHeader('${safeKey}')" style="margin-right:6px;">
                             <i data-lucide="${isCollapsed ? 'plus-square' : 'minus-square'}" class="icon-xs"></i>
                         </button>
                         ${esc(item.activity)}
-                    </td>
-                    <td style="background:none;">
-                        <button class="btn btn-secondary btn-sm" onclick="addCorpEventDetail(${itemIdx})" title="Add detail row under this category" style="font-size:0.7rem; padding:3px 8px;"><i data-lucide="plus"></i> Detail</button>
-                        <button class="btn-icon btn-danger" onclick="removeCorpEventCategory(${itemIdx})" title="Remove category">&times;</button>
+                        <button class="btn btn-secondary btn-sm" onclick="addCorpEventDetail(${itemIdx})" title="Add detail row under this category" style="font-size:0.7rem; padding:2px 8px; margin-left:10px;"><i data-lucide="plus"></i> Detail</button>
+                        <button class="btn-icon btn-danger" onclick="removeCorpEventCategory(${itemIdx})" title="Remove category" style="margin-left:6px;">&times;</button>
                     </td>
                 </tr>`;
         } else {
@@ -2888,11 +2886,20 @@ async function renderConsolidatedSummary(tabId) {
     const groups = [];
     const groupMap = {};
     const companies = new Set();
+    const catNames = [];
+    const catIdx = {};
+    const catVal = (r, ci) => {
+        const nm = ((r && r.category) || '').trim() || 'Type ' + (ci + 1);
+        if (!(nm in catIdx)) { catIdx[nm] = catNames.length; catNames.push(nm); }
+        const sqmSum = ((r && r.sqm) || []).reduce((a, b) => a + (b || 0), 0);
+        const revSum = ((r && r.sqm) || []).reduce((a, b, mi) => a + ((b || 0) * ((r.price_sqm) || 0)), 0);
+        return { nm, sqmSum, revSum };
+    };
     entries.forEach(e => {
         if (e.company) companies.add(e.company);
         const key = isDeptView ? (e.company + '||' + e.project) : (e.department || '(none)');
         if (!groupMap[key]) {
-            groupMap[key] = { company: e.company || '', label: isDeptView ? (e.project || '(no project)') : (e.department || '(none)'), totals: null, count: 0 };
+            groupMap[key] = { company: e.company || '', label: isDeptView ? (e.project || '(no project)') : (e.department || '(none)'), totals: null, count: 0, catSqm: {}, catRev: {} };
             groups.push(groupMap[key]);
         }
         const A = annual(computeMonthlyTotals(e.data || {}));
@@ -2900,9 +2907,21 @@ async function renderConsolidatedSummary(tabId) {
         if (!g.totals) g.totals = A;
         else Object.keys(A).forEach(k => { g.totals[k] += A[k]; });
         g.count++;
+        ((e.data && e.data.target_revenue) || []).forEach((r, ci) => {
+            const c = catVal(r, ci);
+            g.catSqm[c.nm] = (g.catSqm[c.nm] || 0) + c.sqmSum;
+            g.catRev[c.nm] = (g.catRev[c.nm] || 0) + c.revSum;
+        });
     });
     // Same project name under different companies -> disambiguate with the company prefix
     if (isDeptView && companies.size > 1) groups.forEach(g => { if (g.company) g.label = g.company + ' / ' + g.label; });
+
+    // Merged per-category totals for the TOTAL 2027 column (donut 1 style)
+    const mergedCatSqm = {}, mergedCatRev = {};
+    catNames.forEach(nm => {
+        mergedCatSqm[nm] = groups.reduce((s, g) => s + (g.catSqm[nm] || 0), 0);
+        mergedCatRev[nm] = groups.reduce((s, g) => s + (g.catRev[nm] || 0), 0);
+    });
 
     const money = v => formatShortCurrency(v);
     const num = v => Math.round(v).toLocaleString('id-ID');
@@ -2910,7 +2929,7 @@ async function renderConsolidatedSummary(tabId) {
     let html = `
         <thead>
             <tr>
-                <th style="min-width:200px">Category</th>
+                <th style="min-width:200px">Description</th>
                 <th style="min-width:130px; background:var(--accent-purple); color:#fff;">TOTAL 2027</th>
                 ${groups.map(g => `<th style="min-width:130px">${esc(g.label)}${g.count > 1 ? ' <span style="opacity:.55;font-weight:500">(' + g.count + ')</span>' : ''}</th>`).join('')}
             </tr>
@@ -2918,60 +2937,97 @@ async function renderConsolidatedSummary(tabId) {
         <tbody>`;
 
     const secHdr = label => `<tr class="row-group-header"><td colspan="${2 + groups.length}" style="font-size:0.85rem;letter-spacing:0.05em;">${label}</td></tr>`;
+    const mainHdr = label => `<tr class="row-grand-total" style="font-size:0.82rem;background:rgba(139,92,246,0.25)!important"><td colspan="${2 + groups.length}" style="font-weight:800;letter-spacing:0.04em;">${label}</td></tr>`;
     const row = (label, getVal, fmt, cls, style) => {
         html += `<tr${cls ? ' class="' + cls + '"' : ''}><td${style ? ' style="' + style + '"' : ''}>${label}</td><td class="cell-computed" style="font-weight:700">${fmt(getVal(mergedA))}</td>${groups.map(g => `<td class="cell-computed">${fmt(getVal(g.totals))}</td>`).join('')}</tr>`;
     };
+    const catSqmRow = nm => {
+        html += `<tr><td style="padding-left:28px">${esc(nm)}</td><td class="cell-computed">${num(mergedCatSqm[nm] || 0)}</td>${groups.map(g => `<td class="cell-computed">${num(g.catSqm[nm] || 0)}</td>`).join('')}</tr>`;
+    };
+    const catRevRow = nm => {
+        html += `<tr><td style="padding-left:28px">${esc(nm)}</td><td class="cell-computed">${money(mergedCatRev[nm] || 0)}</td>${groups.map(g => `<td class="cell-computed">${money(g.catRev[nm] || 0)}</td>`).join('')}</tr>`;
+    };
 
-    // Revenue block
-    row('Target Revenue', A => A.revenue, money, 'row-grand-total', 'style="font-weight:800"');
-    row('Units Sold', A => A.units, num, '', 'style="padding-left:28px"');
-    row('Sqm Sold', A => A.sqm, num, '', 'style="padding-left:28px"');
+    // ── A. TARGET MARKETING REVENUE (mirrors Consolidated Budget / donut 1) ──
+    html += mainHdr('A. TARGET MARKETING REVENUE');
+    html += secHdr('Sales in SQM');
+    catNames.forEach(catSqmRow);
+    row('TOTAL SALES in SQM', A => A.sqm, num, 'row-group-total', 'style="font-weight:700"');
+    html += secHdr('Marketing Revenue (Rp Bio)');
+    catNames.forEach(catRevRow);
+    row('TOTAL MARKETING REVENUE (Rp Bio)', A => A.revenue, money, 'row-group-total', 'style="font-weight:700"');
 
-    // Cost blocks
+    // ── B. DEVELOPMENT & OPERATIONAL COST ─────────────────────────────────
+    html += mainHdr('B. DEVELOPMENT & OPERATIONAL COST');
     html += secHdr('Project Cost');
-    row('Dev & Land Cost', A => A.devLand, money);
-    html += secHdr('Sales & Marketing');
-    [['Sales Inhouse', A => A.salesInhouse], ['Sales Agent', A => A.salesAgent], ['Program Sales', A => A.salesProgram], ['Marketing ATL', A => A.mktATL], ['Marketing BTL', A => A.mktBTL]].forEach(r => row(r[0], r[1], money, '', 'style="padding-left:28px"'));
-    row('Sales & Marketing Total', A => withSubtotals(A).salesMktg, money, 'row-group-total', 'style="font-weight:700"');
-    html += secHdr('Employee & Operations');
-    [['Payroll', A => A.payroll], ['G&A (incl. Business Trip)', A => A.ga], ['Others', A => A.others], ['Finance', A => A.finance], ['Tax', A => A.tax], ['Corporate Event', A => A.corpEvent]].forEach(r => row(r[0], r[1], money, '', 'style="padding-left:28px"'));
-    row('Employee & Operations Total', A => withSubtotals(A).empOps, money, 'row-group-total', 'style="font-weight:700"');
-    html += secHdr('Capital');
-    row('Capex (Fixed Assets)', A => A.capex, money);
+    row('Land Cost', A => A.devLand, money, '', 'style="padding-left:28px"');
+    row('Hard Cost (Dev Construction)', () => 0, money, '', 'style="padding-left:28px"');
+    row('Soft Cost (Legal, Permits, Fees)', () => 0, money, '', 'style="padding-left:28px"');
+    row('Total Project Cost (Rp Bio)', A => A.devLand, money, 'row-group-total', 'style="font-weight:700"');
+
+    html += secHdr('Sales & Marketing Costs (Rp Bio)');
+    row('Sales Commission (Inhouse + Agent)', A => A.salesInhouse + A.salesAgent, money, '', 'style="padding-left:28px"');
+    row('Program Sales Subsidies', A => A.salesProgram, money, '', 'style="padding-left:28px"');
+    row('Advertising & Promotions (ATL+BTL)', A => A.mktATL + A.mktBTL, money, '', 'style="padding-left:28px"');
+    row('Total Sales & Marketing Costs (Rp Bio)', A => withSubtotals(A).salesMktg, money, 'row-group-total', 'style="font-weight:700"');
+
+    html += secHdr('Employee & Operational Expenses (Rp Bio)');
+    row('Employee Expenses (Payroll)', A => A.payroll, money, '', 'style="padding-left:28px"');
+    row('General & Administration (incl. Bistrip)', A => A.ga, money, '', 'style="padding-left:28px"');
+    row('Others Expenses', A => A.others, money, '', 'style="padding-left:28px"');
+    row('Finance Expense (Interest Loan)', A => A.finance, money, '', 'style="padding-left:28px"');
+    row('Taxes', A => A.tax, money, '', 'style="padding-left:28px"');
+    row('Corporate Event & Exhibitions', A => A.corpEvent, money, '', 'style="padding-left:28px"');
+    row('Total Employee & Operational (Rp Bio)', A => withSubtotals(A).empOps, money, 'row-group-total', 'style="font-weight:700"');
+
+    html += secHdr('Capital Expenditure (Capex)');
+    row('Purchases of Fixed Assets (Capex)', A => A.capex, money, '', 'style="padding-left:28px"');
+    row('Total Purchase Fixed Assets (Rp Bio)', A => A.capex, money, 'row-group-total', 'style="font-weight:700"');
 
     // Grand total + ratio
-    row('TOTAL BUDGET 2027', A => withSubtotals(A).totalCost, money, 'row-grand-total', 'style="font-weight:800"');
+    row('TOTAL ALL COST (Rp Bio)', A => withSubtotals(A).totalCost, money, 'row-grand-total', 'style="font-weight:800"');
     html += `<tr><td colspan="${1 + groups.length}" style="text-align:right;padding-right:12px;color:var(--text-secondary);">Cost / Revenue Ratio</td><td class="cell-computed" style="font-weight:700">${ratioOf(mergedA).toFixed(1)}%</td>${groups.map(g => `<td class="cell-computed">${ratioOf(g.totals).toFixed(1)}%</td>`).join('')}</tr>`;
     html += '</tbody>';
 
     table.innerHTML = html;
 
-    // Cache 2D rows for export (Category | TOTAL 2027 | per-group columns)
-    const rows2d = [['Category', 'TOTAL 2027', ...groups.map(g => g.label)]];
+    // Cache 2D rows for export (Description | TOTAL 2027 | per-group columns)
+    const rows2d = [['Description', 'TOTAL 2027', ...groups.map(g => g.label)]];
     const pushRow = (label, getVal, isNum) => {
         const r = [label, isNum ? Math.round(getVal(mergedA)) : getVal(mergedA)];
         groups.forEach(g => r.push(isNum ? Math.round(getVal(g.totals)) : getVal(g.totals)));
         rows2d.push(r);
     };
-    pushRow('Target Revenue', A => A.revenue);
-    pushRow('Units Sold', A => A.units, true);
-    pushRow('Sqm Sold', A => A.sqm, true);
-    pushRow('Dev & Land Cost', A => A.devLand);
-    pushRow('Sales Inhouse', A => A.salesInhouse);
-    pushRow('Sales Agent', A => A.salesAgent);
-    pushRow('Program Sales', A => A.salesProgram);
-    pushRow('Marketing ATL', A => A.mktATL);
-    pushRow('Marketing BTL', A => A.mktBTL);
-    pushRow('Sales & Marketing Total', A => withSubtotals(A).salesMktg);
-    pushRow('Payroll', A => A.payroll);
-    pushRow('G&A (incl. Business Trip)', A => A.ga);
-    pushRow('Others', A => A.others);
-    pushRow('Finance', A => A.finance);
-    pushRow('Tax', A => A.tax);
-    pushRow('Corporate Event', A => A.corpEvent);
-    pushRow('Employee & Operations Total', A => withSubtotals(A).empOps);
-    pushRow('Capex (Fixed Assets)', A => A.capex);
-    pushRow('TOTAL BUDGET 2027', A => withSubtotals(A).totalCost);
+    rows2d.push(['A. TARGET MARKETING REVENUE', '', ...groups.map(() => '')]);
+    rows2d.push(['Sales in SQM', '', ...groups.map(() => '')]);
+    catNames.forEach(nm => rows2d.push([nm, Math.round(mergedCatSqm[nm] || 0), ...groups.map(g => Math.round(g.catSqm[nm] || 0))]));
+    pushRow('TOTAL SALES in SQM', A => A.sqm, true);
+    rows2d.push(['Marketing Revenue (Rp Bio)', '', ...groups.map(() => '')]);
+    catNames.forEach(nm => rows2d.push([nm, mergedCatRev[nm] || 0, ...groups.map(g => g.catRev[nm] || 0)]));
+    pushRow('TOTAL MARKETING REVENUE (Rp Bio)', A => A.revenue);
+    rows2d.push(['B. DEVELOPMENT & OPERATIONAL COST', '', ...groups.map(() => '')]);
+    rows2d.push(['Project Cost', '', ...groups.map(() => '')]);
+    pushRow('Land Cost', A => A.devLand);
+    pushRow('Hard Cost (Dev Construction)', () => 0);
+    pushRow('Soft Cost (Legal, Permits, Fees)', () => 0);
+    pushRow('Total Project Cost (Rp Bio)', A => A.devLand);
+    rows2d.push(['Sales & Marketing Costs (Rp Bio)', '', ...groups.map(() => '')]);
+    pushRow('Sales Commission (Inhouse + Agent)', A => A.salesInhouse + A.salesAgent);
+    pushRow('Program Sales Subsidies', A => A.salesProgram);
+    pushRow('Advertising & Promotions (ATL+BTL)', A => A.mktATL + A.mktBTL);
+    pushRow('Total Sales & Marketing Costs (Rp Bio)', A => withSubtotals(A).salesMktg);
+    rows2d.push(['Employee & Operational Expenses (Rp Bio)', '', ...groups.map(() => '')]);
+    pushRow('Employee Expenses (Payroll)', A => A.payroll);
+    pushRow('General & Administration (incl. Bistrip)', A => A.ga);
+    pushRow('Others Expenses', A => A.others);
+    pushRow('Finance Expense (Interest Loan)', A => A.finance);
+    pushRow('Taxes', A => A.tax);
+    pushRow('Corporate Event & Exhibitions', A => A.corpEvent);
+    pushRow('Total Employee & Operational (Rp Bio)', A => withSubtotals(A).empOps);
+    rows2d.push(['Capital Expenditure (Capex)', '', ...groups.map(() => '')]);
+    pushRow('Purchases of Fixed Assets (Capex)', A => A.capex);
+    pushRow('Total Purchase Fixed Assets (Rp Bio)', A => A.capex);
+    pushRow('TOTAL ALL COST (Rp Bio)', A => withSubtotals(A).totalCost);
     rows2d.push(['Cost / Revenue Ratio (%)', parseFloat(ratioOf(mergedA).toFixed(1)), ...groups.map(g => parseFloat(ratioOf(g.totals).toFixed(1)))]);
     const namePart = isDeptView
         ? 'Dept_' + (scopeLabel.split('—')[0].trim().replace(/\s+/g, '_'))
@@ -3643,20 +3699,41 @@ async function exportBudget() {
             });
             rows.push(['TOTAL SALES in SQM', g26('total_sqm_b26'), g26('total_sqm_a26'), g26('total_sqm_r26'), b27.sqm, calcPct(g26('total_sqm_b26'), b27.sqm), calcPct(g26('total_sqm_a26'), b27.sqm)]);
 
-            rows.push(['Marketing Revenue (Rp)', '', '', '', '', '', '']);
+            rows.push(['Marketing Revenue (Rp Bio)', '', '', '', '', '', '']);
             d.target_revenue.forEach((r, i) => {
                 const revSum = r.sqm.reduce((a,b,mi)=>a+b*r.price_sqm,0);
                 const k = `rev_cat${i}`;
                 rows.push([`  ${r.category || 'Type '+(i+1)}`, g26(k+'_b26'), g26(k+'_a26'), g26(k+'_r26'), revSum, calcPct(g26(k+'_b26'), revSum), calcPct(g26(k+'_a26'), revSum)]);
             });
-            rows.push(['TOTAL MARKETING REVENUE (Rp)', g26('total_rev_b26'), g26('total_rev_a26'), g26('total_rev_r26'), b27.revenue, calcPct(g26('total_rev_b26'), b27.revenue), calcPct(g26('total_rev_a26'), b27.revenue)]);
+            rows.push(['TOTAL MARKETING REVENUE (Rp Bio)', g26('total_rev_b26'), g26('total_rev_a26'), g26('total_rev_r26'), b27.revenue, calcPct(g26('total_rev_b26'), b27.revenue), calcPct(g26('total_rev_a26'), b27.revenue)]);
 
             rows.push(['B. DEVELOPMENT & OPERATIONAL COST', '', '', '', '', '', '']);
-            rows.push(['Total Project Cost (Land & Dev)', g26('total_proj_b26'), g26('total_proj_a26'), g26('total_proj_r26'), b27.devland, calcPct(g26('total_proj_b26'), b27.devland), calcPct(g26('total_proj_a26'), b27.devland)]);
-            rows.push(['Total Sales & Marketing Costs', g26('total_sales_mkt_b26'), g26('total_sales_mkt_a26'), g26('total_sales_mkt_r26'), b27.totalSalesMkt, calcPct(g26('total_sales_mkt_b26'), b27.totalSalesMkt), calcPct(g26('total_sales_mkt_a26'), b27.totalSalesMkt)]);
-            rows.push(['Total Employee & Operational Expenses', g26('total_emp_ops_b26'), g26('total_emp_ops_a26'), g26('total_emp_ops_r26'), b27.totalEmpOps, calcPct(g26('total_emp_ops_b26'), b27.totalEmpOps), calcPct(g26('total_emp_ops_a26'), b27.totalEmpOps)]);
-            rows.push(['Total Purchase Fixed Assets (Capex)', g26('total_capex_b26'), g26('total_capex_a26'), g26('total_capex_r26'), b27.capex, calcPct(g26('total_capex_b26'), b27.capex), calcPct(g26('total_capex_a26'), b27.capex)]);
-            rows.push(['TOTAL ALL COST (Rp)', g26('total_b26'), g26('total_a26'), g26('total_r26'), b27.totalAllCost, calcPct(g26('total_b26'), b27.totalAllCost), calcPct(g26('total_a26'), b27.totalAllCost)]);
+            rows.push(['Project Cost', '', '', '', '', '', '']);
+            rows.push(['  Land Cost', g26('land_cost_b26'), g26('land_cost_a26'), g26('land_cost_r26'), b27.devland, calcPct(g26('land_cost_b26'), b27.devland), calcPct(g26('land_cost_a26'), b27.devland)]);
+            rows.push(['  Hard Cost (Dev Construction)', g26('hard_cost_b26'), g26('hard_cost_a26'), g26('hard_cost_r26'), 0, '-', '-']);
+            rows.push(['  Soft Cost (Legal, Permits, Fees)', g26('soft_cost_b26'), g26('soft_cost_a26'), g26('soft_cost_r26'), 0, '-', '-']);
+            rows.push(['Total Project Cost (Rp Bio)', g26('total_proj_b26'), g26('total_proj_a26'), g26('total_proj_r26'), b27.devland, calcPct(g26('total_proj_b26'), b27.devland), calcPct(g26('total_proj_a26'), b27.devland)]);
+
+            rows.push(['Sales & Marketing Costs (Rp Bio)', '', '', '', '', '', '']);
+            rows.push(['  Sales Commission (Inhouse + Agent)', g26('sales_comm_b26'), g26('sales_comm_a26'), g26('sales_comm_r26'), b27.salesComm, calcPct(g26('sales_comm_b26'), b27.salesComm), calcPct(g26('sales_comm_a26'), b27.salesComm)]);
+            rows.push(['  Program Sales Subsidies', g26('prog_sales_b26'), g26('prog_sales_a26'), g26('prog_sales_r26'), b27.progSales, calcPct(g26('prog_sales_b26'), b27.progSales), calcPct(g26('prog_sales_a26'), b27.progSales)]);
+            rows.push(['  Advertising & Promotions (ATL+BTL)', g26('marketing_b26'), g26('marketing_a26'), g26('marketing_r26'), b27.marketing, calcPct(g26('marketing_b26'), b27.marketing), calcPct(g26('marketing_a26'), b27.marketing)]);
+            rows.push(['Total Sales & Marketing Costs (Rp Bio)', g26('total_sales_mkt_b26'), g26('total_sales_mkt_a26'), g26('total_sales_mkt_r26'), b27.totalSalesMkt, calcPct(g26('total_sales_mkt_b26'), b27.totalSalesMkt), calcPct(g26('total_sales_mkt_a26'), b27.totalSalesMkt)]);
+
+            rows.push(['Employee & Operational Expenses (Rp Bio)', '', '', '', '', '', '']);
+            rows.push(['  Employee Expenses (Payroll)', g26('employee_b26'), g26('employee_a26'), g26('employee_r26'), b27.employee, calcPct(g26('employee_b26'), b27.employee), calcPct(g26('employee_a26'), b27.employee)]);
+            rows.push(['  General & Administration (incl. Bistrip)', g26('ga_b26'), g26('ga_a26'), g26('ga_r26'), b27.ga, calcPct(g26('ga_b26'), b27.ga), calcPct(g26('ga_a26'), b27.ga)]);
+            rows.push(['  Others Expenses', g26('others_b26'), g26('others_a26'), g26('others_r26'), b27.others, calcPct(g26('others_b26'), b27.others), calcPct(g26('others_a26'), b27.others)]);
+            rows.push(['  Finance Expense (Interest Loan)', g26('finance_b26'), g26('finance_a26'), g26('finance_r26'), b27.finance, calcPct(g26('finance_b26'), b27.finance), calcPct(g26('finance_a26'), b27.finance)]);
+            rows.push(['  Taxes', g26('tax_b26'), g26('tax_a26'), g26('tax_r26'), b27.tax, calcPct(g26('tax_b26'), b27.tax), calcPct(g26('tax_a26'), b27.tax)]);
+            rows.push(['  Corporate Event & Exhibitions', g26('corp_event_b26'), g26('corp_event_a26'), g26('corp_event_r26'), b27.corpEvent, calcPct(g26('corp_event_b26'), b27.corpEvent), calcPct(g26('corp_event_a26'), b27.corpEvent)]);
+            rows.push(['Total Employee & Operational (Rp Bio)', g26('total_emp_ops_b26'), g26('total_emp_ops_a26'), g26('total_emp_ops_r26'), b27.totalEmpOps, calcPct(g26('total_emp_ops_b26'), b27.totalEmpOps), calcPct(g26('total_emp_ops_a26'), b27.totalEmpOps)]);
+
+            rows.push(['Capital Expenditure (Capex)', '', '', '', '', '', '']);
+            rows.push(['  Purchases of Fixed Assets (Capex)', g26('capex_b26'), g26('capex_a26'), g26('capex_r26'), b27.capex, calcPct(g26('capex_b26'), b27.capex), calcPct(g26('capex_a26'), b27.capex)]);
+            rows.push(['Total Purchase Fixed Assets (Rp Bio)', g26('total_capex_b26'), g26('total_capex_a26'), g26('total_capex_r26'), b27.capex, calcPct(g26('total_capex_b26'), b27.capex), calcPct(g26('total_capex_a26'), b27.capex)]);
+
+            rows.push(['TOTAL ALL COST (Rp Bio)', g26('total_b26'), g26('total_a26'), g26('total_r26'), b27.totalAllCost, calcPct(g26('total_b26'), b27.totalAllCost), calcPct(g26('total_a26'), b27.totalAllCost)]);
 
             addSheet('SUMMARY BUDGET', 'SUMMARY BUDGET', rows, { cols: [{wch:38},{wch:18},{wch:18},{wch:22},{wch:18},{wch:16},{wch:16}] });
         })();
@@ -3944,21 +4021,21 @@ const MOCK_SEED_ROWS = [
     ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'FAT'],
     ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PAYROLL'],
     ['PT Perintis Triniti Properti Tbk - Lampung', 'Holdwell Business Park', 'PROJECT'],
-    ['4P', 'SW & TS', 'BOD'],
+    ['PT Triniti Dinamik', 'SW & TS', 'BOD'],
     ['PT Perintis Triniti Properti Tbk', 'Head Office', 'CORFIN']
 ];
 
 function seedMockDrafts() {
     // One-time migration: if the seed version marker is missing, drop stale drafts
     // (e.g. rows seeded under wrong company-project pairs) before reseeding.
-    if (!localStorage.getItem('budget_mock_seed_v4')) {
+    if (!localStorage.getItem('budget_mock_seed_v5')) {
         const stale = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k && k.indexOf('draft_') === 0) stale.push(k);
         }
         stale.forEach(k => localStorage.removeItem(k));
-        localStorage.setItem('budget_mock_seed_v4', '1');
+        localStorage.setItem('budget_mock_seed_v5', '1');
     }
     const keys = [];
     MOCK_SEED_ROWS.forEach(([company, project, dept]) => {

@@ -1,6 +1,5 @@
 {
   "companies": [
-    "4P",
     "JO Triniti Sentul",
     "PT Perintis Triniti Properti Tbk",
     "PT Perintis Triniti Properti Tbk - Lampung",
@@ -23,12 +22,12 @@
   ],
   "projectCompanyMapping": {
     "Collins Boulevard": ["PT Triniti Menara Gading", "PT Triniti Menara Serpong"],
-    "District East": ["PT Triniti Dinamik"],
+    "District East": ["PT Triniti Dinamik", "PT Triniti Garam Properti"],
     "Head Office": ["PT Perintis Triniti Properti Tbk", "PT Sirius Terang Cemerlang", "PT Triniti Pilar Gemilang"],
     "Holdwell Business Park": ["PT Perintis Triniti Properti Tbk - Lampung"],
     "Marcs Boulevard": ["PT Puri Triniti Batam"],
     "Sequoia Hills": ["JO Triniti Sentul", "PT Triniti Garam Properti"],
-    "SW & TS": ["4P"]
+    "SW & TS": ["PT Triniti Dinamik"]
   },
   "currencies": [
     "CNY",
