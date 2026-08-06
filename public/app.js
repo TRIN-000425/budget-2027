@@ -128,8 +128,15 @@ function confirmDiscardDraft() {
 function isTabAllowed(tabId) {
     if (!state.currentUser) return tabId === 'dashboard';
     if (isSuperAdmin()) return true;
-    // FAT manager: consolidated all-departments summary is their only view
-    if (isFAT()) return tabId === 'fat-summary';
+    // FAT manager: consolidated all-departments view (read-only) PLUS their own
+    // division's input tabs (scoped to their department, exactly like a dept head)
+    if (isFAT()) {
+        if (tabId === 'departments' || tabId === 'nik-management') return false;
+        if (tabId === 'fat-summary' || tabId === 'dept-summary' || tabId === 'dashboard' || tabId === 'summary-budget') return true;
+        const mod = BUDGET_MODULES.find(m => m.key === tabId);
+        if (mod) return isModuleAllowed(tabId);
+        return true;
+    }
     if (tabId === 'departments') return false;
     if (tabId === 'nik-management') return isDeptHead();
     if (tabId === 'dept-summary') return isDeptHead();
@@ -3241,7 +3248,9 @@ async function triggerDataLoad() {
 }
 
 function isReadOnlyUser() {
-    return state.currentUser && (state.currentUser.role === 'Viewer' || state.currentUser.role === 'FAT');
+    // FAT is NOT read-only: they input their own division's budget (scoped by
+    // getActiveDepartment + backend authorization to their own department).
+    return state.currentUser && state.currentUser.role === 'Viewer';
 }
 
 // Enable/disable the Save button according to the CURRENT effective user (incl. previews)
@@ -3944,7 +3953,8 @@ function applyPreviewRole(role) {
     } else if (role === 'User') {
         preview = { ...base, role: 'User', department: divName, allowedProjects: projs, allowedCompanies: comps, allowedModules: mods, deptAllowedProjects: projs, deptAllowedCompanies: comps };
     } else if (role === 'FAT') {
-        preview = { ...base, role: 'FAT', department: '', allowedProjects: 'ALL', allowedCompanies: 'ALL', allowedModules: 'ALL', deptAllowedProjects: 'ALL', deptAllowedCompanies: 'ALL' };
+        // FAT = division input (like a dept head) + read-only consolidated view
+        preview = { ...base, role: 'FAT', department: divName, allowedProjects: projs, allowedCompanies: comps, allowedModules: mods, deptAllowedProjects: projs, deptAllowedCompanies: comps };
     } else if (role === 'Viewer') {
         preview = { ...base, role: 'Viewer', department: divName, allowedProjects: projs, allowedCompanies: comps, allowedModules: mods, deptAllowedProjects: projs, deptAllowedCompanies: comps };
     } else {

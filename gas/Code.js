@@ -95,13 +95,14 @@ function doPost(e) {
         const department = payload.department || '';
         const budgetData = payload.data;
 
-        // Server-side authorization: no caller identity => reject. Read-only roles
-        // (Viewer/FAT) cannot save. Non-Admins may only write their OWN division.
+        // Server-side authorization: no *** identity => reject. Viewer is read-only.
+        // FAT may save ONLY their own division (checked below). Non-Admins may only
+        // write their OWN division.
         const caller = payload.callerNik ? verifyNikLogin(payload.callerNik) : null;
         if (!caller) {
             return createJsonResponse({ status: 'error', message: 'Authentication required: callerNik is missing or invalid' });
         }
-        if (caller.role === 'Viewer' || caller.role === 'FAT') {
+        if (caller.role === 'Viewer') {
             return createJsonResponse({ status: 'error', message: 'Read-only role (' + caller.role + ') cannot save budget data' });
         }
         if (caller.role !== 'Admin' && String(caller.department || '').trim().toLowerCase() !== String(department || '').trim().toLowerCase()) {
