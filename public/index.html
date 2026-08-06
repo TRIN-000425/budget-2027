@@ -43,6 +43,16 @@
                     <li class="nav-item active" data-tab="dashboard">
                         <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
                     </li>
+                    <li class="nav-header">Summary</li>
+                    <li class="nav-item" data-tab="summary-budget">
+                        <i data-lucide="pie-chart"></i><span>Consolidated Budget</span>
+                    </li>
+                    <li class="nav-item" data-tab="dept-summary" id="nav-dept-summary" style="display:none;">
+                        <i data-lucide="chart-column"></i><span>Consolidated Division Budget</span>
+                    </li>
+                    <li class="nav-item" data-tab="fat-summary" id="nav-fat-summary" style="display:none;">
+                        <i data-lucide="chart-pie"></i><span>Project Budget</span>
+                    </li>
                     <li class="nav-header">Revenue & Sales</li>
                     <li class="nav-item" data-tab="target-revenue" data-module="target-revenue">
                         <i data-lucide="target"></i><span>Target Revenue</span>
@@ -73,16 +83,7 @@
                     <li class="nav-item" data-tab="business-trip" data-module="business-trip">
                         <i data-lucide="plane"></i><span>Business Trip</span>
                     </li>
-                    <li class="nav-header">Summary & Admin</li>
-                    <li class="nav-item" data-tab="summary-budget">
-                        <i data-lucide="pie-chart"></i><span>Consolidated Budget</span>
-                    </li>
-                    <li class="nav-item" data-tab="dept-summary" id="nav-dept-summary" style="display:none;">
-                        <i data-lucide="chart-column"></i><span>All Projects Summary</span>
-                    </li>
-                    <li class="nav-item" data-tab="fat-summary" id="nav-fat-summary" style="display:none;">
-                        <i data-lucide="chart-pie"></i><span>Consolidated (All Depts)</span>
-                    </li>
+                    <li class="nav-header">Admin</li>
                     <li class="nav-item" data-tab="departments" id="nav-dept-mgmt" style="display:none;">
                         <i data-lucide="building-2"></i><span>Divisions</span>
                     </li>
@@ -609,7 +610,7 @@ Ratio = Total Budget / Target Revenue"></i>
                 <!-- 12. DEPT HEAD: ALL PROJECTS SUMMARY TAB -->
                 <section class="tab-panel" id="tab-dept-summary">
                     <div class="section-header">
-                        <h2>Division Summary — All Projects</h2>
+                        <h2>Consolidated Division Budget</h2>
                         <p id="dept-summary-scope">Aggregating your division's budget across every project...</p>
                     </div>
 
@@ -617,7 +618,7 @@ Ratio = Total Budget / Target Revenue"></i>
                         <div class="table-actions">
                             <span class="info-tag"><i data-lucide="info"></i> Read-only rollup across all projects & modules</span>
                             <label style="display:flex; align-items:center; gap:6px; margin-left:auto; font-size:0.8rem; color:var(--text-secondary);">Division:
-                                <select id="dept-summary-division" style="display:none; max-width:230px;" title="Scope of the All Projects summary (Super Admin)"></select>
+                                <select id="dept-summary-division" style="display:none; max-width:230px;" title="Scope of the Consolidated Division Budget (Super Admin)"></select>
                             </label>
                             <button class="btn btn-secondary btn-sm" id="export-dept-summary-btn"><i data-lucide="download"></i> Export Summary</button>
                         </div>
@@ -631,7 +632,7 @@ Ratio = Total Budget / Target Revenue"></i>
                 <!-- 13. FAT MANAGER: CONSOLIDATED ALL-DEPARTMENTS TAB -->
                 <section class="tab-panel" id="tab-fat-summary">
                     <div class="section-header">
-                        <h2>Consolidated Summary — All Divisions</h2>
+                        <h2>Project Budget</h2>
                         <p id="fat-summary-scope">Aggregating every division's budget for the selected project...</p>
                     </div>
 
